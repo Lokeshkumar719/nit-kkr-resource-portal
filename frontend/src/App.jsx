@@ -1,35 +1,47 @@
 import React from 'react';
-
-import { Routes, Route, Navigate } from 'react-router';
-import { BrowserRouter, useLocation } from 'react-router-dom';
-
+import { Routes, Route, Navigate, BrowserRouter, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
+import { PageLoader } from './components/ui/Spinner.jsx';
 
-import Landing from './pages/public/Landing.jsx';
-
-import UserLogin from './pages/auth/UserLogin.jsx';
-import AdminLogin from './pages/auth/AdminLogin.jsx';
-
-import Dashboard from './pages/student/Dashboard.jsx';
-import Resources from './pages/student/Resources.jsx';
-import Seniors from './pages/student/Seniors.jsx';
-import Contribute from './pages/student/Contribute.jsx';
-
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import Auth from './pages/Auth.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Resources from './pages/Resources.jsx';
+import Seniors from './pages/Seniors.jsx';
+import Alumni from './pages/Alumni.jsx';
+import Contribute from './pages/Contribute.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 // --- Protected Route ---
-const ProtectedRoute = ({ children, allowedType }) => {
-  const { user } = useAuth();
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const { user, loading } = useAuth();
   const location = useLocation();
 
+  if (loading) return <PageLoader />;
+
   if (!user) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedType && user.role !== allowedType){
-    return <Navigate to="/" replace />;
+  if (allowedRole && user.role !== allowedRole) {
+    // Admins can access User routes
+    if (!(user.role === 'ADMIN' && allowedRole === 'USER')) {
+      return <Navigate to={user.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />;
+    }
+  }
+
+  return <Layout>{children}</Layout>;
+};
+
+// --- Public Route (Redirects if already logged in) ---
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <PageLoader />;
+
+  if (user) {
+    return <Navigate to={user.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />;
   }
 
   return children;
@@ -41,38 +53,28 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout><Landing /></Layout>} />
-          <Route path="/login/user" element={<Layout><UserLogin /></Layout>} />
-          <Route path="/login/admin" element={<Layout><AdminLogin /></Layout>} />
-          
-          {/* User Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute allowedType="user">
-              <Layout><Dashboard /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/resources" element={
-            <ProtectedRoute allowedType="user">
-              <Layout><Resources /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/seniors" element={
-            <ProtectedRoute allowedType="user">
-              <Layout><Seniors /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/contribute" element={
-            <ProtectedRoute allowedType="user">
-              <Layout><Contribute /></Layout>
-            </ProtectedRoute>
+          {/* Public Authentication Route */}
+          <Route path="/login" element={
+            <PublicRoute>
+              <Auth />
+            </PublicRoute>
           } />
 
+          {/* Default Route */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* User Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute allowedRole="USER"><Dashboard /></ProtectedRoute>} />
+          <Route path="/resources" element={<ProtectedRoute allowedRole="USER"><Resources /></ProtectedRoute>} />
+          <Route path="/seniors" element={<ProtectedRoute allowedRole="USER"><Seniors /></ProtectedRoute>} />
+          <Route path="/alumni" element={<ProtectedRoute allowedRole="USER"><Alumni /></ProtectedRoute>} />
+          <Route path="/contribute" element={<ProtectedRoute allowedRole="USER"><Contribute /></ProtectedRoute>} />
+
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={
-            <ProtectedRoute allowedType="admin">
-              <Layout><AdminDashboard /></Layout>
-            </ProtectedRoute>
-          } />
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRole="ADMIN"><AdminDashboard /></ProtectedRoute>} />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
