@@ -137,36 +137,52 @@ export default function Contribute() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-6">
         {/* Bug Report Panel */}
-        <button
+        <div
           onClick={() => { setView('bug'); resetState(); }}
-          className="flex flex-col items-start p-6 bg-white border border-slate-300 rounded-xl shadow-sm hover:border-red-200 hover:shadow-md transition-all text-left group"
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
         >
-          <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Bug className="w-5 h-5" />
+          {/* Top Banner Gradient */}
+          <div className="h-16 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 relative" />
+          
+          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
+            {/* Icon Wrap */}
+            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Bug className="w-6 h-6" />
+            </div>
+            
+            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-red-600 transition-colors">Report a Bug</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Found something broken? Tell us what went wrong so we can fix it.</p>
+
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all shadow-sm">
+              Report a Bug <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
-          <h3 className="text-base font-bold text-gray-800 mb-1">Report a Bug</h3>
-          <p className="text-sm text-gray-500 mb-6">Found something broken? Tell us what went wrong.</p>
-          <div className="mt-auto flex items-center justify-center w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-bold group-hover:bg-red-100 transition-colors">
-            Report a Bug <ArrowRight className="w-4 h-4 ml-1" />
-          </div>
-        </button>
+        </div>
 
         {/* Resource Contribution Panel */}
-        <button
+        <div
           onClick={() => { setView('resource-select'); resetState(); }}
-          className="flex flex-col items-start p-6 bg-white border border-slate-300 rounded-xl shadow-sm hover:border-blue-200 hover:shadow-md transition-all text-left group"
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
         >
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-nit-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <BookUp className="w-5 h-5" />
+          {/* Top Banner Gradient */}
+          <div className="h-16 bg-gradient-to-r from-nit-primary via-blue-600 to-indigo-600 relative" />
+          
+          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
+            {/* Icon Wrap */}
+            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-nit-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <BookUp className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-nit-primary transition-colors">Contribute Resources</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Share notes, books, PYQs, and lecture links to help fellow students.</p>
+
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-blue-50 text-nit-primary border border-blue-200 rounded-xl text-sm font-bold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
+              Contribute Resources <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
-          <h3 className="text-base font-bold text-gray-800 mb-1">Contribute Resources</h3>
-          <p className="text-sm text-gray-500 mb-6">Share useful academic material with other students.</p>
-          <div className="mt-auto flex items-center justify-center w-full py-2 bg-blue-50 text-nit-primary border border-blue-200 rounded-lg text-sm font-bold group-hover:bg-blue-100 transition-colors">
-            Contribute Resources <ArrowRight className="w-4 h-4 ml-1" />
-          </div>
-        </button>
+        </div>
       </div>
     </div>
   );
@@ -226,81 +242,89 @@ export default function Contribute() {
   );
 
   const renderResourceSelect = () => (
-    <div className="max-w-2xl mx-auto animate-fade-in space-y-6">
+    <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
       <div className="flex items-center gap-4">
         <button onClick={handleBack} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
           <h2 className="text-xl font-bold text-gray-800">Contribute Resources</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Share useful academic resources with your peers.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Select the resource category you'd like to share with fellow students.</p>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-300 rounded-xl shadow-sm divide-y divide-slate-200 overflow-hidden">
+      <div className="grid sm:grid-cols-2 gap-5">
         
-        {/* Notes */}
-        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+        {/* Notes Card */}
+        <div
+          onClick={() => setView('notes')}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          <div className="h-12 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <div className="p-5 pt-0 flex-1 flex flex-col relative">
+            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <FileText className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-800">Notes</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Upload notes in ZIP format.</p>
+            <h3 className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">Notes</h3>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Upload subject notes in ZIP format for semester study.</p>
+            <div className="mt-auto flex items-center justify-center w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all">
+              Contribute Notes <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
-          <button onClick={() => setView('notes')} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors">
-            Contribute Notes
-          </button>
         </div>
 
-        {/* Books */}
-        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+        {/* Books Card */}
+        <div
+          onClick={() => setView('book')}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          <div className="h-12 bg-gradient-to-r from-indigo-500 to-blue-600" />
+          <div className="p-5 pt-0 flex-1 flex flex-col relative">
+            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <BookOpen className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-800">Books</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Upload books in ZIP format.</p>
+            <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">Books</h3>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Upload academic books or reference material in ZIP format.</p>
+            <div className="mt-auto flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold group-hover:bg-indigo-600 group-hover:text-white transition-all">
+              Contribute Book <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
-          <button onClick={() => setView('book')} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors">
-            Contribute Book
-          </button>
         </div>
 
-        {/* PYQs */}
-        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+        {/* PYQs Card */}
+        <div
+          onClick={() => setView('pyq')}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          <div className="h-12 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="p-5 pt-0 flex-1 flex flex-col relative">
+            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <FileQuestion className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-800">PYQs</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Upload previous year papers in ZIP format.</p>
+            <h3 className="text-base font-bold text-gray-800 group-hover:text-amber-600 transition-colors">PYQs</h3>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Upload previous year exam question papers in ZIP format.</p>
+            <div className="mt-auto flex items-center justify-center w-full py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold group-hover:bg-amber-500 group-hover:text-white transition-all">
+              Contribute PYQ <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
-          <button onClick={() => setView('pyq')} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors">
-            Contribute PYQ
-          </button>
         </div>
 
-        {/* Lectures */}
-        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+        {/* Lectures Card */}
+        <div
+          onClick={() => setView('lecture')}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          <div className="h-12 bg-gradient-to-r from-violet-500 to-purple-600" />
+          <div className="p-5 pt-0 flex-1 flex flex-col relative">
+            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Video className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-800">Lectures</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Submit a YouTube video or playlist link.</p>
+            <h3 className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">Lectures</h3>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Share YouTube video or playlist links for course topics.</p>
+            <div className="mt-auto flex items-center justify-center w-full py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold group-hover:bg-violet-600 group-hover:text-white transition-all">
+              Contribute Lecture <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
-          <button onClick={() => setView('lecture')} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors">
-            Contribute Lecture
-          </button>
         </div>
 
       </div>
