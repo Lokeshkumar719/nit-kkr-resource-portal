@@ -5,7 +5,6 @@ import { register } from "../services/api";
 function Register({ setActiveTab }) {
   const [formData, setFormData] = useState({
     email: "",
-    username: "",
     password: "",
   });
 
@@ -27,7 +26,7 @@ function Register({ setActiveTab }) {
       setLoading(true);
       setMessage({ type: "", text: "" });
 
-      await register(formData.email, formData.username, formData.password);
+      await register(formData.email, formData.password);
 
       setMessage({
         type: "success",
@@ -61,20 +60,6 @@ function Register({ setActiveTab }) {
           type="email"
           placeholder="yourname@nitkkr.ac.in"
           value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="input-group">
-        <label htmlFor="register-username">Username</label>
-        <input
-          id="register-username"
-          className="auth-input"
-          name="username"
-          type="text"
-          placeholder="Choose a username"
-          value={formData.username}
           onChange={handleChange}
           required
         />

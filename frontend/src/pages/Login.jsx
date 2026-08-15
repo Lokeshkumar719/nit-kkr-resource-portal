@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -9,11 +10,9 @@ function Login() {
   const { checkAuth } = useAuth();
 
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleLogin = async (event) => {
@@ -58,15 +57,35 @@ function Login() {
 
       <div className="input-group">
         <label htmlFor="login-password">Password</label>
-        <input
-          id="login-password"
-          className="auth-input"
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            id="login-password"
+            className="auth-input"
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ paddingRight: "2.5rem" }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: "0.75rem",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              color: "#94a3b8",
+              cursor: "pointer",
+            }}
+            title={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       {message.text && (

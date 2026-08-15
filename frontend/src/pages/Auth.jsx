@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, KeyRound, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
@@ -12,9 +12,9 @@ export default function Auth() {
   
   const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState('auth'); // 'auth' | 'verify'
+  const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     otp: ''
@@ -46,7 +46,7 @@ export default function Auth() {
           navigate('/dashboard');
         }
       } else {
-        await apiRegister(formData.email, formData.username, formData.password);
+        await apiRegister(formData.email, formData.password);
         setSuccess('OTP sent to your email! Please verify.');
         setStep('verify');
       }
@@ -64,7 +64,6 @@ export default function Auth() {
     
     try {
       const res = await apiVerifyOTP(formData.email, formData.otp);
-      // Wait, verifyOTP might not return the user object directly, but if it does:
       if(res.data && res.data.data) {
           login(res.data.data);
           if (res.data.data.role === 'ADMIN') {
@@ -73,7 +72,6 @@ export default function Auth() {
             navigate('/dashboard');
           }
       } else {
-          // If it just verifies, we might need to login now, but let's assume it returns user.
           setSuccess('Verified! You can now log in.');
           setStep('auth');
           setIsLogin(true);
@@ -103,19 +101,29 @@ export default function Auth() {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setError('');
-    setFormData({ username: '', email: '', password: '', otp: '' });
+    setShowPassword(false);
+    setFormData({ email: '', password: '', otp: '' });
   };
 
   return (
-    <div className="auth-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-slide-up">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20">
+    <div className="auth-bg flex items-center justify-center p-4 min-h-screen relative">
+      {/* Top Left Back to Home Button */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md text-sm font-semibold border border-white/20 transition-all shadow-md group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Back to Home
+      </Link>
+
+      <div className="w-full max-w-md animate-slide-up pt-12 sm:pt-0">
+        <Link to="/" className="block text-center mb-8 group" title="Go to Homepage">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
              <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">NIT KKR Resources</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Resources</h1>
           <p className="text-blue-200/80 font-medium">Your academic resource hub</p>
-        </div>
+        </Link>
 
         <div className="glass-card p-8">
           <div className="mb-6">
@@ -151,23 +159,6 @@ export default function Auth() {
                   </div>
                 </div>
 
-                {!isLogin && (
-                  <div className="space-y-1.5 mt-4">
-                    <label className="text-sm font-medium text-gray-700 ml-1">Username</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="username"
-                        placeholder="johndoe"
-                        className="input-field"
-                        value={formData.username}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
-
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-1">
                     <label className="text-sm font-medium text-gray-700">Password</label>
@@ -176,14 +167,22 @@ export default function Auth() {
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       name="password"
                       placeholder="••••••••"
-                      className="input-field"
+                      className="input-field pr-10"
                       value={formData.password}
                       onChange={handleChange}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                      title={showPassword ? 'Hide Password' : 'Show Password'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                   {!isLogin && (
                     <p className="text-xs text-gray-500 ml-1 mt-1">

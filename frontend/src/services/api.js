@@ -32,8 +32,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Do not intercept on login or refresh token routes to prevent infinite loops
-    if (originalRequest.url === "/auth/login" || originalRequest.url === "/auth/refresh-token") {
+    // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
+    if (
+      originalRequest.url === "/auth/login" ||
+      originalRequest.url === "/auth/refresh-token" ||
+      originalRequest.url === "/auth/me"
+    ) {
       return Promise.reject(error);
     }
 
@@ -62,9 +66,8 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue(err, null);
         
-        // If refresh token fails (expired/invalid), log the user out
+        // If refresh token fails (expired/invalid), clear cached user
         localStorage.removeItem("nitkkr_user");
-        window.location.href = "/login";
         
         return Promise.reject(err);
       }
@@ -85,8 +88,8 @@ export const authApi = {
 export const login = (email, password) =>
   api.post("/auth/login", { email, password });
 
-export const register = (email, username, password) =>
-  api.post("/auth/register", { email, username, password });
+export const register = (email, password) =>
+  api.post("/auth/register", { email, password });
 
 export const verifyOTP = (email, otp) =>
   api.post("/auth/verify-otp", { email, otp });
