@@ -1,29 +1,34 @@
-import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
-import { authApi } from '../services/api.js';
-import { createContext, useContext, useEffect, useState } from "react";
-
-import { verifyAuth, logout } from "../services/api";
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { verifyAuth, logout as apiLogout } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Start true — checking session
+// Synchronously hydrate from localStorage to prevent flash/redirect on refresh
+const getStoredUser = () => {
+  try {
+    const stored = localStorage.getItem('nitkkr_user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem('nitkkr_user');
+    return null;
+  }
+};
 
-  // On mount: try to restore session from backend cookie
-  const checkSession = useCallback(async () => {
-    setLoading(true);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(getStoredUser);
+  const [loading, setLoading] = useState(true);
+
+  const checkAuth = useCallback(async () => {
     try {
-      const res = await authApi.getMe();
-      if (res.data && res.data.success && res.data.data) {
-        setUser(res.data.data);
-        localStorage.setItem('nitkkr_user', JSON.stringify(res.data.data));
+      const response = await verifyAuth();
+      if (response.data && response.data.data) {
+        setUser(response.data.data);
+        localStorage.setItem('nitkkr_user', JSON.stringify(response.data.data));
       } else {
         setUser(null);
         localStorage.removeItem('nitkkr_user');
       }
-    } catch (err) {
-      // No valid session
+    } catch (error) {
       setUser(null);
       localStorage.removeItem('nitkkr_user');
     } finally {
@@ -32,63 +37,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Quick hydrate from localStorage (avoids flash), then verify
-    const stored = localStorage.getItem('nitkkr_user');
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch (e) {
-        localStorage.removeItem('nitkkr_user');
-      }
-    }
-    checkSession();
-  }, [checkSession]);
+    checkAuth();
+  }, [checkAuth]);
 
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('nitkkr_user', JSON.stringify(userData));
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
-      await authApi.logout();
-    } catch (err) {
-      console.error('Logout API error:', err);
+      await apiLogout();
+    } catch (error) {
+      console.error('Logout API error:', error);
     } finally {
       setUser(null);
       localStorage.removeItem('nitkkr_user');
     }
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkSession }}>
-
-  const [loading, setLoading] = useState(true);
-
-  const checkAuth = async () => {
-    try {
-      const response = await verifyAuth();
-
-      setUser(response.data.data);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error(error);
-    }
-
-    setUser(null);
   };
 
   return (
@@ -97,6 +62,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         checkAuth,
+        checkSession: checkAuth, // alias for backwards compatibility in my components
+        login,
         logout: handleLogout,
       }}
     >

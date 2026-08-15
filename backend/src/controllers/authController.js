@@ -5,18 +5,13 @@ const ApiResponse = require("../utils/ApiResponse");
 
 const STATUS_CODES = require("../constants/statusCodes");
 
-const {
-  validateRegister,
-  validateVerifyOTP,
-  validateResendOTP,
-  validateLogin,
-} = require("../validators/authValidator");
+const authValidator = require("../validators/authValidator");
 
 const clearAuthCookies = require("../utils/auth/clearAuthCookies");
 const sendTokenResponse = require("../utils/auth/sendTokenResponse");
 
 const register = asyncHandler(async (req, res) => {
-  validateRegister(req.body);
+  authValidator.validateRegister(req.body);
 
   const data = await authService.register(req.body);
 
@@ -29,7 +24,7 @@ const register = asyncHandler(async (req, res) => {
 });
 
 const verifyOTP = asyncHandler(async (req, res) => {
-  validateVerifyOTP(req.body);
+  authValidator.validateVerifyOTP(req.body);
 
   const { user, accessToken, refreshToken } = await authService.verifyOTP(
     req.body,
@@ -48,7 +43,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 });
 
 const resendOTP = asyncHandler(async (req, res) => {
-  validateResendOTP(req.body);
+  authValidator.validateResendOTP(req.body);
 
   const data = await authService.resendOTP(req.body);
 
@@ -56,7 +51,7 @@ const resendOTP = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
-  validateLogin(req.body);
+  authValidator.validateLogin(req.body);
 
   const { user, accessToken, refreshToken } = await authService.login(req.body);
 
@@ -102,6 +97,43 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   );
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  authValidator.validateForgotPassword(req.body);
+
+  const data = await authService.forgotPassword(req.body);
+
+  return new ApiResponse(res, STATUS_CODES.OK, "OTP sent successfully.", data);
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  authValidator.validateResetPassword(req.body);
+
+  await authService.resetPassword(req.body);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Password reset successfully. Please login again.",
+  );
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  authValidator.validateChangePassword(req.body);
+
+  await authService.changePassword({
+    userId: req.user.id,
+    ...req.body,
+  });
+
+  clearAuthCookies(res);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Password changed successfully. Please login again.",
+  );
+});
+
 module.exports = {
   register,
   verifyOTP,
@@ -110,4 +142,7 @@ module.exports = {
   refreshAccessToken,
   logout,
   getCurrentUser,
+  forgotPassword,
+  resetPassword,
+  changePassword,
 };

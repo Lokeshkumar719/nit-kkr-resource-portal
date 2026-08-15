@@ -4,7 +4,7 @@ import { Building2, Mail, Award, ExternalLink } from 'lucide-react';
 export default function ProfileCard({ data, index, variant = 'alumni', customGradient }) {
   const isAlumni = variant === 'alumni';
 
-  const avatarUrl = data.imageUrl ||
+  const avatarUrl = data.image || data.imageUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0f2b5b&color=fff&bold=true&size=128`;
 
   const bannerGradient = customGradient || (isAlumni 
@@ -42,6 +42,12 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
           {data.branch}
           <span className="mx-1.5 text-slate-300">·</span>
           <span className={badgeClass}>{badgeText}</span>
+          {data.batch && (
+            <>
+              <span className="mx-1.5 text-slate-300">·</span>
+              <span className="font-medium text-slate-600">Batch: {data.batch}</span>
+            </>
+          )}
         </p>
 
         {/* Company / Internship info */}
@@ -61,13 +67,13 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
         )}
 
         {/* Skills tags */}
-        {data.skills && data.skills.length > 0 && (
+        {data.tags && data.tags.length > 0 && (
           <div className="card-tags">
-            {data.skills.slice(0, 3).map((skill, i) => (
-              <span key={i} className="tag tag-blue">{skill}</span>
+            {data.tags.slice(0, 3).map((tag, i) => (
+              <span key={i} className="tag tag-blue">{tag}</span>
             ))}
-            {data.skills.length > 3 && (
-              <span className="tag">+{data.skills.length - 3}</span>
+            {data.tags.length > 3 && (
+              <span className="tag">+{data.tags.length - 3}</span>
             )}
           </div>
         )}

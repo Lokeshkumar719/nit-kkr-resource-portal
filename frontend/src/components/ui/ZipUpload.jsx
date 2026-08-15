@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileZip, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { UploadCloud, FileArchive, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { ButtonSpinner } from './Spinner.jsx';
 
 export function ZipUpload({ onFileSelect, disabled }) {
@@ -87,7 +87,7 @@ export function ZipUpload({ onFileSelect, disabled }) {
       {!file ? (
         <div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' :
+            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 border-slate-300' :
             dragActive ? 'border-nit-accent bg-blue-50/50' : 'border-gray-300 hover:border-nit-primary hover:bg-gray-50'
           }`}
           onDragEnter={handleDrag}
@@ -116,10 +116,10 @@ export function ZipUpload({ onFileSelect, disabled }) {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white shadow-sm">
+        <div className="flex items-center justify-between p-4 border border-slate-300 rounded-xl bg-white shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-              <FileZip className="w-5 h-5 text-nit-accent" />
+              <FileArchive className="w-5 h-5 text-nit-accent" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-800 truncate">{file.name}</p>

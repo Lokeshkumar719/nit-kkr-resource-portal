@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, BrowserRouter, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
-import { PageLoader } from './components/ui/Spinner.jsx';
+import { AppSkeleton, AdminAppSkeleton } from './components/ui/Skeleton.jsx';
 
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -10,6 +10,7 @@ import Seniors from './pages/Seniors.jsx';
 import Alumni from './pages/Alumni.jsx';
 import Contribute from './pages/Contribute.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import Home from './pages/Home.jsx';
 
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
@@ -17,32 +18,15 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-import { useState } from "react";
 
-import { useAuth } from "./context/AuthContext";
-
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import VerifyOTP from "./pages/VerifyOTP";
-
-import Dashboard from "./pages/Dashboard";
-import Resources from "./pages/Resources";
-import Contribute from "./pages/Contribute";
-import ReportBug from "./pages/ReportBug";
-import AdminDashboard from "./pages/AdminDashboard";
-
-import Navbar from "./components/Navbar";
-
-function App() {
-  const { user, loading } = useAuth();
-
-  const [page, setPage] = useState("dashboard");
-
-  if (loading) {
-    return <div className="app-loading">Loading your portal...</div>;
+  // If still loading AND no cached user — show skeleton
+  if (loading && !user) {
+    return (
+      <Layout>
+        {location.pathname.startsWith('/admin') ? <AdminAppSkeleton /> : <AppSkeleton />}
+      </Layout>
+    );
   }
-
-  if (loading) return <PageLoader />;
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -61,8 +45,16 @@ function App() {
 // --- Public Route (Redirects if already logged in) ---
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
-  if (loading) return <PageLoader />;
+  // If still loading AND no cached user — show skeleton
+  if (loading && !user) {
+    return (
+      <Layout>
+        {location.pathname.startsWith('/admin') ? <AdminAppSkeleton /> : <AppSkeleton />}
+      </Layout>
+    );
+  }
 
   if (user) {
     return <Navigate to={user.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />;
@@ -84,8 +76,8 @@ export default function App() {
             </PublicRoute>
           } />
 
-          {/* Default Route */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Default Route - Landing Page */}
+          <Route path="/" element={<Home />} />
 
           {/* User Routes */}
           <Route path="/dashboard" element={<ProtectedRoute allowedRole="USER"><Dashboard /></ProtectedRoute>} />
@@ -102,94 +94,5 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-    return <AuthLayout />;
-  }
-
-  return (
-    <div>
-      <Navbar setPage={setPage} />
-
-      {page === "dashboard" && <Dashboard />}
-
-      {page === "resources" && <Resources />}
-
-      {page === "contribute" && <Contribute />}
-
-      {page === "bug" && <ReportBug />}
-
-      {page === "admin" && <AdminDashboard />}
-    </div>
   );
 }
-
-function AuthLayout() {
-  const [activeTab, setActiveTab] = useState("login");
-
-  return (
-    <div className="auth-shell">
-      <section className="auth-hero">
-        <div className="auth-hero-content">
-          <div className="brand-badge">NIT KKR Resource Portal</div>
-
-          <h1 className="auth-title">Learn smarter with campus resources.</h1>
-
-          <p className="auth-subtitle">
-            Access curated notes, previous year resources, subject support, and
-            contribution tools built for NIT Kurukshetra students.
-          </p>
-
-          <ul className="auth-features">
-            <li>
-              <span className="feature-dot" /> Verified student access
-            </li>
-            <li>
-              <span className="feature-dot" /> Subject-wise resources
-            </li>
-            <li>
-              <span className="feature-dot" /> Secure one-time email
-              verification
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="auth-panel-wrap">
-        <div className="auth-panel">
-          <div className="auth-tabs">
-            <button
-              type="button"
-              className={`auth-tab ${activeTab === "login" ? "active" : ""}`}
-              onClick={() => setActiveTab("login")}
-            >
-              Login
-            </button>
-
-            <button
-              type="button"
-              className={`auth-tab ${activeTab === "register" ? "active" : ""}`}
-              onClick={() => setActiveTab("register")}
-            >
-              Register
-            </button>
-
-            <button
-              type="button"
-              className={`auth-tab ${activeTab === "verify" ? "active" : ""}`}
-              onClick={() => setActiveTab("verify")}
-            >
-              Verify OTP
-            </button>
-          </div>
-
-          {activeTab === "login" && <Login />}
-
-          {activeTab === "register" && <Register setActiveTab={setActiveTab} />}
-
-          {activeTab === "verify" && <VerifyOTP setActiveTab={setActiveTab} />}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-export default App;

@@ -23,6 +23,8 @@ router.get("/", authMiddleware, resourceController.getResources);
 
 router.get("/:resourceId", authMiddleware, resourceController.getResourceById);
 
+router.get("/:resourceId/download", authMiddleware, resourceController.getDownloadUrl);
+
 router.delete(
   "/:resourceId",
   authMiddleware,

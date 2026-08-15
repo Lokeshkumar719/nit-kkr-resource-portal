@@ -29,6 +29,13 @@ router.patch(
   contributionController.approveContribution,
 );
 
+router.get(
+  "/:contributionId/download",
+  authMiddleware,
+  adminMiddleware,
+  contributionController.getDownloadUrl,
+);
+
 router.delete(
   "/:contributionId",
   authMiddleware,

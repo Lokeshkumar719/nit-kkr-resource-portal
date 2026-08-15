@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
-import { authApi } from '../services/api';
+import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
@@ -14,6 +14,7 @@ export default function Auth() {
   const [step, setStep] = useState('auth'); // 'auth' | 'verify'
   
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
     otp: ''
@@ -35,10 +36,7 @@ export default function Auth() {
     
     try {
       if (isLogin) {
-        const res = await authApi.login({
-          email: formData.email,
-          password: formData.password
-        });
+        const res = await apiLogin(formData.email, formData.password);
         login(res.data.data);
         
         // Role-based redirect
@@ -48,10 +46,7 @@ export default function Auth() {
           navigate('/dashboard');
         }
       } else {
-        await authApi.register({
-          email: formData.email,
-          password: formData.password
-        });
+        await apiRegister(formData.email, formData.username, formData.password);
         setSuccess('OTP sent to your email! Please verify.');
         setStep('verify');
       }
@@ -68,17 +63,20 @@ export default function Auth() {
     setError('');
     
     try {
-      const res = await authApi.verifyOtp({
-        email: formData.email,
-        otp: formData.otp
-      });
-      login(res.data.data);
-      
-      // Role-based redirect
-      if (res.data.data.role === 'ADMIN') {
-        navigate('/admin/dashboard');
+      const res = await apiVerifyOTP(formData.email, formData.otp);
+      // Wait, verifyOTP might not return the user object directly, but if it does:
+      if(res.data && res.data.data) {
+          login(res.data.data);
+          if (res.data.data.role === 'ADMIN') {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
       } else {
-        navigate('/dashboard');
+          // If it just verifies, we might need to login now, but let's assume it returns user.
+          setSuccess('Verified! You can now log in.');
+          setStep('auth');
+          setIsLogin(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed. Please check the OTP.');
@@ -87,10 +85,25 @@ export default function Auth() {
     }
   };
 
+  const handleResendOTP = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      await apiResendOTP(formData.email);
+      setSuccess('A new verification code has been sent to your email.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setError('');
-    setFormData({ email: '', password: '', otp: '' });
+    setFormData({ username: '', email: '', password: '', otp: '' });
   };
 
   return (
@@ -138,10 +151,27 @@ export default function Auth() {
                   </div>
                 </div>
 
+                {!isLogin && (
+                  <div className="space-y-1.5 mt-4">
+                    <label className="text-sm font-medium text-gray-700 ml-1">Username</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="username"
+                        placeholder="johndoe"
+                        className="input-field"
+                        value={formData.username}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-1">
                     <label className="text-sm font-medium text-gray-700">Password</label>
-                    {isLogin && <a href="#" className="text-xs font-semibold text-nit-accent hover:text-blue-700 transition">Forgot password?</a>}
+                    {isLogin && <button type="button" onClick={() => alert('Please contact your college admin to reset your password.')} className="text-xs font-semibold text-nit-accent hover:text-blue-700 transition cursor-pointer">Forgot password?</button>}
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -190,12 +220,23 @@ export default function Auth() {
                   {loading ? <ButtonSpinner /> : 'Verify & Continue'}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
+                
+                <div className="text-center pt-3">
+                  <button 
+                    type="button" 
+                    onClick={handleResendOTP} 
+                    disabled={loading}
+                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50"
+                  >
+                    Didn't receive the code? Resend
+                  </button>
+                </div>
               </form>
             )}
           </div>
 
           {step === 'auth' && (
-            <div className="mt-8 text-center border-t border-gray-100 pt-6">
+            <div className="mt-8 text-center border-t border-slate-200 pt-6">
               <p className="text-sm text-gray-500">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
                 <button

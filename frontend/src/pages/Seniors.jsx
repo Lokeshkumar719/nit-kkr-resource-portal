@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ExternalLink, Briefcase, Mail, Users,
-  Search, Building2, Award, GraduationCap
+  Search, Building2, Award, GraduationCap, ArrowLeft
 } from 'lucide-react';
 import { seniorApi } from '../services/api.js';
 import { BRANCHES, SENIOR_YEARS } from '../constants/index.js';
@@ -35,6 +36,7 @@ export default function Seniors() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (branch) {
@@ -53,7 +55,7 @@ export default function Seniors() {
       );
       const grouped = {};
       SENIOR_YEARS.forEach((year, i) => {
-        grouped[year] = results[i].data.data || [];
+        grouped[year] = results[i].data.data?.mentors || [];
       });
       setSeniorsByYear(grouped);
     } catch (err) {
@@ -94,9 +96,14 @@ export default function Seniors() {
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="page-header">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
-            <Users className="w-5 h-5 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
+          <div className="flex items-center gap-3 shrink-0">
+            <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+              <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
+            </button>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
+              <Users className="w-5 h-5 text-white" />
+            </div>
           </div>
           <div>
             <h1>Senior Support</h1>
@@ -120,7 +127,7 @@ export default function Seniors() {
               {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           </div>
-          {branch && totalCount > 0 && (
+          {branch && (
             <div>
               <label className="filter-label">Search</label>
               <div className="search-bar">
@@ -145,7 +152,14 @@ export default function Seniors() {
           message="Choose your branch above to see seniors organized by year."
         />
       ) : loading ? (
-        <ProfileSkeleton count={8} />
+        <div className="space-y-8">
+          <div className="year-section">
+            <div className="flex items-center gap-3 mb-4 pl-1">
+              <div className="h-7 w-48 bg-slate-200 rounded animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+            </div>
+            <ProfileSkeleton count={8} />
+          </div>
+        </div>
       ) : error ? (
         <div className="error-banner">{error}</div>
       ) : totalCount === 0 ? (
@@ -170,11 +184,11 @@ export default function Seniors() {
             return (
               <div key={year} className="year-section animate-fade-in">
                 {/* Year header badge */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="year-badge" style={{ animationDelay: '0s' }}>
-                    <div className={`w-2 h-2 rounded-full ${accent.dot}`} />
+                <div className="flex items-center gap-3 mb-4 pl-1">
+                  <div className="flex items-center text-xl font-bold text-slate-800" style={{ animationDelay: '0s' }}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${accent.dot} mr-2.5`} />
                     {year}
-                    <span className="text-slate-400 font-normal ml-1">
+                    <span className="text-slate-500 font-medium text-lg ml-2">
                       ({list.length} {list.length === 1 ? 'senior' : 'seniors'})
                     </span>
                   </div>

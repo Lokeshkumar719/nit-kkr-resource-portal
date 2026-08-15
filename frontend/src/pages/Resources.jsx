@@ -1,24 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Video, FileText, BookOpen, StickyNote,
-  Search, FolderOpen, ExternalLink, Library, ChevronRight
+  Search, FolderOpen, ExternalLink, Library, ChevronRight, ArrowLeft, Download
 } from 'lucide-react';
-import { resourceApi } from '../services/api.js';
+import { resourceApi, getResources, getResourceDownloadUrl } from '../services/api.js';
 import { BRANCHES, SEMESTERS, RESOURCE_TYPES } from '../constants/index.js';
 import { ResourceSkeleton } from '../components/ui/Skeleton.jsx';
 
 const TYPE_ICONS = {
-  lecture: Video,
-  pdf: BookOpen,
-  pyq: FileText,
-  notes: StickyNote,
+  LECTURES: Video,
+  BOOKS: BookOpen,
+  PYQS: FileText,
+  NOTES: StickyNote,
 };
 
 const TYPE_COLORS = {
-  lecture: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200' },
-  pdf: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-  pyq: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200' },
-  notes: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
+  LECTURES: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200' },
+  BOOKS: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
+  PYQS: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200' },
+  NOTES: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
 };
 
 const EmptyState = ({ icon: Icon = FolderOpen, title, message }) => (
@@ -37,7 +38,10 @@ export default function Resources() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [activeType, setActiveType] = useState('lecture');
+  const [activeType, setActiveType] = useState('LECTURES');
+  const [subjectResources, setSubjectResources] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (branch && sem) {
@@ -71,22 +75,46 @@ export default function Resources() {
     );
   }, [subjects, search]);
 
-  const itemsForActiveType = useMemo(() => {
-    if (!selectedSubject?.resources) return [];
-    return selectedSubject.resources.filter(r => r.type === activeType);
-  }, [selectedSubject, activeType]);
-
-  const totalResources = useMemo(() => {
-    return selectedSubject?.resources?.length || 0;
+  useEffect(() => {
+    if (selectedSubject) {
+      fetchSubjectResources(selectedSubject._id);
+    } else {
+      setSubjectResources([]);
+    }
   }, [selectedSubject]);
 
+  const fetchSubjectResources = async (subjectId) => {
+    setLoadingResources(true);
+    try {
+      const res = await getResources(subjectId);
+      setSubjectResources(res.data.data || []);
+    } catch (err) {
+      setSubjectResources([]);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
+
+  const itemsForActiveType = useMemo(() => {
+    return subjectResources.filter(r => r.type === activeType);
+  }, [subjectResources, activeType]);
+
+  const totalResources = useMemo(() => {
+    return subjectResources.length || 0;
+  }, [subjectResources]);
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-12">
       {/* Page Header */}
       <div className="page-header">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-            <Library className="w-5 h-5 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
+          <div className="flex items-center gap-3 shrink-0">
+            <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+              <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
+            </button>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+              <Library className="w-5 h-5 text-white" />
+            </div>
           </div>
           <div>
             <h1>Study Materials</h1>
@@ -170,13 +198,16 @@ export default function Resources() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Removing hardcoded resourceCount since it's not pre-fetched */}
+                          {/* 
                           {resourceCount > 0 && (
                             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
                               isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                             }`}>
                               {resourceCount}
                             </span>
-                          )}
+                          )} 
+                          */}
                           <ChevronRight className={`w-3.5 h-3.5 transition-transform ${
                             isActive ? 'text-white/70' : 'text-slate-300'
                           }`} />
@@ -197,7 +228,7 @@ export default function Resources() {
           {/* Resource detail panel */}
           <div className="md:col-span-8 lg:col-span-9">
             {!selectedSubject ? (
-              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 rounded-xl bg-white px-6">
+              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-300 rounded-xl bg-white px-6">
                 <BookOpen className="w-10 h-10 text-slate-200 mb-3" />
                 <p className="text-sm font-medium text-slate-400">Select a subject to view its materials</p>
                 <p className="text-xs text-slate-300 mt-1">Choose from the list on the left</p>
@@ -222,8 +253,8 @@ export default function Resources() {
                 {/* Type tabs */}
                 <div className="tab-bar px-2">
                   {RESOURCE_TYPES.map(t => {
-                    const Icon = TYPE_ICONS[t.value];
-                    const count = selectedSubject.resources?.filter(r => r.type === t.value).length || 0;
+                    const Icon = TYPE_ICONS[t.value] || TYPE_ICONS['LECTURES'];
+                    const count = subjectResources.filter(r => r.type === t.value).length || 0;
                     const isActive = activeType === t.value;
                     return (
                       <button
@@ -241,36 +272,55 @@ export default function Resources() {
 
                 {/* Resource rows */}
                 <div className="panel-body">
-                  {itemsForActiveType.length > 0 ? (
-                    <div className="divide-y divide-gray-100">
-                      {itemsForActiveType.map((item, i) => {
-                        const color = TYPE_COLORS[activeType];
+                  {loadingResources ? (
+                    <ResourceSkeleton rows={3} />
+                  ) : itemsForActiveType.length > 0 ? (
+                    <div className="divide-y divide-slate-200">
+                      {itemsForActiveType.map((item, i) => {                        const color = TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES'];
+                        const ActiveIcon = TYPE_ICONS[activeType] || TYPE_ICONS['LECTURES'];
                         return (
                           <a
                             key={i}
-                            href={item.link}
-                            target="_blank"
+                            href={item.url || '#'}
+                            target={item.url ? "_blank" : "_self"}
                             rel="noreferrer"
                             className="resource-list-item"
+                            onClick={async (e) => {
+                              if (!item.url) {
+                                e.preventDefault();
+                                try {
+                                  const res = await getResourceDownloadUrl(item._id);
+                                  if (res.data?.data?.downloadUrl) {
+                                    window.location.href = res.data.data.downloadUrl;
+                                  }
+                                } catch (err) {
+                                  alert("Could not generate download link. Please try again.");
+                                }
+                              }
+                            }}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className={`w-8 h-8 rounded-lg ${color.bg} flex items-center justify-center shrink-0`}>
-                                {React.createElement(TYPE_ICONS[activeType], {
+                                {React.createElement(ActiveIcon, {
                                   className: `w-4 h-4 ${color.text}`
                                 })}
                               </div>
                               <span className="resource-title truncate">{item.title}</span>
                             </div>
-                            <ExternalLink className="resource-action w-4 h-4" />
+                            {item.url ? (
+                              <ExternalLink className="resource-action w-4 h-4" />
+                            ) : (
+                              <Download className="resource-action w-4 h-4" />
+                            )}
                           </a>
                         );
                       })}
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <div className={`w-12 h-12 mx-auto rounded-xl ${TYPE_COLORS[activeType].bg} flex items-center justify-center mb-3`}>
-                        {React.createElement(TYPE_ICONS[activeType], {
-                          className: `w-6 h-6 ${TYPE_COLORS[activeType].text}`
+                      <div className={`w-12 h-12 mx-auto rounded-xl ${(TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES']).bg} flex items-center justify-center mb-3`}>
+                        {React.createElement(TYPE_ICONS[activeType] || TYPE_ICONS['LECTURES'], {
+                          className: `w-6 h-6 ${(TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES']).text}`
                         })}
                       </div>
                       <p className="text-sm font-medium text-gray-400">
@@ -285,12 +335,6 @@ export default function Resources() {
           </div>
         </div>
       )}
-function Resources() {
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Resources Page</h2>
     </div>
   );
 }
-
-export default Resources;

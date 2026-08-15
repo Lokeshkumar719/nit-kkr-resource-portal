@@ -9,15 +9,12 @@ export const BRANCHES = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
 // Mirrors backend/src/constants/semesters.js exactly
 export const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
-// Mirrors backend/src/models/Resource.js -> resources[].type enum exactly
-// (NOT backend/src/constants/resourceTypes.js — that file's values
-// ('BOOKS','NOTES','PYQS','LECTURES') don't match what the Resource
-// model actually validates/stores. The model is the real contract.)
+// Mirrors backend/src/constants/resourceTypes.js exactly
 export const RESOURCE_TYPES = [
-  { value: 'lecture', label: 'Lecture' },
-  { value: 'pdf', label: 'Book / PDF' },
-  { value: 'pyq', label: 'PYQ' },
-  { value: 'notes', label: 'Notes' },
+  { value: 'LECTURES', label: 'Lecture' },
+  { value: 'BOOKS', label: 'Book / PDF' },
+  { value: 'PYQS', label: 'PYQ' },
+  { value: 'NOTES', label: 'Notes' },
 ];
 
 // Mirrors backend/src/models/Mentor.js -> year enum exactly.
@@ -34,16 +31,36 @@ export const USER_ROLES = { USER: 'USER', ADMIN: 'ADMIN' };
 // Frontend-only categorization, no backend enum for this yet —
 // used purely for optional display/filtering, never sent to the API
 // unless the profile data itself contains a `skills` array.
-export const SKILL_TAG_SUGGESTIONS = [
-  'Competitive Programming',
-  'Machine Learning',
-  'Deep Learning',
-  'Data Science',
-  'Backend Development',
-  'Frontend Development',
-  'System Design',
-  'Research',
-  'Cloud Computing',
-  'DevOps',
-  'Open Source',
+export const MENTOR_TAGS = [
+  "Competitive Programming",
+  "Web Development",
+  "Frontend",
+  "Backend",
+  "Full Stack",
+  "Android Development",
+  "iOS Development",
+  "Machine Learning",
+  "Deep Learning",
+  "Artificial Intelligence",
+  "Data Science",
+  "Cyber Security",
+  "Cloud Computing",
+  "DevOps",
+  "Blockchain",
+  "Open Source",
+  "UI/UX Design",
+  "System Design",
+  "Database",
+  "Operating Systems",
+  "Computer Networks",
+  "Research",
+  "Embedded Systems",
+  "IoT",
+  "Robotics",
+  "AR/VR",
+  "Game Development",
+  "Product Management",
+  "Quant",
+  "Resume Review",
+  "Interview Preparation"
 ];

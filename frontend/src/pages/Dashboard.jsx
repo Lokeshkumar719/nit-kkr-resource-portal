@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, Users, GraduationCap, UploadCloud, ArrowRight, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, Users, GraduationCap, UploadCloud, ArrowRight, Sparkles, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const dashboardOptions = [
@@ -40,14 +40,18 @@ const dashboardOptions = [
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const displayName = user?.email?.split('@')[0] || 'Student';
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Welcome section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-nit-primary via-nit-primary-light to-blue-700 p-8 sm:p-10 text-white">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
+            <button onClick={() => navigate('/')} className="flex items-center justify-center w-8 h-8 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all group" title="Go Back">
+              <ArrowLeft className="w-4 h-4 text-white/70 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+            </button>
             <Sparkles className="w-5 h-5 text-amber-300" />
             <span className="text-sm font-medium text-blue-200">Welcome back</span>
           </div>
@@ -101,28 +105,6 @@ export default function Dashboard() {
           })}
         </div>
       </div>
-import { useAuth } from "../context/AuthContext";
-
-function Dashboard() {
-  const { user } = useAuth();
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Dashboard</h2>
-
-      <h3>Welcome {user?.username}</h3>
-
-      <p>Email : {user?.email}</p>
-
-      <p>Role : {user?.role}</p>
-
-      <br />
-
-      <p>
-        Use the navigation bar above to test the backend APIs.
-      </p>
     </div>
   );
 }
-
-export default Dashboard;

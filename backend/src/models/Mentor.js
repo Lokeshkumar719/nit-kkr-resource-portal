@@ -13,16 +13,14 @@ const mentorSchema = new mongoose.Schema({
     trim: true
   },
 
-  rollNo: {
-    type: Number,
-    required: true,
-    unique: true
-  },
+  // rollNo: {
+  //   type: Number,
+  //   required: true,
+  //   unique: true
+  // },
 
   email: {
     type: String,
-    required: true,
-    unique: true,
     lowercase: true
   },
 
@@ -36,6 +34,10 @@ const mentorSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: CURRENT_YEARS
+  },
+
+  batch: {
+    type: String
   },
 
   image: {

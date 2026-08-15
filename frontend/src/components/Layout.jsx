@@ -38,7 +38,7 @@ export const Layout = ({ children }) => {
           <div className="flex justify-between h-16 items-center">
 
             {/* Logo */}
-            <Link to={user?.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} className="flex items-center space-x-3 group shrink-0">
+            <Link to="/" className="flex items-center space-x-3 group shrink-0" title="Go to Homepage">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
                 <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="Logo" className="w-7 h-7 object-contain"/>
               </div>
