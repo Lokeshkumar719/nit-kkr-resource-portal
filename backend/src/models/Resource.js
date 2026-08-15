@@ -1,36 +1,48 @@
-import mongoose from 'mongoose';
+const mongoose = require("mongoose");
 
-const resourceSchema = new mongoose.Schema({
-  branch: {
-    type: String,
-    required: true
-  },
-  semester: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 8
-  },
-  subjectName: {
-    type: String,
-    required: true
-  },
-  subjectCode: String,
-  resources: [{
-    title: String,
+const RESOURCE_TYPES = require("../constants/resourceTypes");
+
+const resourceSchema = new mongoose.Schema(
+  {
+    subjectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subject",
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     type: {
       type: String,
-      enum: ['lecture', 'pdf', 'pyq', 'notes']
+      required: true,
+      enum: Object.values(RESOURCE_TYPES),
     },
-    link: String
-  }],
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+    fileName: {
+      type: String,
+      trim: true,
+    },
+    fileKey: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    url: {
+      type: String,
+      trim: true,
+    },
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-// Compound index for efficient searching
-resourceSchema.index({ branch: 1, semester: 1 });
+resourceSchema.index({ subjectId: 1, type: 1 });
 
-export const Resource = mongoose.model('Resource', resourceSchema);
+module.exports = mongoose.model("Resource", resourceSchema);

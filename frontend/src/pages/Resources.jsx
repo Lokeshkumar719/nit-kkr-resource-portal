@@ -1,14 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Book, FileText, Video, FolderOpen, Loader } from 'lucide-react';
-import { api } from '../services/api.js';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Video, FileText, BookOpen, StickyNote,
+  Search, FolderOpen, ExternalLink, Library, ChevronRight, ArrowLeft, Download
+} from 'lucide-react';
+import { resourceApi, getResources, getResourceDownloadUrl } from '../services/api.js';
+import { BRANCHES, SEMESTERS, RESOURCE_TYPES } from '../constants/index.js';
+import { ResourceSkeleton } from '../components/ui/Skeleton.jsx';
 
-const BRANCHES = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'Civil', 'PIE', 'AIML','AIDS','M&C', 'IIOT','VLSI','SET','ROBOTICS'];
-const SEMESTERS = Array.from({ length: 8 }, (_, i) => i + 1);
+const TYPE_ICONS = {
+  LECTURES: Video,
+  BOOKS: BookOpen,
+  PYQS: FileText,
+  NOTES: StickyNote,
+};
 
-const NoData = ({ message }) => (
-  <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-dashed border-gray-300 mt-6">
-    <FolderOpen className="w-12 h-12 mb-4 text-gray-300" />
-    <p className="text-lg font-medium">{message || "Sorry we are currently working on it"}</p>
+const TYPE_COLORS = {
+  LECTURES: { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200' },
+  BOOKS: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
+  PYQS: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200' },
+  NOTES: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
+};
+
+const EmptyState = ({ icon: Icon = FolderOpen, title, message }) => (
+  <div className="empty-state">
+    <Icon />
+    <h3>{title}</h3>
+    {message && <p>{message}</p>}
   </div>
 );
 
@@ -18,6 +36,12 @@ export default function Resources() {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [activeType, setActiveType] = useState('LECTURES');
+  const [subjectResources, setSubjectResources] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (branch && sem) {
@@ -30,149 +54,284 @@ export default function Resources() {
 
   const fetchResources = async () => {
     setLoading(true);
+    setError('');
     try {
-      const res = await api.get('/resources', { params: { branch, sem } });
+      const res = await resourceApi.getByBranchAndSem(branch, sem);
       setSubjects(res.data.data || []);
-      setSelectedSubject(null); // Reset selection on fetch
+      setSelectedSubject(null);
     } catch (err) {
-      console.error(err);
       setSubjects([]);
+      setError('Could not load resources right now.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper to categorize resources for the selected subject
-  const getCategorizedResources = (subject) => {
-    const categories = {
-      lectures: [],
-      pdfs: [],
-      pyqs: [],
-      notes: []
-    };
-    
-    if (!subject || !subject.resources) return categories;
+  const filteredSubjects = useMemo(() => {
+    if (!search.trim()) return subjects;
+    const q = search.trim().toLowerCase();
+    return subjects.filter(s =>
+      s.subjectName?.toLowerCase().includes(q) || s.subjectCode?.toLowerCase().includes(q)
+    );
+  }, [subjects, search]);
 
-    subject.resources.forEach(res => {
-      if (res.type === 'lecture') categories.lectures.push(res);
-      else if (res.type === 'pdf') categories.pdfs.push(res);
-      else if (res.type === 'pyq') categories.pyqs.push(res);
-      else if (res.type === 'notes') categories.notes.push(res);
-    });
+  useEffect(() => {
+    if (selectedSubject) {
+      fetchSubjectResources(selectedSubject._id);
+    } else {
+      setSubjectResources([]);
+    }
+  }, [selectedSubject]);
 
-    return categories;
+  const fetchSubjectResources = async (subjectId) => {
+    setLoadingResources(true);
+    try {
+      const res = await getResources(subjectId);
+      setSubjectResources(res.data.data || []);
+    } catch (err) {
+      setSubjectResources([]);
+    } finally {
+      setLoadingResources(false);
+    }
   };
 
-  const resourceData = selectedSubject ? getCategorizedResources(selectedSubject) : null;
+  const itemsForActiveType = useMemo(() => {
+    return subjectResources.filter(r => r.type === activeType);
+  }, [subjectResources, activeType]);
+
+  const totalResources = useMemo(() => {
+    return subjectResources.length || 0;
+  }, [subjectResources]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Academic Resources</h1>
-      
-      {/* Filters */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Branch</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-nit-primary outline-none"
-            value={branch}
-            onChange={(e) => setBranch(e.target.value)}
-          >
-            <option value="">-- Choose Branch --</option>
-            {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Semester</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-nit-primary outline-none"
-            value={sem}
-            onChange={(e) => setSem(e.target.value)}
-          >
-            <option value="">-- Choose Semester --</option>
-            {SEMESTERS.map(s => <option key={s} value={s}>Semester {s}</option>)}
-          </select>
+    <div className="space-y-6 animate-fade-in pb-12">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
+          <div className="flex items-center gap-3 shrink-0">
+            <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+              <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
+            </button>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+              <Library className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <div>
+            <h1>Study Materials</h1>
+            <p>Notes, books, PYQs, and lecture links organized by branch and semester.</p>
+          </div>
         </div>
       </div>
 
-      {/* Content Area */}
-      {branch && sem && (
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Subject List */}
-          <div className="md:col-span-1 space-y-3">
-            <h2 className="font-semibold text-gray-700 mb-2">Subjects</h2>
-            
+      {/* Filters */}
+      <div className="filter-bar">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="filter-label">Branch</label>
+            <select
+              className="form-select"
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              id="resource-branch-filter"
+            >
+              <option value="">Choose branch</option>
+              {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="filter-label">Semester</label>
+            <select
+              className="form-select"
+              value={sem}
+              onChange={(e) => setSem(e.target.value)}
+              id="resource-sem-filter"
+            >
+              <option value="">Choose semester</option>
+              {SEMESTERS.map(s => <option key={s} value={s}>Semester {s}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {!branch || !sem ? (
+        <EmptyState
+          icon={Library}
+          title="Select a branch and semester"
+          message="Choose both filters above to browse subjects and materials."
+        />
+      ) : (
+        <div className="grid md:grid-cols-12 gap-6">
+          {/* Subject list — library sidebar */}
+          <div className="md:col-span-4 lg:col-span-3">
+            <div className="search-bar mb-3">
+              <Search className="search-icon w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search subjects..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                id="subject-search"
+              />
+            </div>
+
             {loading ? (
-              <div className="flex justify-center py-10"><Loader className="animate-spin text-nit-primary" /></div>
-            ) : subjects.length > 0 ? (
-              subjects.map(sub => (
-                <div 
-                  key={sub._id} 
-                  onClick={() => setSelectedSubject(sub)}
-                  className={`p-4 rounded-lg cursor-pointer transition-all ${selectedSubject?._id === sub._id ? 'bg-nit-primary text-white shadow-md' : 'bg-white hover:bg-gray-50 border border-gray-100'}`}
-                >
-                  <div className="font-medium">{sub.subjectName}</div>
-                  <div className={`text-xs ${selectedSubject?._id === sub._id ? 'text-blue-200' : 'text-gray-500'}`}>{sub.subjectCode}</div>
-                </div>
-              ))
+              <ResourceSkeleton rows={6} />
+            ) : error ? (
+              <div className="error-banner">{error}</div>
+            ) : filteredSubjects.length > 0 ? (
+              <div className="space-y-1.5 max-h-[560px] overflow-y-auto pr-1">
+                {filteredSubjects.map((sub, i) => {
+                  const isActive = selectedSubject?._id === sub._id;
+                  const resourceCount = sub.resources?.length || 0;
+                  return (
+                    <button
+                      key={sub._id}
+                      onClick={() => { setSelectedSubject(sub); setActiveType('lecture'); }}
+                      className={`subject-item animate-fade-in ${isActive ? 'active' : ''}`}
+                      style={{ animationDelay: `${i * 0.03}s` }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0">
+                          <div className="subject-name truncate">{sub.subjectName}</div>
+                          {sub.subjectCode && (
+                            <div className="subject-code">{sub.subjectCode}</div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Removing hardcoded resourceCount since it's not pre-fetched */}
+                          {/* 
+                          {resourceCount > 0 && (
+                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                              isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                            }`}>
+                              {resourceCount}
+                            </span>
+                          )} 
+                          */}
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${
+                            isActive ? 'text-white/70' : 'text-slate-300'
+                          }`} />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             ) : (
-              <NoData message="No subjects found. We are working on it." />
+              <EmptyState
+                title="No subjects found"
+                message={search ? 'Try a different search term.' : "We're still adding materials for this selection."}
+              />
             )}
           </div>
 
-          {/* Details Area */}
-          <div className="md:col-span-2">
-             <h2 className="font-semibold text-gray-700 mb-2">Materials</h2>
-             {selectedSubject ? (
-               <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 space-y-6">
-                 <h3 className="text-xl font-bold text-nit-primary border-b pb-2">{selectedSubject.subjectName} Resources</h3>
-                 
-                 {/* Lecture Links */}
-                 <div>
-                   <h4 className="flex items-center text-sm font-bold text-gray-600 mb-3"><Video className="w-4 h-4 mr-2"/> Video Lectures</h4>
-                   <div className="space-y-2">
-                      {resourceData.lectures.length > 0 ? resourceData.lectures.map((l, i) => (
-                        <a key={i} href={l.link} target="_blank" rel="noreferrer" className="block text-blue-600 hover:underline text-sm truncate">{l.title}</a>
-                      )) : <p className="text-xs text-gray-400 italic">No lectures available</p>}
-                   </div>
-                 </div>
+          {/* Resource detail panel */}
+          <div className="md:col-span-8 lg:col-span-9">
+            {!selectedSubject ? (
+              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-300 rounded-xl bg-white px-6">
+                <BookOpen className="w-10 h-10 text-slate-200 mb-3" />
+                <p className="text-sm font-medium text-slate-400">Select a subject to view its materials</p>
+                <p className="text-xs text-slate-300 mt-1">Choose from the list on the left</p>
+              </div>
+            ) : (
+              <div className="panel animate-slide-in-right">
+                {/* Panel header */}
+                <div className="panel-header">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-800">{selectedSubject.subjectName}</h2>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {selectedSubject.subjectCode && (
+                          <span className="text-xs text-gray-400 font-medium">{selectedSubject.subjectCode}</span>
+                        )}
+                        <span className="tag tag-blue">{totalResources} resource{totalResources !== 1 ? 's' : ''}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                 {/* PDFs */}
-                 <div>
-                   <h4 className="flex items-center text-sm font-bold text-gray-600 mb-3"><Book className="w-4 h-4 mr-2"/> Books & PDFs</h4>
-                   <div className="space-y-2">
-                      {resourceData.pdfs.length > 0 ? resourceData.pdfs.map((l, i) => (
-                        <a key={i} href={l.link} target="_blank" rel="noreferrer" className="block text-blue-600 hover:underline text-sm truncate">{l.title}</a>
-                      )) : <p className="text-xs text-gray-400 italic">No documents available</p>}
-                   </div>
-                 </div>
+                {/* Type tabs */}
+                <div className="tab-bar px-2">
+                  {RESOURCE_TYPES.map(t => {
+                    const Icon = TYPE_ICONS[t.value] || TYPE_ICONS['LECTURES'];
+                    const count = subjectResources.filter(r => r.type === t.value).length || 0;
+                    const isActive = activeType === t.value;
+                    return (
+                      <button
+                        key={t.value}
+                        onClick={() => setActiveType(t.value)}
+                        className={`tab-item ${isActive ? 'active' : ''}`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        {t.label}
+                        <span className="tab-badge">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                 {/* PYQs */}
-                 <div>
-                   <h4 className="flex items-center text-sm font-bold text-gray-600 mb-3"><FileText className="w-4 h-4 mr-2"/> Previous Year Questions</h4>
-                   <div className="space-y-2">
-                      {resourceData.pyqs.length > 0 ? resourceData.pyqs.map((l, i) => (
-                        <a key={i} href={l.link} target="_blank" rel="noreferrer" className="block text-blue-600 hover:underline text-sm truncate">{l.title}</a>
-                      )) : <p className="text-xs text-gray-400 italic">No PYQs available</p>}
-                   </div>
-                 </div>
-
-                 {/* Notes */}
-                 <div>
-                   <h4 className="flex items-center text-sm font-bold text-gray-600 mb-3"><FolderOpen className="w-4 h-4 mr-2"/> Other Notes</h4>
-                   <div className="space-y-2">
-                      {resourceData.notes.length > 0 ? resourceData.notes.map((l, i) => (
-                        <a key={i} href={l.link} target="_blank" rel="noreferrer" className="block text-blue-600 hover:underline text-sm truncate">{l.title}</a>
-                      )) : <p className="text-xs text-gray-400 italic">No notes available</p>}
-                   </div>
-                 </div>
-
-               </div>
-             ) : (
-               <div className="h-64 flex items-center justify-center text-gray-400 border-2 border-dashed rounded-xl">
-                 Select a subject to view resources
-               </div>
-             )}
+                {/* Resource rows */}
+                <div className="panel-body">
+                  {loadingResources ? (
+                    <ResourceSkeleton rows={3} />
+                  ) : itemsForActiveType.length > 0 ? (
+                    <div className="divide-y divide-slate-200">
+                      {itemsForActiveType.map((item, i) => {                        const color = TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES'];
+                        const ActiveIcon = TYPE_ICONS[activeType] || TYPE_ICONS['LECTURES'];
+                        return (
+                          <a
+                            key={i}
+                            href={item.url || '#'}
+                            target={item.url ? "_blank" : "_self"}
+                            rel="noreferrer"
+                            className="resource-list-item"
+                            onClick={async (e) => {
+                              if (!item.url) {
+                                e.preventDefault();
+                                try {
+                                  const res = await getResourceDownloadUrl(item._id);
+                                  if (res.data?.data?.downloadUrl) {
+                                    window.location.href = res.data.data.downloadUrl;
+                                  }
+                                } catch (err) {
+                                  alert("Could not generate download link. Please try again.");
+                                }
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-8 h-8 rounded-lg ${color.bg} flex items-center justify-center shrink-0`}>
+                                {React.createElement(ActiveIcon, {
+                                  className: `w-4 h-4 ${color.text}`
+                                })}
+                              </div>
+                              <span className="resource-title truncate">{item.title}</span>
+                            </div>
+                            {item.url ? (
+                              <ExternalLink className="resource-action w-4 h-4" />
+                            ) : (
+                              <Download className="resource-action w-4 h-4" />
+                            )}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className={`w-12 h-12 mx-auto rounded-xl ${(TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES']).bg} flex items-center justify-center mb-3`}>
+                        {React.createElement(TYPE_ICONS[activeType] || TYPE_ICONS['LECTURES'], {
+                          className: `w-6 h-6 ${(TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES']).text}`
+                        })}
+                      </div>
+                      <p className="text-sm font-medium text-gray-400">
+                        No {RESOURCE_TYPES.find(t => t.value === activeType)?.label.toLowerCase()} available yet
+                      </p>
+                      <p className="text-xs text-gray-300 mt-1">Check back later or contribute resources</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
