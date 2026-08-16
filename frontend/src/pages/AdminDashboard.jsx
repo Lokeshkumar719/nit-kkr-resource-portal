@@ -62,7 +62,7 @@ export default function AdminDashboard() {
             </button>
             <div>
               <h2 className="text-xl font-bold text-nit-primary leading-tight">Admin Panel</h2>
-              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Resources</p>
+              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Resource Portal</p>
             </div>
           </div>
         </div>

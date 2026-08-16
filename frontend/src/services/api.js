@@ -100,6 +100,15 @@ export const resendOTP = (email) =>
 export const verifyAuth = () => api.get("/auth/me");
 export const logout = () => api.post("/auth/logout");
 
+export const forgotPassword = (email) =>
+  api.post("/auth/forgot-password", { email });
+
+export const resetPassword = (email, otp, password) =>
+  api.post("/auth/reset-password", { email, otp, password });
+
+export const changePassword = (oldPassword, newPassword) =>
+  api.patch("/auth/change-password", { oldPassword, newPassword });
+
 // ── Subjects / Branches API ──────────────────────
 export const getSubjects = (semester,branch) =>
   api.get("/subjects", {

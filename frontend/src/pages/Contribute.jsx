@@ -206,7 +206,7 @@ export default function Contribute() {
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-800">Bug report submitted successfully.</h3>
-            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Resources.</p>
+            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Resource Portal.</p>
             <button onClick={handleBack} className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors">
               Back to Contributions
             </button>

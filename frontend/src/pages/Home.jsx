@@ -15,7 +15,7 @@ export default function Home() {
             <div className="home-logo-icon">
               <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR Logo" className="w-8 h-8 object-contain" />
             </div>
-            <span className="home-logo-text">NIT KKR Resources</span>
+            <span className="home-logo-text">NIT KKR Resource Portal</span>
           </Link>
           <div className="home-nav-actions">
             {user ? (
@@ -23,12 +23,9 @@ export default function Home() {
                 Go to Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
-              <>
-                <Link to="/login" className="home-btn-ghost">Log In</Link>
-                <Link to="/login" className="home-btn-primary">
-                  Get Started <ArrowRight className="w-4 h-4" />
-                </Link>
-              </>
+              <Link to="/login" className="home-btn-primary">
+                Get Started <ArrowRight className="w-4 h-4" />
+              </Link>
             )}
           </div>
         </div>

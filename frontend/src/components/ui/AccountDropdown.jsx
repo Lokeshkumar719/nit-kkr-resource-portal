@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserCircle, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import { LogOut, KeyRound, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,6 +31,11 @@ export function AccountDropdown() {
     navigate('/login');
   };
 
+  const handleChangePassword = () => {
+    setIsOpen(false);
+    navigate('/change-password');
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger Button */}
@@ -54,16 +59,28 @@ export function AccountDropdown() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 animate-fade-in origin-top-right transform transition-all">
           
-          {/* Header */}
+          {/* Header (visible on mobile only) */}
           <div className="px-4 py-3 border-b border-slate-200 sm:hidden">
             <p className="text-sm font-bold text-gray-800 truncate">{displayName}</p>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-0.5">{displayRole}</p>
           </div>
 
+          {/* Change Password */}
+          <div className="px-1.5 pt-1.5">
+            <button
+              onClick={handleChangePassword}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 font-medium hover:bg-slate-50 rounded-lg transition-colors text-left group"
+            >
+              <KeyRound className="w-4 h-4 text-gray-400 group-hover:text-nit-primary" />
+              Change Password
+            </button>
+          </div>
 
+          {/* Divider */}
+          <div className="mx-3 my-1 border-t border-slate-100" />
 
           {/* Logout */}
-          <div className="px-1.5 py-1.5">
+          <div className="px-1.5 pb-1.5">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 rounded-lg transition-colors text-left group"
