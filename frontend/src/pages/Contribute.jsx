@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Bug, BookUp, Send, CheckCircle2, ArrowLeft, ArrowRight, AlertCircle, FileText, BookOpen, FileQuestion, Video } from 'lucide-react';
 import { contributionApi, createContribution, resourceApi } from '../services/api.js';
-import { BRANCHES, SEMESTERS } from '../constants/index.js';
+import { BRANCHES, BRANCH_LABELS, SEMESTERS } from '../constants/index.js';
 import { Alert } from '../components/ui/Alert.jsx';
 import { ButtonSpinner } from '../components/ui/Spinner.jsx';
 import { ZipUpload } from '../components/ui/ZipUpload.jsx';
+import { CustomSelect } from '../components/ui/CustomSelect.jsx';
 
 export default function Contribute() {
   const navigate = useNavigate();
@@ -389,26 +390,35 @@ export default function Contribute() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-                    <select required className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white" value={branch} onChange={e => setBranch(e.target.value)}>
-                      <option value="">Select Branch</option>
-                      {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={branch}
+                      onChange={setBranch}
+                      options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+                      placeholder="Select Branch"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                    <select required className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white" value={semester} onChange={e => setSemester(e.target.value)}>
-                      <option value="">Select Sem</option>
-                      {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={semester}
+                      onChange={(val) => setSemester(Number(val))}
+                      options={SEMESTERS.map(s => ({ value: s, label: `Semester ${s}` }))}
+                      placeholder="Select Semester"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                  <select required className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white disabled:opacity-50" value={subjectId} onChange={e => setSubjectId(e.target.value)} disabled={!subjects.length}>
-                    <option value="">{subjects.length ? "Select Subject" : "Select Branch & Sem first"}</option>
-                    {subjects.map(s => <option key={s._id} value={s._id}>{s.subjectName} ({s.subjectCode})</option>)}
-                  </select>
+                  <CustomSelect
+                    value={subjectId}
+                    onChange={setSubjectId}
+                    options={subjects.map(s => ({ value: s._id, label: `${s.subjectName} (${s.subjectCode})` }))}
+                    placeholder={subjects.length ? "Select Subject" : "Select Branch & Sem first"}
+                  />
+                  {subjects.length === 0 && branch && semester && (
+                    <p className="text-xs text-amber-600 mt-1">No subjects found for this branch and semester.</p>
+                  )}
                 </div>
 
                 <div>

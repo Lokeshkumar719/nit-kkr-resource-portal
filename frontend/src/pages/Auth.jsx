@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, KeyRound, ArrowRight, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword } from '../services/api';
+import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP, forgotPassword as apiForgotPassword, verifyForgotPasswordOTP as apiVerifyForgotPasswordOTP, resetPassword as apiResetPassword } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
@@ -11,16 +11,18 @@ export default function Auth() {
   const { login } = useAuth();
   
   const [isLogin, setIsLogin] = useState(true);
-  // 'auth' | 'verify' | 'forgot' | 'forgot-otp' | 'reset-success'
+  // 'auth' | 'verify' | 'forgot' | 'forgot-otp' | 'forgot-reset' | 'reset-success'
   const [step, setStep] = useState('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     otp: '',
     newPassword: '',
+    confirmNewPassword: '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -118,8 +120,30 @@ export default function Auth() {
     }
   };
 
+  const handleVerifyForgotOTP = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await apiVerifyForgotPasswordOTP(formData.email, formData.otp);
+      setSuccess('OTP verified. Please set your new password.');
+      setStep('forgot-reset');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid OTP. Please check and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleResetPasswordSubmit = async (e) => {
     e.preventDefault();
+    if (formData.newPassword !== formData.confirmNewPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
@@ -128,7 +152,7 @@ export default function Auth() {
       await apiResetPassword(formData.email, formData.otp, formData.newPassword);
       setStep('reset-success');
     } catch (err) {
-      setError(err.response?.data?.message || 'Password reset failed. Please check your OTP and try again.');
+      setError(err.response?.data?.message || 'Password reset failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -172,7 +196,8 @@ export default function Auth() {
     switch (step) {
       case 'verify': return 'Verify Email';
       case 'forgot': return 'Forgot Password';
-      case 'forgot-otp': return 'Reset Password';
+      case 'forgot-otp': return 'Verify Code';
+      case 'forgot-reset': return 'Reset Password';
       case 'reset-success': return 'Password Reset';
       default: return isLogin ? 'Welcome back' : 'Create account';
     }
@@ -182,7 +207,8 @@ export default function Auth() {
     switch (step) {
       case 'verify': return 'Enter the 6-digit code sent to your email.';
       case 'forgot': return 'Enter your college email to receive a reset OTP.';
-      case 'forgot-otp': return `Enter the OTP sent to ${formData.email} and set your new password.`;
+      case 'forgot-otp': return `Enter the OTP sent to ${formData.email}.`;
+      case 'forgot-reset': return 'Set your new password below.';
       case 'reset-success': return '';
       default: return isLogin ? 'Sign in to access your dashboard.' : 'Sign up using your college email.';
     }
@@ -355,21 +381,21 @@ export default function Auth() {
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
 
-                <div className="text-center pt-3">
+                <div className="pt-2">
                   <button
                     type="button"
                     onClick={goBackToLogin}
-                    className="text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
                   >
-                    ← Back to Sign In
+                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Back to Sign In
                   </button>
                 </div>
               </form>
             )}
 
-            {/* ── FORGOT OTP STEP (Enter OTP + New Password) ─── */}
+            {/* ── FORGOT OTP STEP (Enter OTP) ─── */}
             {step === 'forgot-otp' && (
-              <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+              <form onSubmit={handleVerifyForgotOTP} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 ml-1">Reset Code</label>
                   <div className="relative">
@@ -387,6 +413,36 @@ export default function Auth() {
                   </div>
                 </div>
 
+                <button type="submit" disabled={loading} className="btn-primary mt-2">
+                  {loading ? <ButtonSpinner /> : 'Verify OTP'}
+                  {!loading && <ArrowRight className="w-4 h-4" />}
+                </button>
+
+                <div className="text-center pt-1 space-y-4">
+                  <button
+                    type="button"
+                    onClick={handleResendForgotOTP}
+                    disabled={loading}
+                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50"
+                  >
+                    Didn't receive the code? Resend
+                  </button>
+                  <div className="pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={goBackToLogin}
+                      className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
+                    >
+                      <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Back to Sign In
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* ── FORGOT RESET STEP (Enter New Password) ─── */}
+            {step === 'forgot-reset' && (
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 ml-1">New Password</label>
                   <div className="relative">
@@ -414,29 +470,43 @@ export default function Auth() {
                   </p>
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary mt-2">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 ml-1">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type={showConfirmNewPassword ? 'text' : 'password'}
+                      name="confirmNewPassword"
+                      placeholder="••••••••"
+                      className="input-field pr-10"
+                      value={formData.confirmNewPassword}
+                      onChange={handleChange}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                      title={showConfirmNewPassword ? 'Hide' : 'Show'}
+                    >
+                      {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={loading || !formData.newPassword || !formData.confirmNewPassword} className="btn-primary mt-2">
                   {loading ? <ButtonSpinner /> : 'Reset Password'}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
 
-                <div className="text-center pt-3 space-y-2">
+                <div className="pt-2">
                   <button
                     type="button"
-                    onClick={handleResendForgotOTP}
-                    disabled={loading}
-                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50"
+                    onClick={goBackToLogin}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
                   >
-                    Didn't receive the code? Resend
+                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Cancel Reset
                   </button>
-                  <div>
-                    <button
-                      type="button"
-                      onClick={goBackToLogin}
-                      className="text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      ← Back to Sign In
-                    </button>
-                  </div>
                 </div>
               </form>
             )}

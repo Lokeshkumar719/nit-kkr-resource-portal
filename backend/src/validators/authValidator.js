@@ -120,6 +120,29 @@ const validateResetPassword = (data) => {
   validatePassword(password);
 };
 
+const validateVerifyForgotPasswordOTP = (data) => {
+  const { email, otp } = data;
+  if (!email || !validator.isEmail(email)) {
+    throw new ApiError(
+      STATUS_CODES.BAD_REQUEST,
+      "Please provide a valid email.",
+    );
+  }
+
+  if (
+    !otp ||
+    !validator.isLength(otp, {
+      min: 6,
+      max: 6,
+    }) ||
+    !validator.isNumeric(otp)
+  ) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Please provide a valid OTP.");
+  }
+};
+
+
+
 const validateChangePassword = ({ oldPassword, newPassword }) => {
   if (!oldPassword) {
     throw new ApiError(STATUS_CODES.BAD_REQUEST, "Old password is required.");
@@ -134,6 +157,7 @@ module.exports = {
   validateVerifyOTP,
   validateResendOTP,
   validateForgotPassword,
+  validateVerifyForgotPasswordOTP,
   validateResetPassword,
   validateChangePassword,
 };

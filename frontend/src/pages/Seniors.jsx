@@ -5,8 +5,9 @@ import {
   Search, Building2, Award, GraduationCap, ArrowLeft
 } from 'lucide-react';
 import { seniorApi } from '../services/api.js';
-import { BRANCHES, SENIOR_YEARS } from '../constants/index.js';
+import { BRANCHES, BRANCH_LABELS, SENIOR_YEARS } from '../constants/index.js';
 import { ProfileSkeleton } from '../components/ui/Skeleton.jsx';
+import { CustomSelect } from '../components/ui/CustomSelect.jsx';
 
 const YEAR_GRADIENTS = {
   '4th Year': 'from-nit-primary to-blue-600',
@@ -117,15 +118,13 @@ export default function Seniors() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="filter-label">Branch</label>
-            <select
-              className="form-select"
+            <CustomSelect
               value={branch}
-              onChange={(e) => setBranch(e.target.value)}
+              onChange={setBranch}
+              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+              placeholder="Select branch"
               id="senior-branch-filter"
-            >
-              <option value="">Select branch</option>
-              {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
+            />
           </div>
           {branch && (
             <div>

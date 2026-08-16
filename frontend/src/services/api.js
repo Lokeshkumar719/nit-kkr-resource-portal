@@ -103,6 +103,9 @@ export const logout = () => api.post("/auth/logout");
 export const forgotPassword = (email) =>
   api.post("/auth/forgot-password", { email });
 
+export const verifyForgotPasswordOTP = (email, otp) =>
+  api.post("/auth/verify-forgot-password-otp", { email, otp });
+
 export const resetPassword = (email, otp, password) =>
   api.post("/auth/reset-password", { email, otp, password });
 

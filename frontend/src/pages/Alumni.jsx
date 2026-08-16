@@ -5,8 +5,9 @@ import {
   Search, Building2, MapPin, Award, Calendar, ArrowLeft
 } from 'lucide-react';
 import { seniorApi } from '../services/api.js';
-import { BRANCHES, ALUMNI_YEAR_VALUE } from '../constants/index.js';
+import { BRANCHES, BRANCH_LABELS, ALUMNI_YEAR_VALUE } from '../constants/index.js';
 import { ProfileSkeleton } from '../components/ui/Skeleton.jsx';
+import { CustomSelect } from '../components/ui/CustomSelect.jsx';
 
 import ProfileCard from '../components/ui/ProfileCard.jsx';
 
@@ -83,15 +84,13 @@ export default function Alumni() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="filter-label">Branch</label>
-            <select
-              className="form-select"
+            <CustomSelect
               value={branch}
-              onChange={(e) => setBranch(e.target.value)}
+              onChange={setBranch}
+              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+              placeholder="Select branch"
               id="alumni-branch-filter"
-            >
-              <option value="">Select branch</option>
-              {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
+            />
           </div>
           {branch && (
             <div>
