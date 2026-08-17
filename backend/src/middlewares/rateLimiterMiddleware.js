@@ -17,6 +17,8 @@ const {
   CONTRIBUTION_REFILL_RATE_PER_SEC,
 } = require('../constants/rateLimiterConstants');
 
+const {TOO_MANY_REQUEST} = require("../constants/statusCodes");
+
 const buildHeaders = (limit, remaining, retryAfterMs = null) => {
   const headers = {
     'X-RateLimit-Limit': limit,
@@ -31,7 +33,7 @@ const buildHeaders = (limit, remaining, retryAfterMs = null) => {
 const tooManyRequests = (res, limit, retryAfterMs) => {
   const headers = buildHeaders(limit, 0, retryAfterMs);
   res.set(headers);
-  return res.status(429).json({
+  return res.status(TOO_MANY_REQUEST).json({
     success: false,
     message: 'Too many requests. Please slow down.',
     retryAfterSeconds: headers['Retry-After'],

@@ -5,6 +5,8 @@ import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, 
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
+import { parseRateLimitError } from '../utils/rateLimitUtils';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -28,17 +30,20 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [resendTimer, setResendTimer] = useState(60);
+  
+  // Custom rate limiting hooks for form actions
+  const loginRateLimit = useRateLimitCountdown('login');
+  const registerRateLimit = useRateLimitCountdown('register');
+  const resendOtpRateLimit = useRateLimitCountdown('resendOtp');
+  const forgotPasswordRateLimit = useRateLimitCountdown('forgotPassword');
 
   useEffect(() => {
+    // Basic local UI timer for the resend OTP UX (distinct from rate limiting)
     let interval;
-    if ((step === 'verify' || step === 'forgot-otp') && resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
+    if ((step === 'verify' || step === 'forgot-otp') && resendOtpRateLimit.countdown > 0) {
+      // we can rely on the hook's countdown instead of local resendTimer
     }
-    return () => clearInterval(interval);
-  }, [step, resendTimer]);
+  }, [step]);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -63,11 +68,20 @@ export default function Auth() {
       } else {
         await apiRegister(formData.email, formData.password);
         setSuccess('OTP sent to your email! Please verify.');
-        setResendTimer(60);
+        resendOtpRateLimit.triggerRateLimit(60);
         setStep('verify');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        if (isLogin) {
+          loginRateLimit.triggerRateLimit(retryAfterSeconds);
+        } else {
+          registerRateLimit.triggerRateLimit(retryAfterSeconds);
+        }
+      } else {
+        setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -107,9 +121,14 @@ export default function Auth() {
     try {
       await apiResendOTP(formData.email);
       setSuccess('A new verification code has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        resendOtpRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else {
+        setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -125,10 +144,15 @@ export default function Auth() {
     try {
       await apiForgotPassword(formData.email);
       setSuccess('A password reset OTP has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
       setStep('forgot-otp');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        forgotPasswordRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else {
+        setError(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -179,9 +203,14 @@ export default function Auth() {
     try {
       await apiForgotPassword(formData.email);
       setSuccess('A new password reset OTP has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        resendOtpRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else {
+        setError(err.response?.data?.message || 'Failed to resend OTP.');
+      }
     } finally {
       setLoading(false);
     }
@@ -327,9 +356,19 @@ export default function Auth() {
                   )}
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary mt-2">
-                  {loading ? <ButtonSpinner /> : (isLogin ? 'Sign In' : 'Create Account')}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
+                <button 
+                  type="submit" 
+                  disabled={loading || (isLogin ? loginRateLimit.isRateLimited : registerRateLimit.isRateLimited)} 
+                  className="btn-primary mt-2"
+                >
+                  {loading ? (
+                    <ButtonSpinner />
+                  ) : (
+                    isLogin 
+                      ? (loginRateLimit.isRateLimited ? `Try Again (${loginRateLimit.formattedCountdown})` : 'Sign In')
+                      : (registerRateLimit.isRateLimited ? `Register (${registerRateLimit.formattedCountdown})` : 'Create Account')
+                  )}
+                  {!loading && !loginRateLimit.isRateLimited && !registerRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
                 </button>
               </form>
             )}
@@ -363,10 +402,10 @@ export default function Auth() {
                   <button 
                     type="button" 
                     onClick={handleResendOTP} 
-                    disabled={loading || resendTimer > 0}
+                    disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>
@@ -391,9 +430,19 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary mt-2">
-                  {loading ? <ButtonSpinner /> : 'Send Reset OTP'}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
+                <button 
+                  type="submit" 
+                  disabled={loading || forgotPasswordRateLimit.isRateLimited} 
+                  className="btn-primary mt-2"
+                >
+                  {loading ? (
+                    <ButtonSpinner />
+                  ) : forgotPasswordRateLimit.isRateLimited ? (
+                    `Resend in ${forgotPasswordRateLimit.formattedCountdown}`
+                  ) : (
+                    'Send Reset OTP'
+                  )}
+                  {!loading && !forgotPasswordRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
                 </button>
 
                 <div className="pt-2">
@@ -437,10 +486,10 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={handleResendForgotOTP}
-                    disabled={loading || resendTimer > 0}
+                    disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button

@@ -20,9 +20,12 @@ import {
   Edit2
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api, getContributionDownloadUrl, deleteResource, getResourceDownloadUrl, updateResource } from '../services/api.js';
+import { api, getContributionDownloadUrl, deleteResource, getResourceDownloadUrl, updateResource, deleteMentor, updateMentor } from '../services/api.js';
 import { ContributionSkeleton, OverviewSkeleton, AdminFormSkeleton } from '../components/ui/Skeleton.jsx';
 import toast from 'react-hot-toast';
+import { parseRateLimitError } from '../utils/rateLimitUtils.js';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown.js';
+import { MENTOR_TAGS } from '../constants/index.js';
 
 // Matches backend constants/branches.js exactly
 const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
@@ -239,6 +242,8 @@ const ResourcesTab = () => {
   const [isFetchingSubjects, setIsFetchingSubjects] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  const resourceRateLimit = useRateLimitCountdown('resource');
+
   const [formData, setFormData] = useState({
     branch: '', semester: '1', subjectId: '', subjectName: '', subjectCode: '',
     resourceTitle: '', resourceType: 'LECTURES', resourceLink: ''
@@ -312,7 +317,12 @@ const ResourcesTab = () => {
       setManageMsg({ type: 'success', text: 'Resource deleted successfully.' });
       setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
     } catch (err) {
-      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        setManageMsg({ type: 'error', text: `Please wait ${retryAfterSeconds} seconds before trying again.` });
+      } else {
+        setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
+      }
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
@@ -333,7 +343,12 @@ const ResourcesTab = () => {
       setManageMsg({ type: 'success', text: 'Resource updated successfully.' });
       setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
     } catch (err) {
-      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Update failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        setManageMsg({ type: 'error', text: `Please wait ${retryAfterSeconds} seconds before trying again.` });
+      } else {
+        setManageMsg({ type: 'error', text: err.response?.data?.message || 'Update failed.' });
+      }
     } finally {
       setSavingEditId(null);
     }
@@ -376,7 +391,12 @@ const ResourcesTab = () => {
       if (formData.branch && formData.semester) fetchSubjects();
 
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Operation failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited && mode === 'add_material') {
+        resourceRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else {
+        setMessage({ type: 'error', text: err.response?.data?.message || 'Operation failed.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -479,8 +499,16 @@ const ResourcesTab = () => {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-nit-primary text-white py-2.5 rounded-lg hover:bg-blue-900 transition flex justify-center items-center gap-2">
-            {loading ? <Loader className="animate-spin w-4 h-4" /> : (mode === 'create_subject' ? 'Create Subject' : 'Add Resource')}
+          <button 
+            type="submit" 
+            disabled={loading || (mode !== 'create_subject' && resourceRateLimit.isRateLimited)} 
+            className="w-full bg-nit-primary text-white py-2.5 rounded-lg hover:bg-blue-900 transition flex justify-center items-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary"
+          >
+            {loading ? <Loader className="animate-spin w-4 h-4" /> : (
+              mode === 'create_subject' ? 'Create Subject' : (
+                resourceRateLimit.isRateLimited ? `Upload Available in ${resourceRateLimit.formattedCountdown}` : 'Add Resource'
+              )
+            )}
           </button>
         </form>
       </div>

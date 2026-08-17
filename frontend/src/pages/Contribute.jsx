@@ -7,6 +7,8 @@ import { Alert } from '../components/ui/Alert.jsx';
 import { ButtonSpinner } from '../components/ui/Spinner.jsx';
 import { ZipUpload } from '../components/ui/ZipUpload.jsx';
 import { CustomSelect } from '../components/ui/CustomSelect.jsx';
+import { parseRateLimitError } from '../utils/rateLimitUtils.js';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown.js';
 
 export default function Contribute() {
   const navigate = useNavigate();
@@ -41,10 +43,11 @@ export default function Contribute() {
     }
   }, [branch, semester]);
   
-  // Submission states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const contributionRateLimit = useRateLimitCountdown('contribution');
 
   const resetState = () => {
     setDescription('');
@@ -79,7 +82,10 @@ export default function Contribute() {
       await contributionApi.submit({ type: 'bug', description });
       setSubmitted(true);
     } catch (err) {
-      if (err.response?.status === 404) {
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else if (err.response?.status === 404) {
         setError('Bug reporting backend endpoint is not currently available.');
       } else {
         setError('Unable to submit your report. Please try again.');
@@ -114,7 +120,10 @@ export default function Contribute() {
       await createContribution(formData);
       setSubmitted(true);
     } catch (err) {
-      if (err.response?.status === 404) {
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+      } else if (err.response?.status === 404) {
         setError('Resource contribution backend endpoint is not currently available.');
       } else {
         setError(err.response?.data?.message || 'Unable to submit your contribution. Please try again.');
@@ -226,11 +235,11 @@ export default function Contribute() {
 
             <button
               type="submit"
-              disabled={loading || !description.trim()}
+              disabled={loading || !description.trim() || contributionRateLimit.isRateLimited}
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary"
             >
-              {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
-              {loading ? 'Submitting...' : 'Submit Bug Report'}
+              {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
+              {loading ? 'Submitting...' : (contributionRateLimit.isRateLimited ? `Submit Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Bug Report')}
             </button>
           </form>
         )}
@@ -456,11 +465,11 @@ export default function Contribute() {
 
               <button
                 type="submit"
-                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file)}
+                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file) || contributionRateLimit.isRateLimited}
                 className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm"
               >
-                {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
-                {loading ? 'Submitting contribution...' : 'Submit Contribution'}
+                {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
+                {loading ? 'Submitting contribution...' : (contributionRateLimit.isRateLimited ? `Contribute Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Contribution')}
               </button>
             </form>
           )}
