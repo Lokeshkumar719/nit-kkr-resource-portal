@@ -144,6 +144,9 @@ export const getResourceDownloadUrl = (resourceId) =>
 export const deleteResource = (resourceId) =>
   api.delete(`/resources/${resourceId}`);
 
+export const updateResource = (resourceId, data) =>
+  api.patch(`/resources/${resourceId}`, data);
+
 // For my old premium UI compatibility:
 export const resourceApi = {
   getByBranchAndSem: (branch, sem) => getSubjects(sem, branch),
@@ -151,6 +154,11 @@ export const resourceApi = {
 };
 
 // ── Seniors / Mentors API ──────────────────────
+export const getMentors = (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } });
+export const createMentor = (data) => api.post('/mentors', data);
+export const updateMentor = (id, data) => api.patch(`/mentors/${id}`, data);
+export const deleteMentor = (id) => api.delete(`/mentors/${id}`);
+
 export const seniorApi = {
   getByFilter: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),
   getByYearAndBranch: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),

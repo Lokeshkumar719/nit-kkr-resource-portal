@@ -18,9 +18,14 @@ const deleteResource = async (resourceId) => {
   return await Resource.findByIdAndDelete(resourceId);
 };
 
+const updateResource = async (resourceId, updateData) => {
+  return await Resource.findByIdAndUpdate(resourceId, updateData, { new: true });
+};
+
 module.exports = {
   createResource,
   findResourceById,
   findResources,
   deleteResource,
+  updateResource,
 };

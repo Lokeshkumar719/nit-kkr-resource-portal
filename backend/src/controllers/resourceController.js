@@ -49,6 +49,17 @@ const getResources = asyncHandler(async (req, res) => {
   );
 });
 
+const getResourceStats = asyncHandler(async (req, res) => {
+  const stats = await resourceService.getResourceStats();
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Resource stats fetched successfully.",
+    stats,
+  );
+});
+
 const deleteResource = asyncHandler(async (req, res) => {
   resourceValidator.validateResourceId(req.params.resourceId);
 
@@ -81,10 +92,29 @@ const getDownloadUrl = asyncHandler(async (req, res) => {
   );
 });
 
+const updateResource = asyncHandler(async (req, res) => {
+  resourceValidator.validateResourceId(req.params.resourceId);
+  resourceValidator.validateUpdateResource(req.body);
+
+  const resource = await resourceService.updateResource(
+    req.params.resourceId,
+    req.body
+  );
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Resource updated successfully.",
+    resource,
+  );
+});
+
 module.exports = {
   createResource,
   getResourceById,
   getResources,
+  getResourceStats,
   deleteResource,
   getDownloadUrl,
+  updateResource,
 };
