@@ -100,9 +100,25 @@ const deleteContribution = async (contributionId) => {
   await contributionRepository.deleteContribution(contributionId);
 };
 
+const updateContribution = async (contributionId, updateData) => {
+  const contribution = await contributionRepository.findContributionById(contributionId);
+
+  if (!contribution) {
+    throw new ApiError(STATUS_CODES.NOT_FOUND, "Contribution not found.");
+  }
+
+  const allowedUpdates = {};
+  if (updateData.title !== undefined) allowedUpdates.title = updateData.title;
+  if (updateData.type !== undefined) allowedUpdates.type = updateData.type;
+  if (updateData.url !== undefined) allowedUpdates.url = updateData.url;
+
+  return await contributionRepository.updateContribution(contributionId, allowedUpdates);
+};
+
 module.exports = {
   createContribution,
   getContributions,
   approveContribution,
   deleteContribution,
+  updateContribution,
 };

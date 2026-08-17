@@ -17,9 +17,14 @@ const deleteContribution = async (contributionId) => {
     return await Contribution.findByIdAndDelete(contributionId);
 };
 
+const updateContribution = async (contributionId, updateData) => {
+    return await Contribution.findByIdAndUpdate(contributionId, updateData, { new: true });
+};
+
 module.exports = {
     createContribution,
     findContributionById,
     findContributions,
     deleteContribution,
+    updateContribution,
 };

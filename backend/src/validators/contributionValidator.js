@@ -42,7 +42,29 @@ const validateContributionId = (contributionId) => {
   }
 };
 
+const validateUpdateContribution = (data) => {
+  const { title, type, url } = data;
+
+  if (title !== undefined && validator.isEmpty(title.trim())) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Title cannot be empty.");
+  }
+
+  if (type !== undefined && !Object.values(RESOURCE_TYPES).includes(type)) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Invalid resource type.");
+  }
+
+  if (type === RESOURCE_TYPES.LECTURES || (url !== undefined && url !== "")) {
+    if (url && !validator.isURL(url)) {
+      throw new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        "A valid URL is required.",
+      );
+    }
+  }
+};
+
 module.exports = {
   validateCreateContribution,
   validateContributionId,
+  validateUpdateContribution,
 };

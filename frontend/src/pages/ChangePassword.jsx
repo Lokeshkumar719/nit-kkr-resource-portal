@@ -155,6 +155,10 @@ export default function ChangePassword() {
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    setError('Copy-pasting passwords is not allowed. Please type it manually.');
+                  }}
                   required
                 />
                 <button

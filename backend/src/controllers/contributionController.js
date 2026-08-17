@@ -61,6 +61,23 @@ const deleteContribution = asyncHandler(async (req, res) => {
   );
 });
 
+const updateContribution = asyncHandler(async (req, res) => {
+  contributionValidator.validateContributionId(req.params.contributionId);
+  contributionValidator.validateUpdateContribution(req.body);
+
+  const contribution = await contributionService.updateContribution(
+    req.params.contributionId,
+    req.body
+  );
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Contribution updated successfully.",
+    contribution,
+  );
+});
+
 const getDownloadUrl = asyncHandler(async (req, res) => {
   contributionValidator.validateContributionId(req.params.contributionId);
 
@@ -93,4 +110,5 @@ module.exports = {
   approveContribution,
   deleteContribution,
   getDownloadUrl,
+  updateContribution,
 };

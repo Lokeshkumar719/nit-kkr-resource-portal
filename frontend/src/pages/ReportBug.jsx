@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { createBug } from "../services/api";
 
 function ReportBug() {
@@ -7,12 +8,10 @@ function ReportBug() {
   const submit = async () => {
     try {
       await createBug(description);
-
-      alert("Bug reported.");
-
+      toast.success("Bug reported.");
       setDescription("");
     } catch (err) {
-      alert(err.response?.data?.message);
+      toast.error(err.response?.data?.message || "Failed to report bug.");
     }
   };
 
