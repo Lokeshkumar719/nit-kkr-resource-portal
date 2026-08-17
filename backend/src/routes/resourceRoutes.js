@@ -9,12 +9,15 @@ const {
 
 const resourceController = require("../controllers/resourceController");
 
+const { limitResource } = require("../middlewares/rateLimiterMiddleware");
+
 const router = express.Router();
 
 router.post(
   "/",
   authMiddleware,
   adminMiddleware,
+  limitResource,
   uploadResourceFile,
   resourceController.createResource,
 );
@@ -31,6 +34,7 @@ router.delete(
   "/:resourceId",
   authMiddleware,
   adminMiddleware,
+  limitResource,
   resourceController.deleteResource,
 );
 
@@ -38,6 +42,7 @@ router.patch(
   "/:resourceId",
   authMiddleware,
   adminMiddleware,
+  limitResource,
   resourceController.updateResource,
 );
 

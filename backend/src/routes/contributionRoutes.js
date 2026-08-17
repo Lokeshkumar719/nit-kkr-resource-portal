@@ -6,11 +6,14 @@ const adminMiddleware = require("../middlewares/adminMiddleware");
 
 const contributionController = require("../controllers/contributionController");
 
+const { limitContribution } = require("../middlewares/rateLimiterMiddleware");
+
 const router = express.Router();
 
 router.post(
   "/",
   authMiddleware,
+  limitContribution,
   uploadResourceFile,
   contributionController.createContribution,
 );
