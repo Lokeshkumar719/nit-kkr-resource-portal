@@ -35,8 +35,7 @@ api.interceptors.response.use(
     // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
     if (
       originalRequest.url === "/auth/login" ||
-      originalRequest.url === "/auth/refresh-token" ||
-      originalRequest.url === "/auth/me"
+      originalRequest.url === "/auth/refresh-token"
     ) {
       return Promise.reject(error);
     }

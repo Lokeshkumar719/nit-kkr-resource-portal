@@ -21,8 +21,8 @@ import {
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, getContributionDownloadUrl, deleteResource, getResourceDownloadUrl, updateResource } from '../services/api.js';
-import { MENTOR_TAGS } from '../constants/index.js';
 import { ContributionSkeleton, OverviewSkeleton, AdminFormSkeleton } from '../components/ui/Skeleton.jsx';
+import toast from 'react-hot-toast';
 
 // Matches backend constants/branches.js exactly
 const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
@@ -592,7 +592,7 @@ const ResourcesTab = () => {
                             </a>
                           )}
                           {r.fileKey && (
-                            <button onClick={async () => { try { const res = await getResourceDownloadUrl(r._id); if(res.data?.data?.downloadUrl) window.location.href = res.data.data.downloadUrl; } catch(e) { alert('Download failed.'); }}} className="p-2 rounded-lg bg-nit-primary text-white hover:bg-blue-900 transition" title="Download">
+                            <button onClick={async () => { try { const res = await getResourceDownloadUrl(r._id); if(res.data?.data?.downloadUrl) window.location.href = res.data.data.downloadUrl; } catch(e) { toast.error('Download failed.'); }}} className="p-2 rounded-lg bg-nit-primary text-white hover:bg-blue-900 transition" title="Download">
                               <Download className="w-4 h-4" />
                             </button>
                           )}
@@ -1066,7 +1066,7 @@ const ContributionsTab = () => {
     try {
       await api.patch(`/contributions/${id}/approve`);
       fetchContributions();
-    } catch (e) { alert('Approve failed: ' + (e.response?.data?.message || 'Unknown error')); }
+    } catch (e) { toast.error('Approve failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
   };
 
@@ -1075,7 +1075,7 @@ const ContributionsTab = () => {
     try {
       await api.delete(`/contributions/${id}`);
       fetchContributions();
-    } catch (e) { alert('Reject failed: ' + (e.response?.data?.message || 'Unknown error')); }
+    } catch (e) { toast.error('Reject failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
   };
 
@@ -1085,13 +1085,13 @@ const ContributionsTab = () => {
   };
 
   const handleSaveEdit = async (id) => {
-    if (!editForm.title.trim()) return alert("Title is required");
+    if (!editForm.title.trim()) return toast.error("Title is required");
     setProcessing({ id, action: 'edit' });
     try {
       await api.patch(`/contributions/${id}`, editForm);
       setEditingId(null);
       fetchContributions();
-    } catch (e) { alert('Update failed: ' + (e.response?.data?.message || 'Unknown error')); }
+    } catch (e) { toast.error('Update failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
   };
 
@@ -1190,7 +1190,7 @@ const ContributionsTab = () => {
                               window.location.href = res.data.data.downloadUrl;
                             }
                           } catch (err) {
-                            alert("Could not generate download link.");
+                            toast.error("Could not generate download link.");
                           }
                         }}
                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition" 
@@ -1237,7 +1237,7 @@ const BugsTab = () => {
     try {
       await api.patch(`/bugs/${id}/resolve`);
       fetchBugs();
-    } catch (e) { alert('Resolve failed: ' + (e.response?.data?.message || 'Unknown error')); }
+    } catch (e) { toast.error('Resolve failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessingId(null); }
   };
 

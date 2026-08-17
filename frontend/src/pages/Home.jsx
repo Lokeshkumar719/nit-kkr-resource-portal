@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Users, Upload, Shield, GraduationCap, ArrowRight, Sparkles, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { BRANCHES, SEMESTERS } from '../constants';
+import toast from 'react-hot-toast';
 
 export default function Home() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const dashboardLink = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
 

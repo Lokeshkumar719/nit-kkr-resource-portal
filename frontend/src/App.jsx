@@ -14,6 +14,7 @@ import ChangePassword from './pages/ChangePassword.jsx';
 import Home from './pages/Home.jsx';
 
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { Toaster } from 'react-hot-toast';
 
 // --- Protected Route ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -68,6 +69,7 @@ const PublicRoute = ({ children }) => {
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster position="bottom-right" />
       <BrowserRouter>
         <Routes>
           {/* Public Authentication Route */}
