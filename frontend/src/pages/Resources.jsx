@@ -183,7 +183,7 @@ export default function Resources() {
                   return (
                     <button
                       key={sub._id}
-                      onClick={() => { setSelectedSubject(sub); setActiveType('lecture'); }}
+                      onClick={() => { setSelectedSubject(sub); setActiveType('LECTURES'); }}
                       className={`subject-item animate-fade-in ${isActive ? 'active' : ''}`}
                       style={{ animationDelay: `${i * 0.03}s` }}
                     >

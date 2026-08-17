@@ -481,6 +481,10 @@ export default function Auth() {
                       className="input-field pr-10"
                       value={formData.confirmNewPassword}
                       onChange={handleChange}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        setError('Copy-pasting passwords is not allowed. Please type it manually.');
+                      }}
                       required
                     />
                     <button

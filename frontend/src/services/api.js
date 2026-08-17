@@ -182,6 +182,7 @@ export const getContributions = (params) =>
 export const approveContribution = (id) =>
   api.patch(`/contributions/${id}/approve`);
 export const rejectContribution = (id) => api.delete(`/contributions/${id}`);
+export const updateContribution = (id, data) => api.patch(`/contributions/${id}`, data);
 export const getContributionDownloadUrl = (id) =>
   api.get(`/contributions/${id}/download`);
 

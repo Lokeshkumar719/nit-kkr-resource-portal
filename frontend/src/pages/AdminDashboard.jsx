@@ -1047,6 +1047,8 @@ const ContributionsTab = () => {
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState({ id: null, action: null });
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', type: '', url: '' });
 
   useEffect(() => { fetchContributions(); }, []);
 
@@ -1074,6 +1076,22 @@ const ContributionsTab = () => {
       await api.delete(`/contributions/${id}`);
       fetchContributions();
     } catch (e) { alert('Reject failed: ' + (e.response?.data?.message || 'Unknown error')); }
+    finally { setProcessing({ id: null, action: null }); }
+  };
+
+  const handleEditClick = (item) => {
+    setEditingId(item._id);
+    setEditForm({ title: item.title, type: item.type, url: item.url || '' });
+  };
+
+  const handleSaveEdit = async (id) => {
+    if (!editForm.title.trim()) return alert("Title is required");
+    setProcessing({ id, action: 'edit' });
+    try {
+      await api.patch(`/contributions/${id}`, editForm);
+      setEditingId(null);
+      fetchContributions();
+    } catch (e) { alert('Update failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
   };
 
@@ -1109,48 +1127,87 @@ const ContributionsTab = () => {
       ) : (
         <div className="space-y-4">
           {contributions.map(item => (
-            <div key={item._id} className="bg-white p-5 rounded-xl shadow-sm border border-slate-300 flex flex-col md:flex-row justify-between items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <span className={`px-2 py-0.5 text-xs font-semibold rounded uppercase ${TYPE_COLORS[item.type] || 'bg-gray-100 text-gray-700'}`}>
-                    {TYPE_LABELS[item.type] || item.type}
-                  </span>
-                  <span className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</span>
+            <div key={item._id} className="bg-white p-5 rounded-xl shadow-sm border border-slate-300 flex flex-col md:flex-row justify-between items-start gap-4 transition-all hover:border-slate-400">
+              {editingId === item._id ? (
+                <div className="flex-1 min-w-0 space-y-3 w-full">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Title</label>
+                    <input type="text" value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} className="form-input" />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex flex-col gap-1 w-1/3">
+                      <label className="text-xs font-semibold text-gray-500 uppercase">Type</label>
+                      <select value={editForm.type} onChange={e => setEditForm({...editForm, type: e.target.value})} className="form-input">
+                        {Object.entries(TYPE_LABELS).map(([val, label]) => (
+                          <option key={val} value={val}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {editForm.type === 'LECTURES' && (
+                      <div className="flex flex-col gap-1 w-2/3">
+                        <label className="text-xs font-semibold text-gray-500 uppercase">URL</label>
+                        <input type="text" value={editForm.url} onChange={e => setEditForm({...editForm, url: e.target.value})} className="form-input" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button onClick={() => handleSaveEdit(item._id)} disabled={processing.id === item._id} className="px-3 py-1.5 bg-nit-primary text-white text-sm font-medium rounded-lg hover:bg-blue-900 transition flex items-center gap-2 disabled:opacity-50">
+                      {processing.id === item._id && processing.action === 'edit' ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      Save
+                    </button>
+                    <button onClick={() => setEditingId(null)} disabled={processing.id === item._id} className="px-3 py-1.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition disabled:opacity-50">
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <p className="text-gray-800 text-sm font-medium mb-1">{item.title}</p>
-                {item.fileName && (
-                  <p className="text-xs text-gray-500">File: {item.fileName}</p>
-                )}
-                {item.url && (
-                  <p className="text-xs text-gray-500">Link: <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">{item.url}</a></p>
-                )}
-              </div>
-              <div className="flex gap-2 shrink-0">
-                {item.fileName && (
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const res = await getContributionDownloadUrl(item._id);
-                        if (res.data?.data?.downloadUrl) {
-                          window.location.href = res.data.data.downloadUrl;
-                        }
-                      } catch (err) {
-                        alert("Could not generate download link.");
-                      }
-                    }}
-                    className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition" 
-                    title="Download File"
-                  >
-                    <Download size={18} />
-                  </button>
-                )}
-                <button onClick={() => handleApprove(item._id)} disabled={processing.id === item._id} className="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition disabled:opacity-50" title="Approve">
-                  {processing.id === item._id && processing.action === 'approve' ? <Loader className="animate-spin w-5 h-5" /> : <Check size={18} />}
-                </button>
-                <button onClick={() => handleReject(item._id)} disabled={processing.id === item._id} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition disabled:opacity-50" title="Reject">
-                  {processing.id === item._id && processing.action === 'reject' ? <Loader className="animate-spin w-5 h-5" /> : <X size={18} />}
-                </button>
-              </div>
+              ) : (
+                <>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className={`px-2 py-0.5 text-xs font-semibold rounded uppercase ${TYPE_COLORS[item.type] || 'bg-gray-100 text-gray-700'}`}>
+                        {TYPE_LABELS[item.type] || item.type}
+                      </span>
+                      <span className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-gray-800 text-sm font-medium mb-1">{item.title}</p>
+                    {item.fileName && (
+                      <p className="text-xs text-gray-500">File: {item.fileName}</p>
+                    )}
+                    {item.url && (
+                      <p className="text-xs text-gray-500">Link: <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 underline truncate block max-w-full">{item.url}</a></p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button onClick={() => handleEditClick(item)} className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition" title="Edit">
+                      <Edit2 size={18} />
+                    </button>
+                    {item.fileName && (
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const res = await getContributionDownloadUrl(item._id);
+                            if (res.data?.data?.downloadUrl) {
+                              window.location.href = res.data.data.downloadUrl;
+                            }
+                          } catch (err) {
+                            alert("Could not generate download link.");
+                          }
+                        }}
+                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition" 
+                        title="Download File"
+                      >
+                        <Download size={18} />
+                      </button>
+                    )}
+                    <button onClick={() => handleApprove(item._id)} disabled={processing.id === item._id} className="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition disabled:opacity-50" title="Approve">
+                      {processing.id === item._id && processing.action === 'approve' ? <Loader className="animate-spin w-5 h-5" /> : <Check size={18} />}
+                    </button>
+                    <button onClick={() => handleReject(item._id)} disabled={processing.id === item._id} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition disabled:opacity-50" title="Reject">
+                      {processing.id === item._id && processing.action === 'reject' ? <Loader className="animate-spin w-5 h-5" /> : <X size={18} />}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
