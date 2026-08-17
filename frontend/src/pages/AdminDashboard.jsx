@@ -142,8 +142,8 @@ const OverviewTab = () => {
         const contributionsRes = await api.get('/contributions', { params: { status: 'PENDING', subjectId } });
         pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
       } else {
-        const resourcesRes = await api.get('/resources');
-        totalResources = resourcesRes.data.data ? resourcesRes.data.data.length : 0;
+        const statsRes = await api.get('/resources/stats');
+        totalResources = statsRes.data.data ? statsRes.data.data.total : 0;
 
         const contributionsRes = await api.get('/contributions', { params: { status: 'PENDING' } });
         pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
