@@ -14,6 +14,14 @@ router.post("/resend-otp", authController.resendOTP);
 
 router.post("/login", authController.login);
 
+router.post("/forgot-password", authController.forgotPassword);
+
+router.post("/verify-forgot-password-otp", authController.verifyForgotPasswordOTP);
+
+router.post("/reset-password", authController.resetPassword);
+
+router.patch("/change-password", authMiddleware, authController.changePassword);
+
 router.post("/refresh-token", authController.refreshAccessToken);
 
 router.post("/logout", authMiddleware, authController.logout);

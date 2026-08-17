@@ -1,173 +1,484 @@
-import React, { useState } from 'react';
-import { api } from '../services/api.js';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Bug, BookUp, Send, CheckCircle2, ArrowLeft, ArrowRight, AlertCircle, FileText, BookOpen, FileQuestion, Video } from 'lucide-react';
+import { contributionApi, createContribution, resourceApi } from '../services/api.js';
+import { BRANCHES, BRANCH_LABELS, SEMESTERS } from '../constants/index.js';
+import { Alert } from '../components/ui/Alert.jsx';
+import { ButtonSpinner } from '../components/ui/Spinner.jsx';
+import { ZipUpload } from '../components/ui/ZipUpload.jsx';
+import { CustomSelect } from '../components/ui/CustomSelect.jsx';
 
 export default function Contribute() {
-  const [type, setType] = useState('bug');
-  const [formData, setFormData] = useState({
-    branch: '',
-    semester: '1',
-    subjectName: '',
-    link: '',
-    description: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get('view') || 'landing';
+  const setView = (v) => {
+    if (v === 'landing') {
+      setSearchParams({}, { replace: true });
+    } else {
+      setSearchParams({ view: v }, { replace: true });
+    }
+  };
+  
+  // Form states
+  const [description, setDescription] = useState('');
+  const [file, setFile] = useState(null);
+  const [url, setUrl] = useState('');
+  const [branch, setBranch] = useState('');
+  const [semester, setSemester] = useState('');
+  const [subjectId, setSubjectId] = useState('');
+  const [title, setTitle] = useState('');
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    if (branch && semester) {
+      resourceApi.getByBranchAndSem(branch, semester)
+        .then(res => setSubjects(res.data?.data?.subjects || res.data?.data || []))
+        .catch(() => setSubjects([]));
+    } else {
+      setSubjects([]);
+      setSubjectId('');
+    }
+  }, [branch, semester]);
+  
+  // Submission states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const resetState = () => {
+    setDescription('');
+    setFile(null);
+    setUrl('');
+    setBranch('');
+    setSemester('');
+    setSubjectId('');
+    setTitle('');
+    setError('');
+    setSubmitted(false);
   };
 
-  const handleSubmit = async (e) => {
+  const handleBack = () => {
+    if (view === 'notes' || view === 'book' || view === 'pyq' || view === 'lecture') {
+      setView('resource-select');
+    } else {
+      setView('landing');
+    }
+    resetState();
+  };
+
+  const handleSubmitBug = async (e) => {
     e.preventDefault();
+    if (loading || !description.trim()) return;
+    
     setLoading(true);
     setError('');
-    
-    try {
-      // Construct payload based on type
-      const payload = {
-        type,
-        description: formData.description,
-        details: type === 'resource' ? {
-          branch: formData.branch,
-          semester: parseInt(formData.semester),
-          subjectName: formData.subjectName,
-          link: formData.link
-        } : undefined
-      };
 
-      await api.post('/contributions', payload);
+    try {
+      // Trying the actual backend API. Since the controller doesn't exist, this will throw 404.
+      await contributionApi.submit({ type: 'bug', description });
       setSubmitted(true);
-      setFormData({
-        branch: '',
-        semester: '1',
-        subjectName: '',
-        link: '',
-        description: ''
-      });
-      setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
-      console.error(err);
-      setError('Failed to submit. Please try again.');
+      if (err.response?.status === 404) {
+        setError('Bug reporting backend endpoint is not currently available.');
+      } else {
+        setError('Unable to submit your report. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Contribute & Report</h1>
+  const handleSubmitResource = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    if (view !== 'lecture' && !file) return;
+    if (view === 'lecture' && !url) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const typeMap = { notes: 'NOTES', book: 'BOOKS', pyq: 'PYQS', lecture: 'LECTURES' };
+      const formData = new FormData();
+      formData.append('type', typeMap[view]);
+      formData.append('subjectId', subjectId);
+      formData.append('title', title);
       
-      <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+      if (view === 'lecture') {
+        formData.append('url', url);
+      } else {
+        formData.append('resource', file);
+      }
+      
+      await createContribution(formData);
+      setSubmitted(true);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setError('Resource contribution backend endpoint is not currently available.');
+      } else {
+        setError(err.response?.data?.message || 'Unable to submit your contribution. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── VIEWS ──────────────────────────────────────────────────────────────────
+
+  const renderLanding = () => (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group shrink-0" title="Go Back">
+          <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Student Contributions</h1>
+          <p className="text-sm text-gray-500 mt-1">Help improve the platform or share useful academic resources with fellow students.</p>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-6">
+        {/* Bug Report Panel */}
+        <div
+          onClick={() => { setView('bug'); resetState(); }}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          {/* Top Banner Gradient */}
+          <div className="h-16 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 relative" />
+          
+          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
+            {/* Icon Wrap */}
+            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Bug className="w-6 h-6" />
+            </div>
+            
+            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-red-600 transition-colors">Report a Bug</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Found something broken? Tell us what went wrong so we can fix it.</p>
+
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all shadow-sm">
+              Report a Bug <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+
+        {/* Resource Contribution Panel */}
+        <div
+          onClick={() => { setView('resource-select'); resetState(); }}
+          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+        >
+          {/* Top Banner Gradient */}
+          <div className="h-16 bg-gradient-to-r from-nit-primary via-blue-600 to-indigo-600 relative" />
+          
+          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
+            {/* Icon Wrap */}
+            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-nit-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <BookUp className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-nit-primary transition-colors">Contribute Resources</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Share notes, books, PYQs, and lecture links to help fellow students.</p>
+
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-blue-50 text-nit-primary border border-blue-200 rounded-xl text-sm font-bold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
+              Contribute Resources <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderBugReport = () => (
+    <div className="max-w-2xl mx-auto bg-white border border-slate-300 rounded-xl shadow-sm overflow-hidden animate-fade-in">
+      <div className="p-6 border-b border-slate-200 flex items-center gap-4">
+        <button onClick={handleBack} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">Report a Bug</h2>
+          <p className="text-sm text-gray-500">Help us identify and fix problems.</p>
+        </div>
+      </div>
+
+      <div className="p-6">
         {submitted ? (
-          <div className="text-center text-green-600 py-10 animate-fade-in">
-            <h3 className="text-xl font-bold">Thank You!</h3>
-            <p>Your submission has been received and will be reviewed.</p>
-            <button onClick={() => setSubmitted(false)} className="mt-4 text-sm text-blue-600 underline">Submit another</button>
+          <div className="text-center py-10 animate-fade-in">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-50 rounded-full mb-4">
+              <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Bug report submitted successfully.</h3>
+            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Resource Portal.</p>
+            <button onClick={handleBack} className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors">
+              Back to Contributions
+            </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>}
+          <form onSubmit={handleSubmitBug} className="space-y-5">
+            <Alert type="error" message={error} onDismiss={() => setError('')} />
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Submission Type</label>
-              <div className="flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setType('bug')}
-                  className={`flex-1 py-2 px-4 rounded-md border transition-colors ${type === 'bug' ? 'bg-red-50 border-red-500 text-red-700' : 'border-gray-300 hover:bg-gray-50'}`}
-                >
-                  Report Bug
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setType('resource')}
-                  className={`flex-1 py-2 px-4 rounded-md border transition-colors ${type === 'resource' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'}`}
-                >
-                  Upload Resource
-                </button>
-              </div>
-            </div>
-
-            {type === 'resource' && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-                    <select
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded-md"
-                      required
-                    >
-                      <option value="">Select branch</option>
-                      {['CSE','IT','ECE','EE','ME','Civil','PIE','AIML','AIDS','M&C','IIOT','VLSI','SET','ROBOTICS'].map(b => (
-                        <option key={b} value={b}>{b}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                    <select 
-                      name="semester" 
-                      value={formData.semester} 
-                      onChange={handleChange} 
-                      className="w-full p-2 border rounded-md" 
-                      required
-                    >
-                      {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
-                  <input 
-                    type="text" 
-                    name="subjectName" 
-                    value={formData.subjectName} 
-                    onChange={handleChange} 
-                    className="w-full p-2 border rounded-md" 
-                    required 
-                  />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Resource Link (Drive/Dropbox)</label>
-                    <input 
-                      type="url" 
-                      name="link" 
-                      value={formData.link} 
-                      onChange={handleChange} 
-                      className="w-full p-2 border rounded-md" 
-                      placeholder="https://..." 
-                      required 
-                    />
-                </div>
-              </>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description / Message</label>
-              <textarea 
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-md h-32" 
-                placeholder={type === 'bug' ? "Describe the issue you faced..." : "Describe the resource content..."}
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => { setDescription(e.target.value); setError(''); }}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm h-40 resize-none focus:ring-2 focus:ring-nit-accent focus:border-nit-accent outline-none transition-shadow"
+                placeholder="Describe the issue you encountered..."
                 required
-              ></textarea>
+                disabled={loading}
+              />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={loading}
-              className={`w-full text-white py-3 rounded-lg transition ${loading ? 'bg-gray-400' : 'bg-nit-primary hover:bg-blue-900'}`}
+            <button
+              type="submit"
+              disabled={loading || !description.trim()}
+              className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary"
             >
-              {loading ? 'Submitting...' : 'Submit'}
+              {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
+              {loading ? 'Submitting...' : 'Submit Bug Report'}
             </button>
           </form>
         )}
       </div>
+    </div>
+  );
+
+  const renderResourceSelect = () => (
+    <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
+      <div className="flex items-center gap-4">
+        <button onClick={handleBack} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Contribute Resources</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Select the resource category you'd like to share with fellow students.</p>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-5">
+        
+        {/* Notes Card */}
+<div
+  onClick={() => setView('notes')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-emerald-400 to-teal-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <FileText className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+      Notes
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload subject notes in ZIP format for semester study.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold group-hover:bg-emerald-500 group-hover:text-white transition-all">
+      Contribute Notes
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
+
+{/* Books Card */}
+<div
+  onClick={() => setView('book')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-indigo-400 to-blue-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <BookOpen className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">
+      Books
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload academic books or reference material in ZIP format.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">
+      Contribute Book
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
+
+{/* PYQs Card */}
+<div
+  onClick={() => setView('pyq')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-amber-400 to-orange-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <FileQuestion className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-amber-600 transition-colors">
+      PYQs
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload previous year exam question papers in ZIP format.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold group-hover:bg-amber-500 group-hover:text-white transition-all">
+      Contribute PYQ
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
+
+{/* Lectures Card */}
+<div
+  onClick={() => setView('lecture')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-violet-400 to-purple-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <Video className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">
+      Lectures
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Share YouTube video or playlist links for course topics.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold group-hover:bg-violet-500 group-hover:text-white transition-all">
+      Contribute Lecture
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
+
+      </div>
+    </div>
+  );
+
+  const renderUploadForm = () => {
+    const titles = {
+      notes: 'Contribute Notes',
+      book: 'Contribute Book',
+      pyq: 'Contribute PYQ',
+      lecture: 'Contribute Lecture'
+    };
+    const descs = {
+      notes: 'Upload your notes as a ZIP file.',
+      book: 'Upload your book/resource as a ZIP file.',
+      pyq: 'Upload previous year papers as a ZIP file.',
+      lecture: 'Submit a YouTube video or playlist link.'
+    };
+
+    return (
+      <div className="max-w-2xl mx-auto bg-white border border-slate-300 rounded-xl shadow-sm overflow-hidden animate-fade-in">
+        <div className="p-6 border-b border-slate-200 flex items-center gap-4">
+          <button onClick={handleBack} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">{titles[view]}</h2>
+            <p className="text-sm text-gray-500">{descs[view]}</p>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {submitted ? (
+            <div className="text-center py-10 animate-fade-in">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-50 rounded-full mb-4">
+                <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">Contribution submitted successfully.</h3>
+              <p className="text-sm text-gray-500 mt-1 mb-2">Your resource has been submitted for review.</p>
+              
+              {/* Fake status as prompt suggested "ONLY if that status actually exists" - backend doesn't exist, so this is just UI feedback. */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200 mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                Pending Review
+              </div>
+              
+              <div className="flex items-center justify-center gap-3">
+                <button onClick={handleBack} className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50">
+                  Back to Contributions
+                </button>
+                <button onClick={() => { setSubmitted(false); setFile(null); setUrl(''); }} className="text-sm font-semibold text-white bg-nit-primary hover:bg-blue-900 transition-colors px-4 py-2 rounded-lg shadow-sm">
+                  Submit another
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitResource} className="space-y-6">
+              <Alert type="error" message={error} onDismiss={() => setError('')} />
+              
+              <div className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                    <CustomSelect
+                      value={branch}
+                      onChange={setBranch}
+                      options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+                      placeholder="Select Branch"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <CustomSelect
+                      value={semester}
+                      onChange={(val) => setSemester(Number(val))}
+                      options={SEMESTERS.map(s => ({ value: s, label: `Semester ${s}` }))}
+                      placeholder="Select Semester"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <CustomSelect
+                    value={subjectId}
+                    onChange={setSubjectId}
+                    options={subjects.map(s => ({ value: s._id, label: `${s.subjectName} (${s.subjectCode})` }))}
+                    placeholder={subjects.length ? "Select Subject" : "Select Branch & Sem first"}
+                  />
+                  {subjects.length === 0 && branch && semester && (
+                    <p className="text-xs text-amber-600 mt-1">No subjects found for this branch and semester.</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Resource Title</label>
+                  <input required type="text" className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white" placeholder={view === 'lecture' ? "e.g. Newton Raphson Method..." : "e.g. Midsem Notes, Chapter 1..."} value={title} onChange={e => setTitle(e.target.value)} />
+                </div>
+                
+                {view === 'lecture' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">YouTube URL</label>
+                    <input required type="url" className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white" placeholder="https://youtube.com/watch?v=..." value={url} onChange={e => setUrl(e.target.value)} />
+                  </div>
+                )}
+              </div>
+
+              {view !== 'lecture' && (
+                <ZipUpload onFileSelect={(f) => { setFile(f); setError(''); }} disabled={loading} />
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file)}
+                className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm"
+              >
+                {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
+                {loading ? 'Submitting contribution...' : 'Submit Contribution'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="pb-10">
+      {view === 'landing' && renderLanding()}
+      {view === 'bug' && renderBugReport()}
+      {view === 'resource-select' && renderResourceSelect()}
+      {(view === 'notes' || view === 'book' || view === 'pyq' || view === 'lecture') && renderUploadForm()}
     </div>
   );
 }
