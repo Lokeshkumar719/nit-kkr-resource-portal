@@ -77,11 +77,11 @@ export default function AdminDashboard() {
             </button>
             <div>
               <h2 className="text-xl font-bold text-nit-primary leading-tight">Admin Panel</h2>
-              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Resource Portal</p>
+              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Academic Portal</p>
             </div>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-2">
           <SidebarItem icon={<LayoutDashboard size={18} />} label="Overview" id="overview" active={activeTab} set={setActiveTab} />
           <SidebarItem icon={<BookOpen size={18} />} label="Manage Resources" id="resources" active={activeTab} set={setActiveTab} />
           <SidebarItem icon={<Users size={18} />} label="Manage Seniors" id="seniors" active={activeTab} set={setActiveTab} />
@@ -101,10 +101,13 @@ export default function AdminDashboard() {
 const SidebarItem = ({ icon, label, id, active, set }) => (
   <button
     onClick={() => set(id)}
-    className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${active === id ? 'bg-nit-primary text-white' : 'text-gray-600 hover:bg-gray-100'
-      }`}
+    className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg border transition-all ${
+      active === id
+        ? 'bg-nit-primary text-white border-nit-primary shadow-sm'
+        : 'bg-white text-gray-700 border-slate-200 hover:border-nit-primary/40 hover:bg-slate-50 hover:shadow-sm'
+    }`}
   >
-    <span className="mr-3">{icon}</span>
+    <span className={`mr-3 ${active === id ? 'text-white' : 'text-slate-500'}`}>{icon}</span>
     {label}
   </button>
 );
@@ -404,19 +407,17 @@ const ResourcesTab = () => {
       await updateResource(id, editFormData);
       setManageResources(prev => prev.map(r => r._id === id ? { ...r, ...editFormData } : r));
       setEditingResource(null);
-      setManageMsg({ type: 'success', text: 'Resource updated successfully.' });
+      toast.success('Resource updated successfully.');
     } catch (err) {
-      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Update failed.' });
+      toast.error(err.response?.data?.message || 'Update failed.');
     } finally {
       setSavingEditId(null);
-      setTimeout(() => setManageMsg({ type: '', text: '' }), 5000);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: '', text: '' });
 
     try {
       if (mode === 'create_subject') {
@@ -427,7 +428,7 @@ const ResourcesTab = () => {
           subjectCode: formData.subjectCode
         };
         await api.post('/subjects', payload);
-        setMessage({ type: 'success', text: 'Subject created.' });
+        toast.success('Subject created.');
         setFormData(prev => ({ ...prev, subjectName: '', subjectCode: '' }));
       } else {
         const fd = new FormData();
@@ -442,7 +443,7 @@ const ResourcesTab = () => {
         }
 
         await api.post('/resources', fd);
-        setMessage({ type: 'success', text: 'Resource added.' });
+        toast.success('Resource added.');
         setFormData(prev => ({ ...prev, resourceTitle: '', resourceLink: '' }));
         setResourceFile(null);
       }
@@ -450,10 +451,9 @@ const ResourcesTab = () => {
       if (formData.branch && formData.semester) fetchSubjects();
 
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Operation failed.' });
+      toast.error(err.response?.data?.message || 'Operation failed.');
     } finally {
       setLoading(false);
-      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     }
   };
 
@@ -1170,7 +1170,7 @@ const SeniorsTab = () => {
                     return (
                       <div key={m._id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:border-slate-300 transition">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <img src={m.image || 'https://via.placeholder.com/150'} alt={m.name} className="w-8 h-8 rounded-full object-cover bg-gray-200 shrink-0" />
+                          <img src={processImageUrl(m.image) || 'https://via.placeholder.com/150'} alt={m.name} className="w-8 h-8 rounded-full object-cover bg-gray-200 shrink-0" referrerPolicy="no-referrer" />
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">{m.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -1236,15 +1236,40 @@ const ContributionsTab = () => {
     setProcessing({ id, action: 'approve' });
     try {
       await api.patch(`/contributions/${id}/approve`);
+      toast.success('Contribution approved successfully.');
       fetchContributions();
     } catch (e) { toast.error('Approve failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
   };
 
+  const handleDeleteSenior = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this profile?')) return;
+    try {
+      await api.delete(`/mentors/${id}`);
+      setSeniors(prev => prev.filter(m => m._id !== id));
+      toast.success('Profile deleted.');
+    } catch (err) {
+      toast.error('Failed to delete profile.');
+    }
+  };
+
+  // Helper to extract direct image URL if a Google Drive sharing link is provided
+  const processImageUrl = (url) => {
+    if (!url) return null;
+    const driveRegex = /drive\.google\.com\/file\/d\/([^/]+)/;
+    const match = url.match(driveRegex);
+    if (match && match[1]) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
+  };
+
   const handleReject = async (id) => {
+    if (!window.confirm('Are you sure you want to reject this contribution?')) return;
     setProcessing({ id, action: 'reject' });
     try {
       await api.delete(`/contributions/${id}`);
+      toast.success('Contribution rejected.');
       fetchContributions();
     } catch (e) { toast.error('Reject failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
@@ -1259,8 +1284,9 @@ const ContributionsTab = () => {
     if (!editForm.title.trim()) return toast.error("Title is required");
     setProcessing({ id, action: 'edit' });
     try {
-      await api.patch(`/contributions/${id}`, editForm);
+      await api.put(`/contributions/${id}`, editForm);
       setEditingId(null);
+      toast.success('Contribution updated successfully.');
       fetchContributions();
     } catch (e) { toast.error('Update failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessing({ id: null, action: null }); }
@@ -1403,10 +1429,11 @@ const BugsTab = () => {
     finally { setLoading(false); }
   };
 
-  const handleResolve = async (id) => {
+  const handleResolveBug = async (id) => {
     setProcessingId(id);
     try {
       await api.patch(`/bugs/${id}/resolve`);
+      toast.success('Bug marked as resolved.');
       fetchBugs();
     } catch (e) { toast.error('Resolve failed: ' + (e.response?.data?.message || 'Unknown error')); }
     finally { setProcessingId(null); }

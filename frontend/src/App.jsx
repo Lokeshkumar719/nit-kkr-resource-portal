@@ -69,7 +69,7 @@ const PublicRoute = ({ children }) => {
 export default function App() {
   return (
     <AuthProvider>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
           {/* Public Authentication Route */}

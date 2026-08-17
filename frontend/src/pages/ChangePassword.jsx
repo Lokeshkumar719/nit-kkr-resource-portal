@@ -5,6 +5,7 @@ import { changePassword as apiChangePassword } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
+import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -42,12 +43,14 @@ export default function ChangePassword() {
     try {
       await apiChangePassword(oldPassword, newPassword);
       setSuccess(true);
+      toast.success('Password changed successfully.');
       // Backend clears cookies on change-password, so we log the user out on the frontend as well
       setTimeout(async () => {
         await logout();
         navigate('/login');
       }, 3000);
     } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to change password. Please try again.');
       setError(err.response?.data?.message || 'Failed to change password. Please try again.');
     } finally {
       setLoading(false);

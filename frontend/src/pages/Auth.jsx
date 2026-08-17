@@ -4,6 +4,7 @@ import { Mail, Lock, KeyRound, ArrowRight, ArrowLeft, Eye, EyeOff, ShieldCheck }
 import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP, forgotPassword as apiForgotPassword, verifyForgotPasswordOTP as apiVerifyForgotPasswordOTP, resetPassword as apiResetPassword } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
+import toast from 'react-hot-toast';
 import { ButtonSpinner } from '../components/ui/Spinner';
 
 export default function Auth() {
@@ -54,6 +55,7 @@ export default function Auth() {
       if (isLogin) {
         const res = await apiLogin(formData.email, formData.password);
         login(res.data.data);
+        toast.success('Logged in successfully!');
         
         if (res.data.data.role === 'ADMIN') {
           navigate('/admin/dashboard');
@@ -62,12 +64,12 @@ export default function Auth() {
         }
       } else {
         await apiRegister(formData.email, formData.password);
-        setSuccess('OTP sent to your email! Please verify.');
+        toast.success('OTP sent to your email! Please verify.');
         setResendTimer(60);
         setStep('verify');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -82,18 +84,19 @@ export default function Auth() {
       const res = await apiVerifyOTP(formData.email, formData.otp);
       if(res.data && res.data.data) {
           login(res.data.data);
+          toast.success('Email verified successfully.');
           if (res.data.data.role === 'ADMIN') {
             navigate('/admin/dashboard');
           } else {
             navigate('/dashboard');
           }
       } else {
-          setSuccess('Verified! You can now log in.');
+          toast.success('Verified! You can now log in.');
           setStep('auth');
           setIsLogin(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Verification failed. Please check the OTP.');
+      toast.error(err.response?.data?.message || 'Verification failed. Please check the OTP.');
     } finally {
       setLoading(false);
     }
@@ -106,10 +109,10 @@ export default function Auth() {
     
     try {
       await apiResendOTP(formData.email);
-      setSuccess('A new verification code has been sent to your email.');
+      toast.success('A new verification code has been sent to your email.');
       setResendTimer(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -124,11 +127,11 @@ export default function Auth() {
 
     try {
       await apiForgotPassword(formData.email);
-      setSuccess('A password reset OTP has been sent to your email.');
+      toast.success('A password reset OTP has been sent to your email.');
       setResendTimer(60);
       setStep('forgot-otp');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -142,10 +145,10 @@ export default function Auth() {
 
     try {
       await apiVerifyForgotPasswordOTP(formData.email, formData.otp);
-      setSuccess('OTP verified. Please set your new password.');
+      toast.success('OTP verified. Please set your new password.');
       setStep('forgot-reset');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid OTP. Please check and try again.');
+      toast.error(err.response?.data?.message || 'Invalid OTP. Please check and try again.');
     } finally {
       setLoading(false);
     }
@@ -164,9 +167,10 @@ export default function Auth() {
 
     try {
       await apiResetPassword(formData.email, formData.otp, formData.newPassword);
+      toast.success('Password reset successfully.');
       setStep('reset-success');
     } catch (err) {
-      setError(err.response?.data?.message || 'Password reset failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Password reset failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -178,10 +182,10 @@ export default function Auth() {
     setSuccess('');
     try {
       await apiForgotPassword(formData.email);
-      setSuccess('A new password reset OTP has been sent to your email.');
+      toast.success('A new password reset OTP has been sent to your email.');
       setResendTimer(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP.');
+      toast.error(err.response?.data?.message || 'Failed to resend OTP.');
     } finally {
       setLoading(false);
     }
@@ -242,10 +246,10 @@ export default function Auth() {
 
       <div className="w-full max-w-md animate-slide-up pt-12 sm:pt-0">
         <Link to="/" className="block text-center mb-8 group" title="Go to Homepage">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
              <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Resource Portal</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Academic Portal</h1>
           <p className="text-blue-200/80 font-medium">Your academic resource hub</p>
         </Link>
 

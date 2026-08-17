@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { LogOut, KeyRound, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export function AccountDropdown() {
   const { user, logout } = useAuth();
@@ -41,6 +42,7 @@ export function AccountDropdown() {
   const handleLogout = async () => {
     setIsOpen(false);
     await logout();
+    toast.success('Logged out successfully.');
     navigate('/login');
   };
 
