@@ -82,7 +82,6 @@ const initialiseConnection = async () => {
 
     console.log('Database Connected');
 
-    // Initialize scheduled cron jobs
     const setupCronJobs = require('./utils/cronJobs');
     setupCronJobs();
 

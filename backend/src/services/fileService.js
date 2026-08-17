@@ -51,7 +51,6 @@ const getFileUrl = async (fileKey) => {
     Key: fileKey,
   });
 
-  // Presigned URL valid for 1 hour
   return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
 };
 

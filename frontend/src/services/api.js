@@ -1,12 +1,10 @@
 import axios from 'axios';
 
-// Axios instance
 export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });
 
-// Request interceptor
 api.interceptors.request.use((config) => {
   return config;
 });
@@ -26,13 +24,11 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
     if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/refresh-token') {
       return Promise.reject(error);
     }
@@ -62,7 +58,6 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue(err, null);
 
-        // If refresh token fails (expired/invalid), clear cached user
         localStorage.removeItem('nitkkr_user');
 
         return Promise.reject(err);
@@ -73,7 +68,6 @@ api.interceptors.response.use(
   }
 );
 
-// ── Auth API ──────────────────────
 export const authApi = {
   login: (data) => api.post('/auth/login', data),
   signup: (data) => api.post('/auth/signup', data), // My original signup route just in case
@@ -103,7 +97,6 @@ export const resetPassword = (email, otp, password) =>
 export const changePassword = (oldPassword, newPassword) =>
   api.patch('/auth/change-password', { oldPassword, newPassword });
 
-// ── Subjects / Branches API ──────────────────────
 export const getSubjects = (semester, branch) =>
   api.get('/subjects', {
     params: {
@@ -114,7 +107,6 @@ export const getSubjects = (semester, branch) =>
 
 export const createSubject = (data) => api.post('/subjects', data);
 
-// ── Resources API ──────────────────────
 export const getResources = (subjectId) =>
   api.get('/resources', {
     params: {
@@ -135,13 +127,11 @@ export const deleteResource = (resourceId) => api.delete(`/resources/${resourceI
 
 export const updateResource = (resourceId, data) => api.patch(`/resources/${resourceId}`, data);
 
-// For my old premium UI compatibility:
 export const resourceApi = {
   getByBranchAndSem: (branch, sem) => getSubjects(sem, branch),
   getAll: () => api.get('/resources'), // Backup
 };
 
-// ── Seniors / Mentors API ──────────────────────
 export const getMentors = (year, branch) =>
   api.get('/mentors', { params: { currentYear: year, branch } });
 export const createMentor = (data) => api.post('/mentors', data);
@@ -154,12 +144,10 @@ export const seniorApi = {
     api.get('/mentors', { params: { currentYear: year, branch } }),
 };
 
-// ── Alumni API ──────────────────────
 export const alumniApi = {
   getAll: (branch) => api.get('/alumni', { params: { branch } }),
 };
 
-// ── Contributions API ──────────────────────
 export const createContribution = (formData) =>
   api.post('/contributions', formData, {
     headers: {
@@ -173,7 +161,6 @@ export const rejectContribution = (id) => api.delete(`/contributions/${id}`);
 export const updateContribution = (id, data) => api.patch(`/contributions/${id}`, data);
 export const getContributionDownloadUrl = (id) => api.get(`/contributions/${id}/download`);
 
-// ── Bugs API ──────────────────────
 export const createBug = (description) =>
   api.post('/bugs', {
     description,
@@ -185,10 +172,8 @@ export const resolveBug = (bugId) => api.patch(`/bugs/${bugId}/resolve`);
 
 export const deleteBug = (bugId) => api.delete(`/bugs/${bugId}`);
 
-// Old API object for my premium UI compatibility
 export const contributionApi = {
   submit: (formData) => {
-    // Determine if it's bug or resource based on what the UI passes
     if (formData instanceof FormData) {
       return createContribution(formData);
     } else {

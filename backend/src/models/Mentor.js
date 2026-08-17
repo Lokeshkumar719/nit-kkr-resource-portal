@@ -11,12 +11,6 @@ const mentorSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // rollNo: {
-    //   type: Number,
-    //   required: true,
-    //   unique: true
-    // },
-
     email: {
       type: String,
       lowercase: true,
