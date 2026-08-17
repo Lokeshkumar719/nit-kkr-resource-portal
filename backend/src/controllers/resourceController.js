@@ -82,7 +82,7 @@ const getDownloadUrl = asyncHandler(async (req, res) => {
   }
 
   const { getFileUrl } = require("../services/fileService");
-  const downloadUrl = await getFileUrl(resource.fileKey);
+  const downloadUrl = await getFileUrl(resource.fileKey, resource.title);
 
   return new ApiResponse(
     res,

@@ -58,9 +58,37 @@ const getSubjects = asyncHandler(async (req, res) => {
   );
 });
 
+const updateSubject = asyncHandler(async (req, res) => {
+  subjectValidator.validateSubjectId(req.params.subjectId);
+  subjectValidator.validateUpdateSubject(req.body);
+
+  const subject = await subjectService.updateSubject(req.params.subjectId, req.body);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Subject updated successfully.",
+    subject,
+  );
+});
+
+const deleteSubject = asyncHandler(async (req, res) => {
+  subjectValidator.validateSubjectId(req.params.subjectId);
+
+  await subjectService.deleteSubject(req.params.subjectId);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Subject deleted successfully.",
+  );
+});
+
 module.exports = {
   createSubject,
   getSubjectById,
   getSubjectByCode,
   getSubjects,
+  updateSubject,
+  deleteSubject,
 };

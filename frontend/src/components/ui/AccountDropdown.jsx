@@ -14,16 +14,29 @@ export function AccountDropdown() {
   // Format role from backend (e.g. USER -> Student, ADMIN -> Administrator)
   const displayRole = user?.role === 'ADMIN' ? 'Administrator' : 'Student';
 
-  // Handle clicking outside to close
+  // Handle clicking outside to close and 3-second auto-close
   useEffect(() => {
+    let timeoutId;
+    
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
+    
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    
+    if (isOpen) {
+      timeoutId = setTimeout(() => {
+        setIsOpen(false);
+      }, 3000);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isOpen]);
 
   const handleLogout = async () => {
     setIsOpen(false);
@@ -57,35 +70,36 @@ export function AccountDropdown() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 animate-fade-in origin-top-right transform transition-all">
+        <div className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200 py-2 z-50 animate-fade-in origin-top-right transform transition-all overflow-hidden">
           
           {/* Header (visible on mobile only) */}
-          <div className="px-4 py-3 border-b border-slate-200 sm:hidden">
+          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 sm:hidden mb-1">
             <p className="text-sm font-bold text-gray-800 truncate">{displayName}</p>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-0.5">{displayRole}</p>
+            <p className="text-[10px] font-bold text-nit-primary uppercase tracking-wider mt-0.5">{displayRole}</p>
           </div>
 
           {/* Change Password */}
-          <div className="px-1.5 pt-1.5">
+          <div className="px-2 pt-1 pb-1">
             <button
               onClick={handleChangePassword}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 font-medium hover:bg-slate-50 rounded-lg transition-colors text-left group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 font-semibold bg-white border border-slate-100 shadow-sm hover:border-blue-200 hover:bg-blue-50 hover:text-nit-primary hover:shadow-md rounded-xl transition-all duration-200 text-left group"
             >
-              <KeyRound className="w-4 h-4 text-gray-400 group-hover:text-nit-primary" />
+              <div className="p-1.5 rounded-lg bg-gray-50 group-hover:bg-white group-hover:shadow-sm transition-all border border-transparent group-hover:border-blue-100">
+                <KeyRound className="w-4 h-4 text-gray-400 group-hover:text-nit-primary transition-colors" />
+              </div>
               Change Password
             </button>
           </div>
 
-          {/* Divider */}
-          <div className="mx-3 my-1 border-t border-slate-100" />
-
           {/* Logout */}
-          <div className="px-1.5 pb-1.5">
+          <div className="px-2 pb-1">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 rounded-lg transition-colors text-left group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 font-semibold bg-white border border-slate-100 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:shadow-md rounded-xl transition-all duration-200 text-left group"
             >
-              <LogOut className="w-4 h-4 text-red-500 group-hover:text-red-600" />
+              <div className="p-1.5 rounded-lg bg-gray-50 group-hover:bg-white group-hover:shadow-sm transition-all border border-transparent group-hover:border-red-100">
+                <LogOut className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
+              </div>
               Log out
             </button>
           </div>
