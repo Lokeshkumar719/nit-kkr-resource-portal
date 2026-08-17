@@ -8,6 +8,7 @@ import { resourceApi, getResources, getResourceDownloadUrl } from '../services/a
 import { BRANCHES, BRANCH_LABELS, SEMESTERS, RESOURCE_TYPES } from '../constants/index.js';
 import { ResourceSkeleton } from '../components/ui/Skeleton.jsx';
 import { CustomSelect } from '../components/ui/CustomSelect.jsx';
+import toast from 'react-hot-toast';
 
 const TYPE_ICONS = {
   LECTURES: Video,
@@ -183,7 +184,7 @@ export default function Resources() {
                   return (
                     <button
                       key={sub._id}
-                      onClick={() => { setSelectedSubject(sub); setActiveType('lecture'); }}
+                      onClick={() => { setSelectedSubject(sub); setActiveType('LECTURES'); }}
                       className={`subject-item animate-fade-in ${isActive ? 'active' : ''}`}
                       style={{ animationDelay: `${i * 0.03}s` }}
                     >
@@ -291,7 +292,7 @@ export default function Resources() {
                                     window.location.href = res.data.data.downloadUrl;
                                   }
                                 } catch (err) {
-                                  alert("Could not generate download link. Please try again.");
+                                  toast.error("Could not generate download link. Please try again.");
                                 }
                               }
                             }}
