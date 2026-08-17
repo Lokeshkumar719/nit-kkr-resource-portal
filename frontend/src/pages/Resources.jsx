@@ -272,7 +272,7 @@ export default function Resources() {
                   {loadingResources ? (
                     <ResourceSkeleton rows={3} />
                   ) : itemsForActiveType.length > 0 ? (
-                    <div className="divide-y divide-slate-200">
+                    <div className="space-y-0">
                       {itemsForActiveType.map((item, i) => {                        const color = TYPE_COLORS[activeType] || TYPE_COLORS['LECTURES'];
                         const ActiveIcon = TYPE_ICONS[activeType] || TYPE_ICONS['LECTURES'];
                         return (
@@ -305,9 +305,13 @@ export default function Resources() {
                               <span className="resource-title truncate">{item.title}</span>
                             </div>
                             {item.url ? (
-                              <ExternalLink className="resource-action w-4 h-4" />
+                              <div className="resource-action">
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </div>
                             ) : (
-                              <Download className="resource-action w-4 h-4" />
+                              <div className="resource-action">
+                                <Download className="w-3.5 h-3.5" />
+                              </div>
                             )}
                           </a>
                         );

@@ -11,15 +11,20 @@ import {
   Loader,
   RefreshCw,
   Download,
-  Bug
+  Bug,
+  Trash2,
+  ExternalLink,
+  FileText,
+  Video,
+  StickyNote
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api, getContributionDownloadUrl } from '../services/api.js';
+import { api, getContributionDownloadUrl, deleteResource, getResourceDownloadUrl } from '../services/api.js';
 import { MENTOR_TAGS } from '../constants/index.js';
 import { ContributionSkeleton, OverviewSkeleton, AdminFormSkeleton } from '../components/ui/Skeleton.jsx';
 
 // Matches backend constants/branches.js exactly
-const BRANCHES = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
+const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
 const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 // Matches Mentor model's `year` enum exactly
 const SENIOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];
@@ -230,6 +235,17 @@ const ResourcesTab = () => {
 
   const [existingSubjects, setExistingSubjects] = useState([]);
 
+  // Manage existing state
+  const [manageBranch, setManageBranch] = useState('');
+  const [manageSem, setManageSem] = useState('');
+  const [manageSubjectId, setManageSubjectId] = useState('');
+  const [manageSubjects, setManageSubjects] = useState([]);
+  const [manageResources, setManageResources] = useState([]);
+  const [loadingManage, setLoadingManage] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [manageMsg, setManageMsg] = useState({ type: '', text: '' });
+
   const fetchSubjects = async () => {
     if (formData.branch && formData.semester) {
       setIsFetchingSubjects(true);
@@ -244,6 +260,47 @@ const ResourcesTab = () => {
   useEffect(() => {
     if (mode === 'add_material') fetchSubjects();
   }, [mode, formData.branch, formData.semester]);
+
+  // Fetch subjects for manage mode
+  useEffect(() => {
+    if (mode === 'manage_existing' && manageBranch && manageSem) {
+      api.get('/subjects', { params: { branch: manageBranch, semester: manageSem } })
+        .then(res => setManageSubjects(res.data.data || []))
+        .catch(() => setManageSubjects([]));
+    } else {
+      setManageSubjects([]);
+      setManageSubjectId('');
+      setManageResources([]);
+    }
+  }, [mode, manageBranch, manageSem]);
+
+  // Fetch resources for selected subject in manage mode
+  useEffect(() => {
+    if (mode === 'manage_existing' && manageSubjectId) {
+      setLoadingManage(true);
+      api.get('/resources', { params: { subjectId: manageSubjectId } })
+        .then(res => setManageResources(res.data.data || []))
+        .catch(() => setManageResources([]))
+        .finally(() => setLoadingManage(false));
+    } else {
+      setManageResources([]);
+    }
+  }, [manageSubjectId]);
+
+  const handleDeleteResource = async (id) => {
+    setDeletingId(id);
+    try {
+      await deleteResource(id);
+      setManageResources(prev => prev.filter(r => r._id !== id));
+      setManageMsg({ type: 'success', text: 'Resource deleted successfully.' });
+      setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
+    } catch (err) {
+      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
+    } finally {
+      setDeletingId(null);
+      setConfirmDeleteId(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -299,9 +356,13 @@ const ResourcesTab = () => {
           <button onClick={() => setMode('create_subject')} className={`px-4 py-2 text-sm rounded-md transition ${mode === 'create_subject' ? 'bg-nit-primary text-white shadow' : 'text-gray-600'}`}>
             Create Subject
           </button>
+          <button onClick={() => setMode('manage_existing')} className={`px-4 py-2 text-sm rounded-md transition ${mode === 'manage_existing' ? 'bg-nit-primary text-white shadow' : 'text-gray-600'}`}>
+            Manage Existing
+          </button>
         </div>
       </div>
 
+      {mode !== 'manage_existing' && (
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
         {message.text && (
           <div className={`mb-4 p-3 rounded-md text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
@@ -382,6 +443,100 @@ const ResourcesTab = () => {
           </button>
         </form>
       </div>
+      )}
+
+      {/* ── Manage Existing Resources ── */}
+      {mode === 'manage_existing' && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300 space-y-4">
+          {manageMsg.text && (
+            <div className={`p-3 rounded-md text-sm ${manageMsg.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>{manageMsg.text}</div>
+          )}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+              <select className="w-full p-2.5 border border-gray-300 rounded-lg" value={manageBranch} onChange={e => { setManageBranch(e.target.value); setManageSubjectId(''); }}>
+                <option value="">Select Branch</option>
+                {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+              <select className="w-full p-2.5 border border-gray-300 rounded-lg" value={manageSem} onChange={e => { setManageSem(e.target.value); setManageSubjectId(''); }}>
+                <option value="">Select Sem</option>
+                {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+              <select className="w-full p-2.5 border border-gray-300 rounded-lg disabled:bg-gray-100" disabled={!manageSubjects.length} value={manageSubjectId} onChange={e => setManageSubjectId(e.target.value)}>
+                <option value="">{manageSubjects.length ? 'Select Subject' : 'Select branch & sem first'}</option>
+                {manageSubjects.map(s => <option key={s._id} value={s._id}>{s.subjectName} ({s.subjectCode})</option>)}
+              </select>
+            </div>
+          </div>
+
+          {manageSubjectId && (
+            <div className="border-t border-slate-200 pt-4 mt-2">
+              <h3 className="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2">
+                <BookOpen className="w-4 h-4" /> Resources ({manageResources.length})
+              </h3>
+              {loadingManage ? (
+                <div className="flex justify-center py-8"><Loader className="w-5 h-5 animate-spin text-nit-primary" /></div>
+              ) : manageResources.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-sm">No resources found for this subject.</div>
+              ) : (
+                <div className="space-y-2">
+                  {manageResources.map(r => {
+                    const typeIcons = { LECTURES: Video, BOOKS: BookOpen, PYQS: FileText, NOTES: StickyNote };
+                    const typeColors = { LECTURES: 'bg-violet-100 text-violet-700', BOOKS: 'bg-blue-100 text-blue-700', PYQS: 'bg-amber-100 text-amber-700', NOTES: 'bg-emerald-100 text-emerald-700' };
+                    const Icon = typeIcons[r.type] || FileText;
+                    return (
+                      <div key={r._id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:border-slate-300 transition">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${typeColors[r.type] || 'bg-gray-100 text-gray-600'}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">{r.title}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-gray-400 uppercase font-semibold">{r.type}</span>
+                              {r.fileName && <span className="text-xs text-gray-400">• {r.fileName}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {r.url && (
+                            <a href={r.url} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition" title="Open Link">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          )}
+                          {r.fileKey && (
+                            <button onClick={async () => { try { const res = await getResourceDownloadUrl(r._id); if(res.data?.data?.downloadUrl) window.location.href = res.data.data.downloadUrl; } catch(e) { alert('Download failed.'); }}} className="p-2 rounded-lg bg-nit-primary text-white hover:bg-blue-900 transition" title="Download">
+                              <Download className="w-4 h-4" />
+                            </button>
+                          )}
+                          {confirmDeleteId === r._id ? (
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleDeleteResource(r._id)} disabled={deletingId === r._id} className="px-2 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition disabled:opacity-50">
+                                {deletingId === r._id ? <Loader className="w-3 h-3 animate-spin" /> : 'Yes'}
+                              </button>
+                              <button onClick={() => setConfirmDeleteId(null)} className="px-2 py-1.5 rounded-lg bg-gray-200 text-gray-600 text-xs font-semibold hover:bg-gray-300 transition">No</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setConfirmDeleteId(r._id)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition" title="Delete">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

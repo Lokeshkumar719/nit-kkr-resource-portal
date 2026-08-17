@@ -1,4 +1,4 @@
-const MAX_RESOURCE_SIZE = 100 * 1024 * 1024;
+const MAX_RESOURCE_FILE_SIZE = 200 * 1024 * 1024;
 
 const ALLOWED_RESOURCE_MIME_TYPES = [
     'application/zip',
@@ -6,6 +6,6 @@ const ALLOWED_RESOURCE_MIME_TYPES = [
 ];
 
 module.exports = {
-    MAX_RESOURCE_SIZE,
+    MAX_RESOURCE_FILE_SIZE,
     ALLOWED_RESOURCE_MIME_TYPES,
 };

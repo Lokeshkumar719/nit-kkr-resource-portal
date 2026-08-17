@@ -530,7 +530,7 @@ body {
 
 .tab-bar {
   display: flex;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
   overflow-x: auto;
   gap: 0;
   -ms-overflow-style: none;
@@ -588,15 +588,25 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem 1rem;
   border-radius: var(--radius-sm);
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   color: inherit;
+  border: 1px solid var(--border-light);
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+}
+
+.resource-list-item:last-child {
+  margin-bottom: 0;
 }
 
 .resource-list-item:hover {
   background: var(--surface-muted);
+  border-color: var(--nit-accent-light, #93c5fd);
+  box-shadow: 0 2px 8px rgba(15, 43, 91, 0.06);
+  transform: translateX(2px);
 }
 
 .resource-list-item .resource-title {
@@ -611,13 +621,23 @@ body {
 }
 
 .resource-list-item .resource-action {
-  color: var(--text-faint);
-  transition: color 0.15s ease;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: var(--nit-primary);
+  color: white;
   flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(15, 43, 91, 0.2);
 }
 
 .resource-list-item:hover .resource-action {
-  color: var(--nit-accent);
+  background: var(--nit-accent);
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
+  transform: scale(1.08);
 }
 
 /* Subject list sidebar */
@@ -864,15 +884,16 @@ body {
 
 .panel {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(15, 43, 91, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
 .panel-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 1.125rem 1.5rem;
+  border-bottom: 1.5px solid var(--border);
+  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), rgba(241, 245, 249, 0.4));
 }
 
 .panel-body {

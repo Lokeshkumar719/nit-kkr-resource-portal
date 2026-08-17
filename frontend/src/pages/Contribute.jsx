@@ -257,76 +257,96 @@ export default function Contribute() {
       <div className="grid sm:grid-cols-2 gap-5">
         
         {/* Notes Card */}
-        <div
-          onClick={() => setView('notes')}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
-        >
-          <div className="h-12 bg-gradient-to-r from-emerald-500 to-teal-600" />
-          <div className="p-5 pt-0 flex-1 flex flex-col relative">
-            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <FileText className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">Notes</h3>
-            <p className="text-xs text-gray-500 mt-1 mb-4">Upload subject notes in ZIP format for semester study.</p>
-            <div className="mt-auto flex items-center justify-center w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all">
-              Contribute Notes <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
+<div
+  onClick={() => setView('notes')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-emerald-400 to-teal-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <FileText className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+      Notes
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload subject notes in ZIP format for semester study.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold group-hover:bg-emerald-500 group-hover:text-white transition-all">
+      Contribute Notes
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
 
-        {/* Books Card */}
-        <div
-          onClick={() => setView('book')}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
-        >
-          <div className="h-12 bg-gradient-to-r from-indigo-500 to-blue-600" />
-          <div className="p-5 pt-0 flex-1 flex flex-col relative">
-            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">Books</h3>
-            <p className="text-xs text-gray-500 mt-1 mb-4">Upload academic books or reference material in ZIP format.</p>
-            <div className="mt-auto flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold group-hover:bg-indigo-600 group-hover:text-white transition-all">
-              Contribute Book <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
+{/* Books Card */}
+<div
+  onClick={() => setView('book')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-indigo-400 to-blue-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <BookOpen className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">
+      Books
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload academic books or reference material in ZIP format.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">
+      Contribute Book
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
 
-        {/* PYQs Card */}
-        <div
-          onClick={() => setView('pyq')}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
-        >
-          <div className="h-12 bg-gradient-to-r from-amber-500 to-orange-500" />
-          <div className="p-5 pt-0 flex-1 flex flex-col relative">
-            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <FileQuestion className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800 group-hover:text-amber-600 transition-colors">PYQs</h3>
-            <p className="text-xs text-gray-500 mt-1 mb-4">Upload previous year exam question papers in ZIP format.</p>
-            <div className="mt-auto flex items-center justify-center w-full py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold group-hover:bg-amber-500 group-hover:text-white transition-all">
-              Contribute PYQ <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
+{/* PYQs Card */}
+<div
+  onClick={() => setView('pyq')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-amber-400 to-orange-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <FileQuestion className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-amber-600 transition-colors">
+      PYQs
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Upload previous year exam question papers in ZIP format.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold group-hover:bg-amber-500 group-hover:text-white transition-all">
+      Contribute PYQ
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
 
-        {/* Lectures Card */}
-        <div
-          onClick={() => setView('lecture')}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
-        >
-          <div className="h-12 bg-gradient-to-r from-violet-500 to-purple-600" />
-          <div className="p-5 pt-0 flex-1 flex flex-col relative">
-            <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Video className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">Lectures</h3>
-            <p className="text-xs text-gray-500 mt-1 mb-4">Share YouTube video or playlist links for course topics.</p>
-            <div className="mt-auto flex items-center justify-center w-full py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold group-hover:bg-violet-600 group-hover:text-white transition-all">
-              Contribute Lecture <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
+{/* Lectures Card */}
+<div
+  onClick={() => setView('lecture')}
+  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+>
+  <div className="h-12 bg-gradient-to-r from-violet-400 to-purple-500" />
+  <div className="p-5 pt-0 flex-1 flex flex-col relative">
+    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+      <Video className="w-5 h-5" />
+    </div>
+    <h3 className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">
+      Lectures
+    </h3>
+    <p className="text-xs text-gray-500 mt-1 mb-4">
+      Share YouTube video or playlist links for course topics.
+    </p>
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold group-hover:bg-violet-500 group-hover:text-white transition-all">
+      Contribute Lecture
+      <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+</div>
 
       </div>
     </div>
