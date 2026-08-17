@@ -23,6 +23,7 @@ app.set("trust proxy", 1);
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:5173",
+  "http://localhost:5175",
 ].filter(Boolean);
 
 app.use(
@@ -80,6 +81,10 @@ const initialiseConnection = async () => {
     await Promise.all([connectDB(), connectRedis()]);
 
     console.log("Database Connected");
+
+    // Initialize scheduled cron jobs
+    const setupCronJobs = require("./utils/cronJobs");
+    setupCronJobs();
 
     app.listen(process.env.PORT, () => {
       console.log(`Server running on port ${process.env.PORT}`);

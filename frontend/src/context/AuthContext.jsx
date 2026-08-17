@@ -1,38 +1,59 @@
-import { createContext, useContext, useEffect, useState } from "react";
-
-import { verifyAuth, logout } from "../services/api";
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { verifyAuth, logout as apiLogout } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+// Synchronously hydrate from localStorage to prevent flash/redirect on refresh
+const getStoredUser = () => {
+  try {
+    const stored = localStorage.getItem('nitkkr_user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem('nitkkr_user');
+    return null;
+  }
+};
 
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(getStoredUser);
   const [loading, setLoading] = useState(true);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await verifyAuth();
-
-      setUser(response.data.data);
+      if (response.data && response.data.data) {
+        setUser(response.data.data);
+        localStorage.setItem('nitkkr_user', JSON.stringify(response.data.data));
+      } else {
+        setUser(null);
+        localStorage.removeItem('nitkkr_user');
+      }
     } catch (error) {
       setUser(null);
+      localStorage.removeItem('nitkkr_user');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
+
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem('nitkkr_user', JSON.stringify(userData));
+  };
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await apiLogout();
     } catch (error) {
-      console.error(error);
+      console.error('Logout API error:', error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('nitkkr_user');
     }
-
-    setUser(null);
   };
 
   return (
@@ -41,6 +62,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         checkAuth,
+        checkSession: checkAuth, // alias for backwards compatibility in my components
+        login,
         logout: handleLogout,
       }}
     >
@@ -49,4 +72,8 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+};

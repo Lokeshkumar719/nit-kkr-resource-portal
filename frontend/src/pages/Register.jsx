@@ -26,7 +26,7 @@ function Register({ setActiveTab }) {
       setLoading(true);
       setMessage({ type: "", text: "" });
 
-      await register(formData);
+      await register(formData.email, formData.password);
 
       setMessage({
         type: "success",
@@ -102,3 +102,4 @@ function Register({ setActiveTab }) {
 }
 
 export default Register;
+

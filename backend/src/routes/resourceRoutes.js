@@ -21,13 +21,24 @@ router.post(
 
 router.get("/", authMiddleware, resourceController.getResources);
 
+router.get("/stats", resourceController.getResourceStats);
+
 router.get("/:resourceId", authMiddleware, resourceController.getResourceById);
+
+router.get("/:resourceId/download", authMiddleware, resourceController.getDownloadUrl);
 
 router.delete(
   "/:resourceId",
   authMiddleware,
   adminMiddleware,
   resourceController.deleteResource,
+);
+
+router.patch(
+  "/:resourceId",
+  authMiddleware,
+  adminMiddleware,
+  resourceController.updateResource,
 );
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require("../models/User");
 
 const findUserByEmail = async (email) => {
   return await User.findOne({ email });
@@ -19,7 +19,7 @@ const updateEmailVerificationOTP = async (email, hashedOTP, expiresAt) => {
       emailVerificationOTP: hashedOTP,
       emailVerificationOTPExpires: expiresAt,
     },
-    { new: true }
+    { new: true },
   );
 };
 
@@ -31,7 +31,46 @@ const verifyUser = async (email) => {
       emailVerificationOTP: null,
       emailVerificationOTPExpires: null,
     },
-    { new: true }
+    { new: true },
+  );
+};
+
+const updateForgotPasswordOTP = async (email, hashedOTP, expiresAt) => {
+  return await User.findOneAndUpdate(
+    { email },
+    {
+      forgotPasswordOTP: hashedOTP,
+      forgotPasswordOTPExpires: expiresAt,
+    },
+    {
+      new: true,
+    },
+  );
+};
+
+const resetPassword = async (email, hashedPassword) => {
+  return await User.findOneAndUpdate(
+    { email },
+    {
+      password: hashedPassword,
+      forgotPasswordOTP: null,
+      forgotPasswordOTPExpires: null,
+    },
+    {
+      new: true,
+    },
+  );
+};
+
+const changePassword = async (userId, hashedPassword) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    {
+      password: hashedPassword,
+    },
+    {
+      new: true,
+    },
   );
 };
 
@@ -41,4 +80,7 @@ module.exports = {
   createUser,
   updateEmailVerificationOTP,
   verifyUser,
+  updateForgotPasswordOTP,
+  resetPassword,
+  changePassword
 };

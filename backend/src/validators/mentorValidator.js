@@ -17,7 +17,6 @@ const validateMentorId = (mentorId) => {
 const validateCreateMentor = (data) => {
   const {
     name,
-    rollNo,
     email,
     branch,
     currentYear,
@@ -25,8 +24,6 @@ const validateCreateMentor = (data) => {
 
   if (
     !name ||
-    !rollNo ||
-    !email ||
     !branch ||
     !currentYear
   ) {
@@ -36,7 +33,7 @@ const validateCreateMentor = (data) => {
     );
   }
 
-  if (!validator.isEmail(email)) {
+  if (email && !validator.isEmail(email)) {
     throw new ApiError(
       STATUS_CODES.BAD_REQUEST,
       "Invalid email."

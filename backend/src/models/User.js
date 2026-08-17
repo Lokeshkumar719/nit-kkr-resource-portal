@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const USER_ROLE = require('../constants/roles');
+const mongoose = require("mongoose");
+const USER_ROLE = require("../constants/roles");
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [
         /^[a-zA-Z0-9._%+-]+@nitkkr\.ac\.in$/,
-        'Please use a valid @nitkkr.ac.in email',
+        "Please use a valid @nitkkr.ac.in email",
       ],
     },
 
@@ -40,10 +40,20 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    
+    forgotPasswordOTP: {
+      type: String,
+      default: null,
+    },
+
+    forgotPasswordOTPExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

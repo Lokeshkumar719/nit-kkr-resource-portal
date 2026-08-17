@@ -1,6 +1,9 @@
 const BRANCHES = [
     'CSE',
     'IT',
+    'AIDS',
+    'AIML',
+    'MNC',
     'ECE',
     'EE',
     'ME',
@@ -9,3 +12,4 @@ const BRANCHES = [
 ];
 
 module.exports = BRANCHES;
+module.exports.BRANCHES = BRANCHES;

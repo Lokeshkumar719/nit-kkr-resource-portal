@@ -49,6 +49,17 @@ const getResources = asyncHandler(async (req, res) => {
   );
 });
 
+const getResourceStats = asyncHandler(async (req, res) => {
+  const stats = await resourceService.getResourceStats();
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Resource stats fetched successfully.",
+    stats,
+  );
+});
+
 const deleteResource = asyncHandler(async (req, res) => {
   resourceValidator.validateResourceId(req.params.resourceId);
 
@@ -61,9 +72,49 @@ const deleteResource = asyncHandler(async (req, res) => {
   );
 });
 
+const getDownloadUrl = asyncHandler(async (req, res) => {
+  resourceValidator.validateResourceId(req.params.resourceId);
+
+  const resource = await resourceService.getResourceById(req.params.resourceId);
+
+  if (!resource.fileKey) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "This resource does not have a downloadable file.");
+  }
+
+  const { getFileUrl } = require("../services/fileService");
+  const downloadUrl = await getFileUrl(resource.fileKey);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Download URL generated successfully.",
+    { downloadUrl }
+  );
+});
+
+const updateResource = asyncHandler(async (req, res) => {
+  resourceValidator.validateResourceId(req.params.resourceId);
+  resourceValidator.validateUpdateResource(req.body);
+
+  const resource = await resourceService.updateResource(
+    req.params.resourceId,
+    req.body
+  );
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Resource updated successfully.",
+    resource,
+  );
+});
+
 module.exports = {
   createResource,
   getResourceById,
   getResources,
+  getResourceStats,
   deleteResource,
+  getDownloadUrl,
+  updateResource,
 };

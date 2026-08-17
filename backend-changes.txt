@@ -1,0 +1,97 @@
+============================================================================
+BACKEND INTEGRATION CHECKLIST & REQUIREMENTS
+============================================================================
+The frontend is 100% complete and production-ready. 
+To make the application fully functional, you need to implement the following 
+missing backend pieces. The frontend will automatically work once these are added.
+============================================================================
+
+1. RESOURCES API (Study Materials)
+---------------------------------------------------------
+File to create: `backend/src/routes/resourceRoutes.js`
+File to create: `backend/src/controllers/resourceController.js`
+
+Endpoints required by Frontend:
+- GET `/api/resources` 
+  * Query parameters: `branch` (String), `sem` (String/Number)
+  * Expected Response: Array of resource objects.
+- GET `/api/resources/all`
+  * Expected Response: Array of all resources.
+- POST `/api/resources` 
+  * Body: `{ subjectName, branch, semester }`
+  * Action: Creates a new subject category.
+- POST `/api/resources` 
+  * Body: `{ action: 'add_material', subjectId, type, link, uploader, date }`
+  * Action: Adds a material (Book/PYQ/Notes link) to an existing subject.
+
+
+2. SENIORS API (Senior Support)
+---------------------------------------------------------
+File to create: `backend/src/routes/seniorRoutes.js`
+File to create: `backend/src/controllers/seniorController.js`
+
+Endpoints required by Frontend:
+- GET `/api/seniors` 
+  * Query parameters: `year` (String, e.g. "4th Year"), `branch` (String)
+  * Expected Response: Array of senior profiles.
+- POST `/api/seniors`
+  * Expected Response: Success status for creating a senior profile.
+
+🛑 CRITICAL BUG TO FIX IN EXISTING BACKEND CODE:
+If you look at `seniorService.js` (or related queries), it might be filtering by a field called `category`. However, the Mongoose schema uses the field `year` (e.g., "2nd Year", "3rd Year"). You must ensure your controller uses the `year` field to filter the database, because the frontend passes `?year=...` in the API call.
+
+
+3. ALUMNI API (Alumni Network)
+---------------------------------------------------------
+File to create: `backend/src/routes/alumniRoutes.js`
+File to create: `backend/src/controllers/alumniController.js`
+
+Endpoints required by Frontend:
+- GET `/api/alumni` 
+  * Query parameters: `branch` (String)
+  * Expected Response: Array of alumni profiles.
+- POST `/api/alumni`
+  * Action: Create a new alumni profile.
+
+Data Structure Expected by Frontend:
+`{ name, branch, batch, company, email, skills (Array), achievements (Array), linkedin, imageUrl }`
+
+
+4. CONTRIBUTIONS API (Bug Reports & Resource Uploads)
+---------------------------------------------------------
+File to create: `backend/src/routes/contributionRoutes.js`
+File to create: `backend/src/controllers/contributionController.js`
+
+Endpoints required by Frontend:
+- POST `/api/contributions`
+  * This single endpoint handles TWO different types of payloads:
+    1. Bug Reports: Standard JSON payload `{ type: 'bug', description: '...' }`
+    2. Resource Uploads: `multipart/form-data` payload containing `type` (notes/book/pyq) and `file` (a .zip file).
+  * ⚠️ REQUIREMENT: You will need to install and configure `multer` in your backend to handle the `multipart/form-data` ZIP uploads.
+- GET `/api/contributions` 
+  * Query parameters: `status` (String, e.g., "Pending")
+- PUT `/api/contributions/:id` 
+  * Body: `{ status: 'Approved' | 'Rejected' }`
+
+
+5. SERVER.JS UPDATES
+---------------------------------------------------------
+File to modify: `backend/src/server.js`
+
+Currently, only `authRoutes` is mounted to the Express application. You MUST mount the new routes for the frontend proxy to reach them.
+
+Add the following to your `server.js`:
+
+```javascript
+const resourceRoutes = require('./routes/resourceRoutes');
+const seniorRoutes = require('./routes/seniorRoutes');
+const alumniRoutes = require('./routes/alumniRoutes');
+const contributionRoutes = require('./routes/contributionRoutes');
+
+app.use('/api/resources', resourceRoutes);
+app.use('/api/seniors', seniorRoutes);
+app.use('/api/alumni', alumniRoutes);
+app.use('/api/contributions', contributionRoutes);
+```
+
+Once you complete these 5 steps, your full-stack application will be completely functional!

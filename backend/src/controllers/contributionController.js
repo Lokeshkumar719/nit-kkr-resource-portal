@@ -61,9 +61,54 @@ const deleteContribution = asyncHandler(async (req, res) => {
   );
 });
 
+const updateContribution = asyncHandler(async (req, res) => {
+  contributionValidator.validateContributionId(req.params.contributionId);
+  contributionValidator.validateUpdateContribution(req.body);
+
+  const contribution = await contributionService.updateContribution(
+    req.params.contributionId,
+    req.body
+  );
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Contribution updated successfully.",
+    contribution,
+  );
+});
+
+const getDownloadUrl = asyncHandler(async (req, res) => {
+  contributionValidator.validateContributionId(req.params.contributionId);
+
+  const contribution = await contributionService.getContributions({ _id: req.params.contributionId });
+  
+  if (!contribution || contribution.length === 0) {
+    throw new ApiError(STATUS_CODES.NOT_FOUND, "Contribution not found.");
+  }
+
+  const targetContribution = contribution[0];
+
+  if (!targetContribution.fileKey) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "This contribution does not have a downloadable file.");
+  }
+
+  const { getFileUrl } = require("../services/fileService");
+  const downloadUrl = await getFileUrl(targetContribution.fileKey);
+
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Download URL generated successfully.",
+    { downloadUrl }
+  );
+});
+
 module.exports = {
   createContribution,
   getContributions,
   approveContribution,
   deleteContribution,
+  getDownloadUrl,
+  updateContribution,
 };

@@ -1,66 +1,128 @@
 import axios from "axios";
 
-// Create Axios instance
+// Axios instance
 export const api = axios.create({
   baseURL: "/api",
   withCredentials: true,
 });
 
-// Global Response Interceptor
+// Request interceptor
+api.interceptors.request.use((config) => {
+  return config;
+});
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.warn("Unauthorized access");
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
+    if (
+      originalRequest.url === "/auth/login" ||
+      originalRequest.url === "/auth/refresh-token"
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        await api.post("/auth/refresh-token");
+        isRefreshing = false;
+        processQueue(null, "Success");
+        return api(originalRequest);
+      } catch (err) {
+        isRefreshing = false;
+        processQueue(err, null);
+        
+        // If refresh token fails (expired/invalid), clear cached user
+        localStorage.removeItem("nitkkr_user");
+        
+        return Promise.reject(err);
+      }
     }
 
     return Promise.reject(error);
   }
 );
 
-// ================= AUTH =================
+// ── Auth API ──────────────────────
+export const authApi = {
+  login: (data) => api.post('/auth/login', data),
+  signup: (data) => api.post('/auth/signup', data), // My original signup route just in case
+  checkSession: () => api.get('/auth/me'),
+  logout: () => api.post('/auth/logout'),
+};
 
 export const login = (email, password) =>
-  api.post("/auth/login", {
-    email,
-    password,
-  });
+  api.post("/auth/login", { email, password });
 
-export const register = (userData) =>
-  api.post("/auth/register", userData);
+export const register = (email, password) =>
+  api.post("/auth/register", { email, password });
 
 export const verifyOTP = (email, otp) =>
-  api.post("/auth/verify-otp", {
-    email,
-    otp,
-  });
+  api.post("/auth/verify-otp", { email, otp });
 
 export const resendOTP = (email) =>
-  api.post("/auth/resend-otp", {
-    email,
-  });
+  api.post("/auth/resend-otp", { email });
 
-export const verifyAuth = () =>
-  api.get("/auth/me");
+export const verifyAuth = () => api.get("/auth/me");
+export const logout = () => api.post("/auth/logout");
 
-export const logout = () =>
-  api.post("/auth/logout");
+export const forgotPassword = (email) =>
+  api.post("/auth/forgot-password", { email });
 
-// ================= SUBJECTS =================
+export const verifyForgotPasswordOTP = (email, otp) =>
+  api.post("/auth/verify-forgot-password-otp", { email, otp });
 
-export const getSubjects = (branch, semester) =>
+export const resetPassword = (email, otp, password) =>
+  api.post("/auth/reset-password", { email, otp, password });
+
+export const changePassword = (oldPassword, newPassword) =>
+  api.patch("/auth/change-password", { oldPassword, newPassword });
+
+// ── Subjects / Branches API ──────────────────────
+export const getSubjects = (semester,branch) =>
   api.get("/subjects", {
     params: {
-      ...(branch && { branch }),
       ...(semester && { semester }),
+      ...(branch && { branch }),
     },
   });
 
-export const createSubject = (data) =>
-  api.post("/subjects", data);
+export const createSubject = (data) => api.post("/subjects", data);
 
-// ================= RESOURCES =================
-
+// ── Resources API ──────────────────────
 export const getResources = (subjectId) =>
   api.get("/resources", {
     params: {
@@ -75,11 +137,38 @@ export const uploadResource = (formData) =>
     },
   });
 
+export const getResourceDownloadUrl = (resourceId) =>
+  api.get(`/resources/${resourceId}/download`);
+
 export const deleteResource = (resourceId) =>
   api.delete(`/resources/${resourceId}`);
 
-// ================= CONTRIBUTIONS =================
+export const updateResource = (resourceId, data) =>
+  api.patch(`/resources/${resourceId}`, data);
 
+// For my old premium UI compatibility:
+export const resourceApi = {
+  getByBranchAndSem: (branch, sem) => getSubjects(sem, branch),
+  getAll: () => api.get('/resources'), // Backup
+};
+
+// ── Seniors / Mentors API ──────────────────────
+export const getMentors = (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } });
+export const createMentor = (data) => api.post('/mentors', data);
+export const updateMentor = (id, data) => api.patch(`/mentors/${id}`, data);
+export const deleteMentor = (id) => api.delete(`/mentors/${id}`);
+
+export const seniorApi = {
+  getByFilter: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),
+  getByYearAndBranch: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),
+};
+
+// ── Alumni API ──────────────────────
+export const alumniApi = {
+  getAll: (branch) => api.get('/alumni', { params: { branch } }),
+};
+
+// ── Contributions API ──────────────────────
 export const createContribution = (formData) =>
   api.post("/contributions", formData, {
     headers: {
@@ -87,27 +176,38 @@ export const createContribution = (formData) =>
     },
   });
 
-export const getContributions = () =>
-  api.get("/contributions");
+export const getContributions = (params) =>
+  api.get("/contributions", { params });
+export const approveContribution = (id) =>
+  api.patch(`/contributions/${id}/approve`);
+export const rejectContribution = (id) => api.delete(`/contributions/${id}`);
+export const updateContribution = (id, data) => api.patch(`/contributions/${id}`, data);
+export const getContributionDownloadUrl = (id) =>
+  api.get(`/contributions/${id}/download`);
 
-export const approveContribution = (contributionId) =>
-  api.patch(`/contributions/${contributionId}/approve`);
-
-export const deleteContribution = (contributionId) =>
-  api.delete(`/contributions/${contributionId}`);
-
-// ================= BUGS =================
-
+// ── Bugs API ──────────────────────
 export const createBug = (description) =>
   api.post("/bugs", {
     description,
   });
 
-export const getBugs = () =>
-  api.get("/bugs");
+export const getBugs = () => api.get("/bugs");
 
-export const resolveBug = (bugId) =>
-  api.patch(`/bugs/${bugId}/resolve`);
+export const resolveBug = (bugId) => api.patch(`/bugs/${bugId}/resolve`);
 
-export const deleteBug = (bugId) =>
-  api.delete(`/bugs/${bugId}`);
+export const deleteBug = (bugId) => api.delete(`/bugs/${bugId}`);
+
+// Old API object for my premium UI compatibility
+export const contributionApi = {
+  submit: (formData) => {
+    // Determine if it's bug or resource based on what the UI passes
+    if (formData instanceof FormData) {
+      return createContribution(formData);
+    } else {
+      if (formData.type === 'bug') {
+        return createBug(formData.description);
+      }
+    }
+    return Promise.reject("Invalid contribution type");
+  }
+};
