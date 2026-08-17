@@ -1,4 +1,4 @@
-const Resource = require("../models/Resource");
+const Resource = require('../models/Resource');
 
 const createResource = async (resourceData) => {
   return await Resource.create(resourceData);
@@ -10,7 +10,7 @@ const findResourceById = async (resourceId) => {
 
 const findResources = async (filter) => {
   return await Resource.find(filter).sort({
-    createdAt: -1,
+    createdAt: 1,
   });
 };
 

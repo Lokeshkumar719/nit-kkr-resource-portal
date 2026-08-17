@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, KeyRound, ArrowRight, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP, forgotPassword as apiForgotPassword, verifyForgotPasswordOTP as apiVerifyForgotPasswordOTP, resetPassword as apiResetPassword } from '../services/api';
+import {
+  Mail,
+  Lock,
+  KeyRound,
+  ArrowRight,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+} from 'lucide-react';
+import {
+  login as apiLogin,
+  register as apiRegister,
+  verifyOTP as apiVerifyOTP,
+  resendOTP as apiResendOTP,
+  forgotPassword as apiForgotPassword,
+  verifyForgotPasswordOTP as apiVerifyForgotPasswordOTP,
+  resetPassword as apiResetPassword,
+} from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
@@ -9,14 +26,14 @@ import { ButtonSpinner } from '../components/ui/Spinner';
 export default function Auth() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  
+
   const [isLogin, setIsLogin] = useState(true);
   // 'auth' | 'verify' | 'forgot' | 'forgot-otp' | 'forgot-reset' | 'reset-success'
   const [step, setStep] = useState('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,7 +41,7 @@ export default function Auth() {
     newPassword: '',
     confirmNewPassword: '',
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -41,7 +58,7 @@ export default function Auth() {
   }, [step, resendTimer]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
   };
 
@@ -49,12 +66,12 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       if (isLogin) {
         const res = await apiLogin(formData.email, formData.password);
         login(res.data.data);
-        
+
         if (res.data.data.role === 'ADMIN') {
           navigate('/admin/dashboard');
         } else {
@@ -77,20 +94,20 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       const res = await apiVerifyOTP(formData.email, formData.otp);
-      if(res.data && res.data.data) {
-          login(res.data.data);
-          if (res.data.data.role === 'ADMIN') {
-            navigate('/admin/dashboard');
-          } else {
-            navigate('/dashboard');
-          }
+      if (res.data && res.data.data) {
+        login(res.data.data);
+        if (res.data.data.role === 'ADMIN') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-          setSuccess('Verified! You can now log in.');
-          setStep('auth');
-          setIsLogin(true);
+        setSuccess('Verified! You can now log in.');
+        setStep('auth');
+        setIsLogin(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed. Please check the OTP.');
@@ -103,7 +120,7 @@ export default function Auth() {
     setLoading(true);
     setError('');
     setSuccess('');
-    
+
     try {
       await apiResendOTP(formData.email);
       setSuccess('A new verification code has been sent to your email.');
@@ -209,23 +226,35 @@ export default function Auth() {
   // ── Step Title & Subtitle ────────────────────────
   const getStepTitle = () => {
     switch (step) {
-      case 'verify': return 'Verify Email';
-      case 'forgot': return 'Forgot Password';
-      case 'forgot-otp': return 'Verify Code';
-      case 'forgot-reset': return 'Reset Password';
-      case 'reset-success': return 'Password Reset';
-      default: return isLogin ? 'Welcome back' : 'Create account';
+      case 'verify':
+        return 'Verify Email';
+      case 'forgot':
+        return 'Forgot Password';
+      case 'forgot-otp':
+        return 'Verify Code';
+      case 'forgot-reset':
+        return 'Reset Password';
+      case 'reset-success':
+        return 'Password Reset';
+      default:
+        return isLogin ? 'Welcome back' : 'Create account';
     }
   };
 
   const getStepSubtitle = () => {
     switch (step) {
-      case 'verify': return 'Enter the 6-digit code sent to your email.';
-      case 'forgot': return 'Enter your college email to receive a reset OTP.';
-      case 'forgot-otp': return `Enter the OTP sent to ${formData.email}.`;
-      case 'forgot-reset': return 'Set your new password below.';
-      case 'reset-success': return '';
-      default: return isLogin ? 'Sign in to access your dashboard.' : 'Sign up using your college email.';
+      case 'verify':
+        return 'Enter the 6-digit code sent to your email.';
+      case 'forgot':
+        return 'Enter your college email to receive a reset OTP.';
+      case 'forgot-otp':
+        return `Enter the OTP sent to ${formData.email}.`;
+      case 'forgot-reset':
+        return 'Set your new password below.';
+      case 'reset-success':
+        return '';
+      default:
+        return isLogin ? 'Sign in to access your dashboard.' : 'Sign up using your college email.';
     }
   };
 
@@ -243,9 +272,15 @@ export default function Auth() {
       <div className="w-full max-w-md animate-slide-up pt-12 sm:pt-0">
         <Link to="/" className="block text-center mb-8 group" title="Go to Homepage">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
-             <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR" className="w-10 h-10 object-contain" />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
+              alt="NIT KKR"
+              className="w-10 h-10 object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Resource Portal</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">
+            NIT KKR Resource Portal
+          </h1>
           <p className="text-blue-200/80 font-medium">Your academic resource hub</p>
         </Link>
 
@@ -253,16 +288,13 @@ export default function Auth() {
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800">{getStepTitle()}</h2>
-            {getStepSubtitle() && (
-              <p className="text-sm text-gray-500 mt-1">{getStepSubtitle()}</p>
-            )}
+            {getStepSubtitle() && <p className="text-sm text-gray-500 mt-1">{getStepSubtitle()}</p>}
           </div>
 
           <Alert type="error" message={error} onDismiss={() => setError('')} />
           <Alert type="success" message={success} onDismiss={() => setSuccess('')} />
 
           <div className="mt-6">
-
             {/* ── AUTH STEP (Login / Register) ───────────── */}
             {step === 'auth' && (
               <form onSubmit={handleAuthSubmit} className="space-y-4">
@@ -328,7 +360,7 @@ export default function Auth() {
                 </div>
 
                 <button type="submit" disabled={loading} className="btn-primary mt-2">
-                  {loading ? <ButtonSpinner /> : (isLogin ? 'Sign In' : 'Create Account')}
+                  {loading ? <ButtonSpinner /> : isLogin ? 'Sign In' : 'Create Account'}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
               </form>
@@ -338,7 +370,9 @@ export default function Auth() {
             {step === 'verify' && (
               <form onSubmit={handleVerifySubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700 ml-1">Verification Code</label>
+                  <label className="text-sm font-medium text-gray-700 ml-1">
+                    Verification Code
+                  </label>
                   <div className="relative">
                     <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
@@ -358,15 +392,17 @@ export default function Auth() {
                   {loading ? <ButtonSpinner /> : 'Verify & Continue'}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
-                
+
                 <div className="text-center pt-3">
-                  <button 
-                    type="button" 
-                    onClick={handleResendOTP} 
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
                     disabled={loading || resendTimer > 0}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                    {resendTimer > 0
+                      ? `Resend code in ${resendTimer}s`
+                      : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>
@@ -402,7 +438,8 @@ export default function Auth() {
                     onClick={goBackToLogin}
                     className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
                   >
-                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Back to Sign In
+                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" />{' '}
+                    Back to Sign In
                   </button>
                 </div>
               </form>
@@ -440,7 +477,9 @@ export default function Auth() {
                     disabled={loading || resendTimer > 0}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                    {resendTimer > 0
+                      ? `Resend code in ${resendTimer}s`
+                      : "Didn't receive the code? Resend"}
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button
@@ -448,7 +487,8 @@ export default function Auth() {
                       onClick={goBackToLogin}
                       className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
                     >
-                      <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Back to Sign In
+                      <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" />{' '}
+                      Back to Sign In
                     </button>
                   </div>
                 </div>
@@ -477,7 +517,11 @@ export default function Auth() {
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                       title={showNewPassword ? 'Hide' : 'Show'}
                     >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showNewPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 ml-1 mt-1">
@@ -508,12 +552,20 @@ export default function Auth() {
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                       title={showConfirmNewPassword ? 'Hide' : 'Show'}
                     >
-                      {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showConfirmNewPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading || !formData.newPassword || !formData.confirmNewPassword} className="btn-primary mt-2">
+                <button
+                  type="submit"
+                  disabled={loading || !formData.newPassword || !formData.confirmNewPassword}
+                  className="btn-primary mt-2"
+                >
                   {loading ? <ButtonSpinner /> : 'Reset Password'}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
@@ -524,7 +576,8 @@ export default function Auth() {
                     onClick={goBackToLogin}
                     className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold text-white bg-slate-700 border border-transparent rounded-lg hover:bg-slate-800 transition-all shadow-sm group"
                   >
-                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" /> Cancel Reset
+                    <ArrowLeft className="w-4 h-4 text-slate-300 group-hover:-translate-x-0.5 transition-transform" />{' '}
+                    Cancel Reset
                   </button>
                 </div>
               </form>
@@ -536,14 +589,13 @@ export default function Auth() {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full mb-5 border border-emerald-100">
                   <ShieldCheck className="w-8 h-8 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 mb-1">Password Reset Successfully!</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-1">
+                  Password Reset Successfully!
+                </h3>
                 <p className="text-sm text-gray-500 mb-6">
                   Your password has been updated. Please sign in with your new password.
                 </p>
-                <button
-                  onClick={goBackToLogin}
-                  className="btn-primary inline-flex"
-                >
+                <button onClick={goBackToLogin} className="btn-primary inline-flex">
                   Sign In Now <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -554,7 +606,7 @@ export default function Auth() {
           {step === 'auth' && (
             <div className="mt-8 text-center border-t border-slate-200 pt-6">
               <p className="text-sm text-gray-500">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+                {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                 <button
                   onClick={toggleMode}
                   className="font-semibold text-nit-primary hover:text-nit-accent transition-colors"

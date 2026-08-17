@@ -20,7 +20,7 @@
 
 body {
   margin: 0;
-  font-family: Inter, "Segoe UI", sans-serif;
+  font-family: Inter, 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #edf5ff 0%, #eef2ff 52%, #f8fafc 100%);
   color: var(--primary);
 }
@@ -34,11 +34,7 @@ input {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.05),
-    rgba(56, 189, 248, 0.06)
-  );
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(56, 189, 248, 0.06));
 }
 
 .auth-hero {
@@ -51,32 +47,24 @@ input {
 }
 
 .auth-hero::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 12% auto auto -10%;
   width: 380px;
   height: 380px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(37, 99, 235, 0.18),
-    rgba(37, 99, 235, 0)
-  );
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.18), rgba(37, 99, 235, 0));
 }
 
 .auth-hero::after {
-  content: "";
+  content: '';
   position: absolute;
   right: -70px;
   bottom: -50px;
   width: 260px;
   height: 260px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(56, 189, 248, 0.18),
-    rgba(56, 189, 248, 0)
-  );
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0));
 }
 
 .auth-hero-content {

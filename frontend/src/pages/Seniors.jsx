@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ExternalLink, Briefcase, Mail, Users,
-  Search, Building2, Award, GraduationCap, ArrowLeft
+  ExternalLink,
+  Briefcase,
+  Mail,
+  Users,
+  Search,
+  Building2,
+  Award,
+  GraduationCap,
+  ArrowLeft,
 } from 'lucide-react';
 import { seniorApi } from '../services/api.js';
 import { BRANCHES, BRANCH_LABELS, SENIOR_YEARS } from '../constants/index.js';
@@ -52,7 +59,7 @@ export default function Seniors() {
     setError('');
     try {
       const results = await Promise.all(
-        SENIOR_YEARS.map(year => seniorApi.getByYearAndBranch(year, branch))
+        SENIOR_YEARS.map((year) => seniorApi.getByYearAndBranch(year, branch))
       );
       const grouped = {};
       SENIOR_YEARS.forEach((year, i) => {
@@ -79,10 +86,11 @@ export default function Seniors() {
     const filtered = {};
     for (const year of SENIOR_YEARS) {
       const list = seniorsByYear[year] || [];
-      filtered[year] = list.filter(s =>
-        s.name?.toLowerCase().includes(q) ||
-        s.company?.toLowerCase().includes(q) ||
-        s.email?.toLowerCase().includes(q)
+      filtered[year] = list.filter(
+        (s) =>
+          s.name?.toLowerCase().includes(q) ||
+          s.company?.toLowerCase().includes(q) ||
+          s.email?.toLowerCase().includes(q)
       );
     }
     return filtered;
@@ -99,7 +107,11 @@ export default function Seniors() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
           <div className="flex items-center gap-3 shrink-0">
-            <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
+              title="Go Back"
+            >
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
             </button>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
@@ -121,7 +133,7 @@ export default function Seniors() {
             <CustomSelect
               value={branch}
               onChange={setBranch}
-              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+              options={BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))}
               placeholder="Select branch"
               id="senior-branch-filter"
             />
@@ -167,14 +179,11 @@ export default function Seniors() {
           message={`We're still adding senior profiles for ${branch}.`}
         />
       ) : filteredTotal === 0 && search ? (
-        <EmptyState
-          title="No matching seniors"
-          message="Try a different search term."
-        />
+        <EmptyState title="No matching seniors" message="Try a different search term." />
       ) : (
         <div className="space-y-8">
           {/* Year sections — displayed in reverse order (4th first) */}
-          {[...SENIOR_YEARS].reverse().map(year => {
+          {[...SENIOR_YEARS].reverse().map((year) => {
             const list = filteredByYear[year] || [];
             if (list.length === 0) return null;
             const accent = YEAR_ACCENT[year];
@@ -184,7 +193,10 @@ export default function Seniors() {
               <div key={year} className="year-section animate-fade-in">
                 {/* Year header badge */}
                 <div className="flex items-center gap-3 mb-4 pl-1">
-                  <div className="flex items-center text-xl font-bold text-slate-800" style={{ animationDelay: '0s' }}>
+                  <div
+                    className="flex items-center text-xl font-bold text-slate-800"
+                    style={{ animationDelay: '0s' }}
+                  >
                     <div className={`w-2.5 h-2.5 rounded-full ${accent.dot} mr-2.5`} />
                     {year}
                     <span className="text-slate-500 font-medium text-lg ml-2">

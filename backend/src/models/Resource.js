@@ -1,12 +1,12 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const RESOURCE_TYPES = require("../constants/resourceTypes");
+const RESOURCE_TYPES = require('../constants/resourceTypes');
 
 const resourceSchema = new mongoose.Schema(
   {
     subjectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject",
+      ref: 'Subject',
       required: true,
     },
     title: {
@@ -34,15 +34,15 @@ const resourceSchema = new mongoose.Schema(
     },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 resourceSchema.index({ subjectId: 1, type: 1 });
 
-module.exports = mongoose.model("Resource", resourceSchema);
+module.exports = mongoose.model('Resource', resourceSchema);

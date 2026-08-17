@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const RESOURCE_TYPES = require("../constants/resourceTypes");
-const CONTRIBUTION_STATUS = require("../constants/contributionStatus");
+const RESOURCE_TYPES = require('../constants/resourceTypes');
+const CONTRIBUTION_STATUS = require('../constants/contributionStatus');
 
 const contributionSchema = new mongoose.Schema(
   {
     subjectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject",
+      ref: 'Subject',
       required: true,
     },
     title: {
@@ -36,7 +36,7 @@ const contributionSchema = new mongoose.Schema(
     },
     contributedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     status: {
@@ -47,7 +47,7 @@ const contributionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 contributionSchema.index({
@@ -55,4 +55,4 @@ contributionSchema.index({
   status: 1,
 });
 
-module.exports = mongoose.model("Contribution", contributionSchema);
+module.exports = mongoose.model('Contribution', contributionSchema);

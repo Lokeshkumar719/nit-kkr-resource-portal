@@ -16,9 +16,11 @@ Only users with a **valid NIT Kurukshetra email domain** can access the resource
 # 🚀 Features
 
 ## 🔐 Domain Restricted Login
+
 Users must log in using their **NIT Kurukshetra email ID**.
 
 Authentication uses:
+
 - **JWT**
 - **HTTP-only cookies**
 - Secure backend session validation
@@ -126,22 +128,26 @@ NIT-KKR-RESOURCE-PORTAL
 # ⚙️ Tech Stack
 
 ### Frontend
+
 - React
 - Vite
 - Tailwind CSS
 - Axios
 
 ### Backend
+
 - Node.js
 - Express.js
 - MongoDB
 - Mongoose
 
 ### Authentication
+
 - JWT
 - HTTP-only Cookies
 
 ### Storage
+
 - Google Drive (for Notes, Books, PYQs)
 
 ---

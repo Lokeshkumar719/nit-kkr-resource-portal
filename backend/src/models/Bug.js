@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const BUG_STATUS = require("../constants/bugStatus");
+const BUG_STATUS = require('../constants/bugStatus');
 
 const bugSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const bugSchema = new mongoose.Schema(
     },
     reportedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     status: {
@@ -22,7 +22,7 @@ const bugSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 bugSchema.index({
@@ -30,4 +30,4 @@ bugSchema.index({
   createdAt: -1,
 });
 
-module.exports = mongoose.model("Bug", bugSchema);
+module.exports = mongoose.model('Bug', bugSchema);

@@ -8,7 +8,7 @@ const setupCronJobs = () => {
     console.log('[CRON] Starting annual mentor promotion script...');
     try {
       const currentYear = new Date().getFullYear();
-      
+
       // 1. Promote 4th Years to Alumni
       const fourthYears = await Mentor.find({ currentYear: '4th Year' });
       for (const mentor of fourthYears) {
@@ -17,7 +17,9 @@ const setupCronJobs = () => {
         mentor.batch = `${currentYear - 4}-${currentYear}`;
         await mentor.save();
       }
-      console.log(`[CRON] Promoted ${fourthYears.length} '4th Year' mentors to 'Alumni' (Batch: ${currentYear - 4}-${currentYear}).`);
+      console.log(
+        `[CRON] Promoted ${fourthYears.length} '4th Year' mentors to 'Alumni' (Batch: ${currentYear - 4}-${currentYear}).`
+      );
 
       // 2. Promote 3rd Years to 4th Years
       const result3to4 = await Mentor.updateMany(

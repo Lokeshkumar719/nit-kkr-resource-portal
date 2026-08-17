@@ -12,10 +12,7 @@ export const Spinner = ({ size = 'sm', light = false }) => {
     <div
       className={`
         ${sizes[size]} rounded-full animate-spin
-        ${light
-          ? 'border-white/30 border-t-white'
-          : 'border-slate-200 border-t-nit-primary'
-        }
+        ${light ? 'border-white/30 border-t-white' : 'border-slate-200 border-t-nit-primary'}
       `}
     />
   );
@@ -30,6 +27,4 @@ export const PageLoader = () => (
   </div>
 );
 
-export const ButtonSpinner = () => (
-  <Spinner size="xs" light />
-);
+export const ButtonSpinner = () => <Spinner size="xs" light />;

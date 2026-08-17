@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Users, Upload, Shield, GraduationCap, ArrowRight, Sparkles, FileText, Video } from 'lucide-react';
+import {
+  BookOpen,
+  Users,
+  Upload,
+  Shield,
+  GraduationCap,
+  ArrowRight,
+  Sparkles,
+  FileText,
+  Video,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { BRANCHES, SEMESTERS } from '../constants';
@@ -11,11 +21,18 @@ export default function Home() {
   const { user } = useAuth();
   const dashboardLink = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
 
-  const [resourceStats, setResourceStats] = useState({ total: 0, notes: 0, books: 0, pyqs: 0, lectures: 0 });
+  const [resourceStats, setResourceStats] = useState({
+    total: 0,
+    notes: 0,
+    books: 0,
+    pyqs: 0,
+    lectures: 0,
+  });
 
   useEffect(() => {
-    api.get('/resources/stats')
-      .then(res => {
+    api
+      .get('/resources/stats')
+      .then((res) => {
         if (res.data && res.data.data) {
           setResourceStats(res.data.data);
         }
@@ -29,7 +46,11 @@ export default function Home() {
         <div className="home-nav-inner">
           <Link to="/" className="home-logo-link">
             <div className="home-logo-icon">
-              <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR Logo" className="w-8 h-8 object-contain" />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
+                alt="NIT KKR Logo"
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <span className="home-logo-text">NIT KKR Resource Portal</span>
           </Link>
@@ -56,14 +77,15 @@ export default function Home() {
             <span>Built by Students, for Students</span>
           </div>
           <h1 className="home-hero-title">
-            Your Academic <span className="home-hero-highlight">Resource Hub</span> at NIT Kurukshetra
+            Your Academic <span className="home-hero-highlight">Resource Hub</span> at NIT
+            Kurukshetra
           </h1>
           <p className="home-hero-subtitle">
-            Access notes, books, previous year papers, and lecture links — all organized by branch and semester. 
-            Contribute resources, connect with seniors, and help your juniors thrive.
+            Access notes, books, previous year papers, and lecture links — all organized by branch
+            and semester. Contribute resources, connect with seniors, and help your juniors thrive.
           </p>
           <div className="home-hero-actions">
-            <Link to={user ? dashboardLink : "/login"} className="home-btn-hero-primary">
+            <Link to={user ? dashboardLink : '/login'} className="home-btn-hero-primary">
               {user ? 'Go to Dashboard' : 'Start Exploring'} <ArrowRight className="w-5 h-5" />
             </Link>
             <a href="#features" className="home-btn-hero-secondary">
@@ -113,7 +135,10 @@ export default function Home() {
         <div className="home-section-inner">
           <div className="home-section-header">
             <h2 className="home-section-title">Everything You Need to Ace Your Semesters</h2>
-            <p className="home-section-subtitle">One platform for all your academic needs — meticulously organized and community-driven.</p>
+            <p className="home-section-subtitle">
+              One platform for all your academic needs — meticulously organized and
+              community-driven.
+            </p>
           </div>
           <div className="home-features-grid">
             <FeatureCard
@@ -163,9 +188,10 @@ export default function Home() {
             <GraduationCap className="w-12 h-12 text-white/90 mb-4" />
             <h2 className="home-cta-title">Ready to Get Started?</h2>
             <p className="home-cta-subtitle">
-              Join your fellow NITians. Sign up with your college email, and start accessing resources instantly.
+              Join your fellow NITians. Sign up with your college email, and start accessing
+              resources instantly.
             </p>
-            <Link to={user ? dashboardLink : "/login"} className="home-btn-cta">
+            <Link to={user ? dashboardLink : '/login'} className="home-btn-cta">
               {user ? 'Go to Dashboard' : 'Create Your Account'} <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
@@ -177,11 +203,17 @@ export default function Home() {
         <div className="home-footer-inner">
           <div className="home-footer-brand">
             <div className="home-logo-icon-sm">
-              <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
+                alt="Logo"
+                className="w-6 h-6 object-contain"
+              />
             </div>
             <span className="font-semibold text-gray-700">NIT KKR Resource Portal</span>
           </div>
-          <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} NIT Kurukshetra. Academic Resource Portal.</p>
+          <p className="text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} NIT Kurukshetra. Academic Resource Portal.
+          </p>
         </div>
       </footer>
     </div>

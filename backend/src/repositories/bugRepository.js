@@ -1,4 +1,4 @@
-const Bug = require("../models/Bug");
+const Bug = require('../models/Bug');
 
 const createBug = async (bugData) => {
   return await Bug.create(bugData);
@@ -9,7 +9,7 @@ const findBugById = async (bugId) => {
 };
 
 const findBugs = async (filter) => {
-  return await Bug.find(filter).populate("reportedBy", "username email").sort({
+  return await Bug.find(filter).populate('reportedBy', 'username email').sort({
     createdAt: -1,
   });
 };

@@ -1,22 +1,17 @@
-const STATUS_CODES = require("../constants/statusCodes");
+const STATUS_CODES = require('../constants/statusCodes');
 
-const ApiResponse = require("../utils/ApiResponse");
-const asyncHandler = require("../utils/asyncHandler");
+const ApiResponse = require('../utils/ApiResponse');
+const asyncHandler = require('../utils/asyncHandler');
 
-const subjectService = require("../services/subjectService");
-const subjectValidator = require("../validators/subjectValidator");
+const subjectService = require('../services/subjectService');
+const subjectValidator = require('../validators/subjectValidator');
 
 const createSubject = asyncHandler(async (req, res) => {
   subjectValidator.validateCreateSubject(req.body);
 
   const subject = await subjectService.createSubject(req.body);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.CREATED,
-    "Subject created successfully.",
-    subject,
-  );
+  return new ApiResponse(res, STATUS_CODES.CREATED, 'Subject created successfully.', subject);
 });
 
 const getSubjectById = asyncHandler(async (req, res) => {
@@ -24,12 +19,7 @@ const getSubjectById = asyncHandler(async (req, res) => {
 
   const subject = await subjectService.getSubjectById(req.params.subjectId);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Subject fetched successfully.",
-    subject,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Subject fetched successfully.', subject);
 });
 
 const getSubjectByCode = asyncHandler(async (req, res) => {
@@ -37,12 +27,7 @@ const getSubjectByCode = asyncHandler(async (req, res) => {
 
   const subject = await subjectService.getSubjectByCode(req.params.subjectCode);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Subject fetched successfully.",
-    subject,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Subject fetched successfully.', subject);
 });
 
 const getSubjects = asyncHandler(async (req, res) => {
@@ -50,12 +35,7 @@ const getSubjects = asyncHandler(async (req, res) => {
 
   const subjects = await subjectService.getSubjects(req.query);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Subjects fetched successfully.",
-    subjects,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Subjects fetched successfully.', subjects);
 });
 
 module.exports = {

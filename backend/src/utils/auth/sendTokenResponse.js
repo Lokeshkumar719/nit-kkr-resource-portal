@@ -1,17 +1,9 @@
-const {
-  accessTokenCookieOptions,
-  refreshTokenCookieOptions,
-} = require("./cookieOptions");
+const { accessTokenCookieOptions, refreshTokenCookieOptions } = require('./cookieOptions');
 
-const sendTokenResponse = (
-  res,
-  statusCode,
-  message,
-  { user, accessToken, refreshToken },
-) => {
-  res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+const sendTokenResponse = (res, statusCode, message, { user, accessToken, refreshToken }) => {
+  res.cookie('accessToken', accessToken, accessTokenCookieOptions);
 
-  res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+  res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
 
   return res.status(statusCode).json({
     success: true,

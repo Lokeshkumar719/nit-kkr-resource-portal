@@ -105,7 +105,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={oldPassword}
-                  onChange={(e) => { setOldPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setOldPassword(e.target.value);
+                    setError('');
+                  }}
                   required
                 />
                 <button
@@ -128,7 +131,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={newPassword}
-                  onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    setError('');
+                  }}
                   required
                 />
                 <button
@@ -146,7 +152,9 @@ export default function ChangePassword() {
 
             {/* Confirm New Password */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 ml-0.5">Confirm New Password</label>
+              <label className="text-sm font-medium text-gray-700 ml-0.5">
+                Confirm New Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -154,7 +162,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={confirmPassword}
-                  onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setError('');
+                  }}
                   onPaste={(e) => {
                     e.preventDefault();
                     setError('Copy-pasting passwords is not allowed. Please type it manually.');

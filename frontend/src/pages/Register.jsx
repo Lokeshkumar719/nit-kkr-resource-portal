@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { register } from "../services/api";
+import { register } from '../services/api';
 
 function Register({ setActiveTab }) {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleChange = (event) => {
     setFormData({
@@ -24,20 +24,20 @@ function Register({ setActiveTab }) {
 
     try {
       setLoading(true);
-      setMessage({ type: "", text: "" });
+      setMessage({ type: '', text: '' });
 
       await register(formData.email, formData.password);
 
       setMessage({
-        type: "success",
-        text: "OTP sent successfully. Please verify your email to continue.",
+        type: 'success',
+        text: 'OTP sent successfully. Please verify your email to continue.',
       });
 
-      setActiveTab("verify");
+      setActiveTab('verify');
     } catch (error) {
       setMessage({
-        type: "error",
-        text: error.response?.data?.message || "Registration failed.",
+        type: 'error',
+        text: error.response?.data?.message || 'Registration failed.',
       });
     } finally {
       setLoading(false);
@@ -79,21 +79,15 @@ function Register({ setActiveTab }) {
         />
       </div>
 
-      {message.text && (
-        <div className={`auth-message ${message.type}`}>{message.text}</div>
-      )}
+      {message.text && <div className={`auth-message ${message.type}`}>{message.text}</div>}
 
       <button className="primary-button" type="submit" disabled={loading}>
-        {loading ? "Registering..." : "Register"}
+        {loading ? 'Registering...' : 'Register'}
       </button>
 
       <div className="form-helper">
         <span>Already have an account?</span>
-        <button
-          type="button"
-          className="form-link"
-          onClick={() => setActiveTab("login")}
-        >
+        <button type="button" className="form-link" onClick={() => setActiveTab('login')}>
           Sign in
         </button>
       </div>
@@ -102,4 +96,3 @@ function Register({ setActiveTab }) {
 }
 
 export default Register;
-

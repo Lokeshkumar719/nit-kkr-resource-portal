@@ -1,23 +1,18 @@
-const mentorService = require("../services/mentorService");
+const mentorService = require('../services/mentorService');
 
-const mentorValidator = require("../validators/mentorValidator");
+const mentorValidator = require('../validators/mentorValidator');
 
-const asyncHandler = require("../utils/asyncHandler");
-const ApiResponse = require("../utils/ApiResponse");
+const asyncHandler = require('../utils/asyncHandler');
+const ApiResponse = require('../utils/ApiResponse');
 
-const STATUS_CODES = require("../constants/statusCodes");
+const STATUS_CODES = require('../constants/statusCodes');
 
 const getMentors = asyncHandler(async (req, res) => {
   mentorValidator.validateGetMentors(req.query);
 
   const mentors = await mentorService.getMentors(req.query);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Mentors fetched successfully.",
-    mentors,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Mentors fetched successfully.', mentors);
 });
 
 const getMentor = asyncHandler(async (req, res) => {
@@ -25,12 +20,7 @@ const getMentor = asyncHandler(async (req, res) => {
 
   const mentor = await mentorService.getMentor(req.params.id);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Mentor fetched successfully.",
-    mentor,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Mentor fetched successfully.', mentor);
 });
 
 const createMentor = asyncHandler(async (req, res) => {
@@ -38,12 +28,7 @@ const createMentor = asyncHandler(async (req, res) => {
 
   const mentor = await mentorService.createMentor(req.body);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.CREATED,
-    "Mentor created successfully.",
-    mentor,
-  );
+  return new ApiResponse(res, STATUS_CODES.CREATED, 'Mentor created successfully.', mentor);
 });
 
 const updateMentor = asyncHandler(async (req, res) => {
@@ -51,12 +36,7 @@ const updateMentor = asyncHandler(async (req, res) => {
 
   const mentor = await mentorService.updateMentor(req.params.id, req.body);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Mentor updated successfully.",
-    mentor,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Mentor updated successfully.', mentor);
 });
 
 const deleteMentor = asyncHandler(async (req, res) => {
@@ -64,7 +44,7 @@ const deleteMentor = asyncHandler(async (req, res) => {
 
   await mentorService.deleteMentor(req.params.id);
 
-  return new ApiResponse(res, STATUS_CODES.OK, "Mentor deleted successfully.");
+  return new ApiResponse(res, STATUS_CODES.OK, 'Mentor deleted successfully.');
 });
 
 module.exports = {

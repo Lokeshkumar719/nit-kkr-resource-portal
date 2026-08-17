@@ -1,53 +1,43 @@
-const express = require("express");
+const express = require('express');
 
-const authMiddleware = require("../middlewares/authMiddleware");
-const {uploadResourceFile }= require("../middlewares/uploadResourceFileMiddleware");
-const adminMiddleware = require("../middlewares/adminMiddleware");
+const authMiddleware = require('../middlewares/authMiddleware');
+const { uploadResourceFile } = require('../middlewares/uploadResourceFileMiddleware');
+const adminMiddleware = require('../middlewares/adminMiddleware');
 
-const contributionController = require("../controllers/contributionController");
+const contributionController = require('../controllers/contributionController');
 
 const router = express.Router();
 
-router.post(
-  "/",
-  authMiddleware,
-  uploadResourceFile,
-  contributionController.createContribution,
-);
+router.post('/', authMiddleware, uploadResourceFile, contributionController.createContribution);
 
-router.get(
-  "/",
-  authMiddleware,
-  adminMiddleware,
-  contributionController.getContributions,
-);
+router.get('/', authMiddleware, adminMiddleware, contributionController.getContributions);
 
 router.patch(
-  "/:contributionId/approve",
+  '/:contributionId/approve',
   authMiddleware,
   adminMiddleware,
-  contributionController.approveContribution,
+  contributionController.approveContribution
 );
 
 router.get(
-  "/:contributionId/download",
+  '/:contributionId/download',
   authMiddleware,
   adminMiddleware,
-  contributionController.getDownloadUrl,
+  contributionController.getDownloadUrl
 );
 
 router.delete(
-  "/:contributionId",
+  '/:contributionId',
   authMiddleware,
   adminMiddleware,
-  contributionController.deleteContribution,
+  contributionController.deleteContribution
 );
 
 router.patch(
-  "/:contributionId",
+  '/:contributionId',
   authMiddleware,
   adminMiddleware,
-  contributionController.updateContribution,
+  contributionController.updateContribution
 );
 
 module.exports = router;

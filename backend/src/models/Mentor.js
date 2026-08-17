@@ -1,74 +1,79 @@
 const mongoose = require('mongoose');
-const {BRANCHES} = require('../constants/branches');
+const { BRANCHES } = require('../constants/branches');
 
-const {
-  CURRENT_YEARS,
-  TAGS
-} = require("../constants/mentorTags");
+const { CURRENT_YEARS, TAGS } = require('../constants/mentorTags');
 
-const mentorSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-
-  // rollNo: {
-  //   type: Number,
-  //   required: true,
-  //   unique: true
-  // },
-
-  email: {
-    type: String,
-    lowercase: true
-  },
-
-  branch: {
-    type: String,
-    required: true,
-    enum:BRANCHES
-  },
-
-  currentYear: {
+const mentorSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
       required: true,
-      enum: CURRENT_YEARS
-  },
+      trim: true,
+    },
 
-  batch: {
-    type: String
-  },
+    // rollNo: {
+    //   type: Number,
+    //   required: true,
+    //   unique: true
+    // },
 
-  image: {
-    type: String
-  },
-
-  linkedin: {
-    type: String
-  },
-
-  tags: [{
-    type: String,
-    enum: TAGS
-  }],
-
-  experiences: [{
-    company: String,
-    role: String,
-    type: {
+    email: {
       type: String,
-      enum: ["Internship", "Placement", "Research"]
-    }
-  }],
+      lowercase: true,
+    },
 
-  achievements: [{
-    type: String
-  }],
-},
-{
-  timestamps: true
-});
+    branch: {
+      type: String,
+      required: true,
+      enum: BRANCHES,
+    },
+
+    currentYear: {
+      type: String,
+      required: true,
+      enum: CURRENT_YEARS,
+    },
+
+    batch: {
+      type: String,
+    },
+
+    image: {
+      type: String,
+    },
+
+    linkedin: {
+      type: String,
+    },
+
+    tags: [
+      {
+        type: String,
+        enum: TAGS,
+      },
+    ],
+
+    experiences: [
+      {
+        company: String,
+        role: String,
+        type: {
+          type: String,
+          enum: ['Internship', 'Placement', 'Research'],
+        },
+      },
+    ],
+
+    achievements: [
+      {
+        type: String,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
 
 mentorSchema.index({ currentYear: 1 });
 

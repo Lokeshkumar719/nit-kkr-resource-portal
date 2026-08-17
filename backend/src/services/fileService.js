@@ -1,9 +1,9 @@
-const { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
-const crypto = require("crypto");
+const crypto = require('crypto');
 
-const r2Client = require("../config/r2Client");
+const r2Client = require('../config/r2Client');
 
 const generateFileKey = (folder) => {
   return `${folder}/${crypto.randomUUID()}.zip`;
@@ -25,13 +25,13 @@ const uploadFile = async (buffer, fileName, mimeType, folder) => {
       fileKey,
     };
   } catch (error) {
-    console.error("================ R2 / S3 UPLOAD ERROR ================");
-    console.error("Error Name:", error.name);
-    console.error("Error Message:", error.message);
-    console.error("HTTP Status Code:", error.$metadata?.httpStatusCode);
-    console.error("Bucket Name:", process.env.R2_BUCKET_NAME);
-    console.error("Full Error Object:", error);
-    console.error("======================================================");
+    console.error('================ R2 / S3 UPLOAD ERROR ================');
+    console.error('Error Name:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('HTTP Status Code:', error.$metadata?.httpStatusCode);
+    console.error('Bucket Name:', process.env.R2_BUCKET_NAME);
+    console.error('Full Error Object:', error);
+    console.error('======================================================');
     throw error;
   }
 };

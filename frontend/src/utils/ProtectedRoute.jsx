@@ -1,6 +1,6 @@
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from '../context/AuthContext';
 
-import Login from "../pages/Login";
+import Login from '../pages/Login';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();

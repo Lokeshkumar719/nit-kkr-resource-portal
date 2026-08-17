@@ -24,10 +24,11 @@ export function ZipUpload({ onFileSelect, disabled }) {
     if (!selectedFile) return false;
 
     // Check if it's a zip file
-    const isZip = selectedFile.type === 'application/zip' || 
-                  selectedFile.type === 'application/x-zip-compressed' || 
-                  selectedFile.name.endsWith('.zip');
-                  
+    const isZip =
+      selectedFile.type === 'application/zip' ||
+      selectedFile.type === 'application/x-zip-compressed' ||
+      selectedFile.name.endsWith('.zip');
+
     if (!isZip) {
       setError('Please upload a .zip file.');
       return false;
@@ -87,8 +88,11 @@ export function ZipUpload({ onFileSelect, disabled }) {
       {!file ? (
         <div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 border-slate-300' :
-            dragActive ? 'border-nit-accent bg-blue-50/50' : 'border-gray-300 hover:border-nit-primary hover:bg-gray-50'
+            disabled
+              ? 'opacity-50 cursor-not-allowed bg-gray-50 border-slate-300'
+              : dragActive
+                ? 'border-nit-accent bg-blue-50/50'
+                : 'border-gray-300 hover:border-nit-primary hover:bg-gray-50'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -104,7 +108,9 @@ export function ZipUpload({ onFileSelect, disabled }) {
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
           <div className="flex flex-col items-center justify-center gap-3 pointer-events-none">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${dragActive ? 'bg-blue-100 text-nit-accent' : 'bg-gray-100 text-gray-400'}`}>
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${dragActive ? 'bg-blue-100 text-nit-accent' : 'bg-gray-100 text-gray-400'}`}
+            >
               <UploadCloud className="w-6 h-6" />
             </div>
             <div>

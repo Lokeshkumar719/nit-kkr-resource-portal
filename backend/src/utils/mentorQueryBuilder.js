@@ -10,7 +10,7 @@ function buildMentorQuery(query) {
   }
 
   if (query.tags) {
-    const tags = Array.isArray(query.tags) ? query.tags : query.tags.split(",");
+    const tags = Array.isArray(query.tags) ? query.tags : query.tags.split(',');
 
     filter.tags = {
       $in: tags,

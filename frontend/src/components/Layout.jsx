@@ -1,7 +1,17 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { LogOut, UserCircle, BookOpen, Users, GraduationCap, UploadCloud, LayoutDashboard, Menu, X } from 'lucide-react';
+import {
+  LogOut,
+  UserCircle,
+  BookOpen,
+  Users,
+  GraduationCap,
+  UploadCloud,
+  LayoutDashboard,
+  Menu,
+  X,
+} from 'lucide-react';
 import { AccountDropdown } from './ui/AccountDropdown.jsx';
 
 export const Layout = ({ children }) => {
@@ -36,13 +46,22 @@ export const Layout = ({ children }) => {
       <nav className="navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group shrink-0" title="Go to Homepage">
+            <Link
+              to="/"
+              className="flex items-center space-x-3 group shrink-0"
+              title="Go to Homepage"
+            >
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="Logo" className="w-7 h-7 object-contain"/>
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
+                  alt="Logo"
+                  className="w-7 h-7 object-contain"
+                />
               </div>
-              <span className="font-bold text-lg tracking-wide hidden sm:block">NIT KKR Resource Portal</span>
+              <span className="font-bold text-lg tracking-wide hidden sm:block">
+                NIT KKR Resource Portal
+              </span>
             </Link>
 
             {/* Desktop Navigation Links */}

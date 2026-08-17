@@ -10,7 +10,7 @@ export function AccountDropdown() {
   const dropdownRef = useRef(null);
 
   const displayName = user?.email?.split('@')[0] || 'User';
-  
+
   // Format role from backend (e.g. USER -> Student, ADMIN -> Administrator)
   const displayRole = user?.role === 'ADMIN' ? 'Administrator' : 'Student';
 
@@ -50,19 +50,24 @@ export function AccountDropdown() {
         </div>
         <div className="hidden sm:flex flex-col items-start leading-none max-w-[120px]">
           <span className="text-sm font-semibold text-white truncate w-full">{displayName}</span>
-          <span className="text-[10px] text-blue-200 font-medium tracking-wide uppercase">{displayRole}</span>
+          <span className="text-[10px] text-blue-200 font-medium tracking-wide uppercase">
+            {displayRole}
+          </span>
         </div>
-        <ChevronDown className={`hidden sm:block w-3.5 h-3.5 text-blue-200 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`hidden sm:block w-3.5 h-3.5 text-blue-200 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 animate-fade-in origin-top-right transform transition-all">
-          
           {/* Header (visible on mobile only) */}
           <div className="px-4 py-3 border-b border-slate-200 sm:hidden">
             <p className="text-sm font-bold text-gray-800 truncate">{displayName}</p>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-0.5">{displayRole}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-0.5">
+              {displayRole}
+            </p>
           </div>
 
           {/* Change Password */}
