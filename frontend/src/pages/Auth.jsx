@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, KeyRound, ArrowRight, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { login as apiLogin, register as apiRegister, verifyOTP as apiVerifyOTP, resendOTP as apiResendOTP, forgotPassword as apiForgotPassword, verifyForgotPasswordOTP as apiVerifyForgotPasswordOTP, resetPassword as apiResetPassword } from '../services/api';
@@ -28,6 +28,17 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [resendTimer, setResendTimer] = useState(60);
+
+  useEffect(() => {
+    let interval;
+    if ((step === 'verify' || step === 'forgot-otp') && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, resendTimer]);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -52,6 +63,7 @@ export default function Auth() {
       } else {
         await apiRegister(formData.email, formData.password);
         setSuccess('OTP sent to your email! Please verify.');
+        setResendTimer(60);
         setStep('verify');
       }
     } catch (err) {
@@ -95,6 +107,7 @@ export default function Auth() {
     try {
       await apiResendOTP(formData.email);
       setSuccess('A new verification code has been sent to your email.');
+      setResendTimer(60);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
     } finally {
@@ -112,6 +125,7 @@ export default function Auth() {
     try {
       await apiForgotPassword(formData.email);
       setSuccess('A password reset OTP has been sent to your email.');
+      setResendTimer(60);
       setStep('forgot-otp');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
@@ -165,6 +179,7 @@ export default function Auth() {
     try {
       await apiForgotPassword(formData.email);
       setSuccess('A new password reset OTP has been sent to your email.');
+      setResendTimer(60);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP.');
     } finally {
@@ -348,10 +363,10 @@ export default function Auth() {
                   <button 
                     type="button" 
                     onClick={handleResendOTP} 
-                    disabled={loading}
-                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50"
+                    disabled={loading || resendTimer > 0}
+                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Didn't receive the code? Resend
+                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>
@@ -422,10 +437,10 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={handleResendForgotOTP}
-                    disabled={loading}
-                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50"
+                    disabled={loading || resendTimer > 0}
+                    className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Didn't receive the code? Resend
+                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button
@@ -481,6 +496,10 @@ export default function Auth() {
                       className="input-field pr-10"
                       value={formData.confirmNewPassword}
                       onChange={handleChange}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        setError('Copy-pasting passwords is not allowed. Please type it manually.');
+                      }}
                       required
                     />
                     <button

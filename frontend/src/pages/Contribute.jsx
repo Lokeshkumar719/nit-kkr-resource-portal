@@ -142,21 +142,19 @@ export default function Contribute() {
         {/* Bug Report Panel */}
         <div
           onClick={() => { setView('bug'); resetState(); }}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+          className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
         >
-          {/* Top Banner Gradient */}
-          <div className="h-16 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 relative" />
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
           
-          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
-            {/* Icon Wrap */}
-            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="p-6 flex-1 flex flex-col">
+            <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-4 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm group-hover:scale-110">
               <Bug className="w-6 h-6" />
             </div>
             
-            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-red-600 transition-colors">Report a Bug</h3>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Found something broken? Tell us what went wrong so we can fix it.</p>
+            <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-nit-primary transition-colors">Report a Bug</h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">Found something broken? Tell us what went wrong so we can fix it.</p>
 
-            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all shadow-sm">
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-white text-nit-primary border border-slate-200 rounded-xl text-sm font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
               Report a Bug <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -165,21 +163,19 @@ export default function Contribute() {
         {/* Resource Contribution Panel */}
         <div
           onClick={() => { setView('resource-select'); resetState(); }}
-          className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+          className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
         >
-          {/* Top Banner Gradient */}
-          <div className="h-16 bg-gradient-to-r from-nit-primary via-blue-600 to-indigo-600 relative" />
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
           
-          <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
-            {/* Icon Wrap */}
-            <div className="-mt-8 mb-4 w-12 h-12 rounded-xl bg-white border-2 border-white shadow-md text-nit-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="p-6 flex-1 flex flex-col">
+            <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-4 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm group-hover:scale-110">
               <BookUp className="w-6 h-6" />
             </div>
 
-            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-nit-primary transition-colors">Contribute Resources</h3>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Share notes, books, PYQs, and lecture links to help fellow students.</p>
+            <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-nit-primary transition-colors">Contribute Resources</h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">Share notes, books, PYQs, and lecture links to help fellow students.</p>
 
-            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-blue-50 text-nit-primary border border-blue-200 rounded-xl text-sm font-bold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
+            <div className="mt-auto flex items-center justify-center w-full py-2.5 bg-white text-nit-primary border border-slate-200 rounded-xl text-sm font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
               Contribute Resources <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -259,20 +255,20 @@ export default function Contribute() {
         {/* Notes Card */}
 <div
   onClick={() => setView('notes')}
-  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+  className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
 >
-  <div className="h-12 bg-gradient-to-r from-emerald-400 to-teal-500" />
-  <div className="p-5 pt-0 flex-1 flex flex-col relative">
-    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
+  <div className="p-5 flex-1 flex flex-col">
+    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-3 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm">
       <FileText className="w-5 h-5" />
     </div>
-    <h3 className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+    <h3 className="text-base font-bold text-slate-800 group-hover:text-nit-primary transition-colors">
       Notes
     </h3>
-    <p className="text-xs text-gray-500 mt-1 mb-4">
+    <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
       Upload subject notes in ZIP format for semester study.
     </p>
-    <div className="mt-auto flex items-center justify-center w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold group-hover:bg-emerald-500 group-hover:text-white transition-all">
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-white text-nit-primary border border-slate-200 rounded-xl text-xs font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
       Contribute Notes
       <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
     </div>
@@ -282,20 +278,20 @@ export default function Contribute() {
 {/* Books Card */}
 <div
   onClick={() => setView('book')}
-  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+  className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
 >
-  <div className="h-12 bg-gradient-to-r from-indigo-400 to-blue-500" />
-  <div className="p-5 pt-0 flex-1 flex flex-col relative">
-    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
+  <div className="p-5 flex-1 flex flex-col">
+    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-3 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm">
       <BookOpen className="w-5 h-5" />
     </div>
-    <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">
+    <h3 className="text-base font-bold text-slate-800 group-hover:text-nit-primary transition-colors">
       Books
     </h3>
-    <p className="text-xs text-gray-500 mt-1 mb-4">
+    <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
       Upload academic books or reference material in ZIP format.
     </p>
-    <div className="mt-auto flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-white text-nit-primary border border-slate-200 rounded-xl text-xs font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
       Contribute Book
       <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
     </div>
@@ -305,20 +301,20 @@ export default function Contribute() {
 {/* PYQs Card */}
 <div
   onClick={() => setView('pyq')}
-  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+  className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
 >
-  <div className="h-12 bg-gradient-to-r from-amber-400 to-orange-500" />
-  <div className="p-5 pt-0 flex-1 flex flex-col relative">
-    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
+  <div className="p-5 flex-1 flex flex-col">
+    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-3 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm">
       <FileQuestion className="w-5 h-5" />
     </div>
-    <h3 className="text-base font-bold text-gray-800 group-hover:text-amber-600 transition-colors">
+    <h3 className="text-base font-bold text-slate-800 group-hover:text-nit-primary transition-colors">
       PYQs
     </h3>
-    <p className="text-xs text-gray-500 mt-1 mb-4">
+    <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
       Upload previous year exam question papers in ZIP format.
     </p>
-    <div className="mt-auto flex items-center justify-center w-full py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold group-hover:bg-amber-500 group-hover:text-white transition-all">
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-white text-nit-primary border border-slate-200 rounded-xl text-xs font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
       Contribute PYQ
       <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
     </div>
@@ -328,20 +324,20 @@ export default function Contribute() {
 {/* Lectures Card */}
 <div
   onClick={() => setView('lecture')}
-  className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+  className="group cursor-pointer bg-slate-50/50 hover:bg-slate-100/60 border border-slate-200 hover:border-nit-primary/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative"
 >
-  <div className="h-12 bg-gradient-to-r from-violet-400 to-purple-500" />
-  <div className="p-5 pt-0 flex-1 flex flex-col relative">
-    <div className="-mt-6 mb-3 w-10 h-10 rounded-xl bg-white border-2 border-white shadow text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-nit-primary to-nit-accent opacity-80 group-hover:opacity-100 transition-opacity" />
+  <div className="p-5 flex-1 flex flex-col">
+    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-nit-primary flex items-center justify-center mb-3 group-hover:bg-nit-primary group-hover:text-white transition-all shadow-sm">
       <Video className="w-5 h-5" />
     </div>
-    <h3 className="text-base font-bold text-gray-800 group-hover:text-violet-600 transition-colors">
+    <h3 className="text-base font-bold text-slate-800 group-hover:text-nit-primary transition-colors">
       Lectures
     </h3>
-    <p className="text-xs text-gray-500 mt-1 mb-4">
+    <p className="text-xs text-slate-500 mt-1 mb-4 leading-relaxed">
       Share YouTube video or playlist links for course topics.
     </p>
-    <div className="mt-auto flex items-center justify-center w-full py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold group-hover:bg-violet-500 group-hover:text-white transition-all">
+    <div className="mt-auto flex items-center justify-center w-full py-2 bg-white text-nit-primary border border-slate-200 rounded-xl text-xs font-semibold group-hover:bg-nit-primary group-hover:text-white group-hover:border-nit-primary transition-all shadow-sm">
       Contribute Lecture
       <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
     </div>

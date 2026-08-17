@@ -35,8 +35,7 @@ api.interceptors.response.use(
     // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
     if (
       originalRequest.url === "/auth/login" ||
-      originalRequest.url === "/auth/refresh-token" ||
-      originalRequest.url === "/auth/me"
+      originalRequest.url === "/auth/refresh-token"
     ) {
       return Promise.reject(error);
     }
@@ -182,6 +181,7 @@ export const getContributions = (params) =>
 export const approveContribution = (id) =>
   api.patch(`/contributions/${id}/approve`);
 export const rejectContribution = (id) => api.delete(`/contributions/${id}`);
+export const updateContribution = (id, data) => api.patch(`/contributions/${id}`, data);
 export const getContributionDownloadUrl = (id) =>
   api.get(`/contributions/${id}/download`);
 

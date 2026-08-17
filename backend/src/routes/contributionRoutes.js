@@ -43,4 +43,11 @@ router.delete(
   contributionController.deleteContribution,
 );
 
+router.patch(
+  "/:contributionId",
+  authMiddleware,
+  adminMiddleware,
+  contributionController.updateContribution,
+);
+
 module.exports = router;
