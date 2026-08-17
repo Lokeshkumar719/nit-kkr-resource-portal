@@ -10,6 +10,7 @@ import Seniors from './pages/Seniors.jsx';
 import Alumni from './pages/Alumni.jsx';
 import Contribute from './pages/Contribute.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import ChangePassword from './pages/ChangePassword.jsx';
 import Home from './pages/Home.jsx';
 
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -85,6 +86,9 @@ export default function App() {
           <Route path="/seniors" element={<ProtectedRoute allowedRole="USER"><Seniors /></ProtectedRoute>} />
           <Route path="/alumni" element={<ProtectedRoute allowedRole="USER"><Alumni /></ProtectedRoute>} />
           <Route path="/contribute" element={<ProtectedRoute allowedRole="USER"><Contribute /></ProtectedRoute>} />
+
+          {/* Shared Routes (both Student & Admin) */}
+          <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<ProtectedRoute allowedRole="ADMIN"><AdminDashboard /></ProtectedRoute>} />

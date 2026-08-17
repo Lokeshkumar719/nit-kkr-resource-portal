@@ -65,9 +65,8 @@ export const ContributionSkeleton = ({ rows = 3 }) => (
 
 // For AdminDashboard.jsx Overview tab
 export const OverviewSkeleton = () => (
-  <div className="space-y-6">
-    <Bone className="h-7 w-32" />
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
       <div className="p-6 rounded-xl border-l-4 border-emerald-500 shadow-sm bg-white">
         <Bone className="h-3 w-28 mb-3" />
         <Bone className="h-8 w-16" />
@@ -77,15 +76,19 @@ export const OverviewSkeleton = () => (
         <Bone className="h-8 w-16" />
       </div>
     </div>
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-      <Bone className="h-4 w-32 mb-4" />
-      <div className="flex items-center gap-2">
-        <Bone className="w-2.5 h-2.5 rounded-full" />
-        <Bone className="h-3 w-24" />
+
+    <div className="border-t border-slate-200 pt-8 mb-6">
+      <Bone className="h-6 w-48 mb-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="p-6 rounded-xl border-l-4 border-red-500 shadow-sm bg-white">
+          <Bone className="h-3 w-28 mb-3" />
+          <Bone className="h-8 w-16" />
+        </div>
       </div>
     </div>
+
     <Bone className="h-10 w-32 rounded-lg" />
-  </div>
+  </>
 );
 
 // For AdminDashboard.jsx Resources & Seniors form tabs
@@ -179,7 +182,17 @@ export const AdminAppSkeleton = () => (
     {/* Main Content — matches OverviewTab */}
     <div className="flex-1 p-6 md:p-8 space-y-6">
       <Bone className="h-7 w-32 mb-2" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300 space-y-4">
+        <Bone className="h-4 w-32" />
+        <div className="grid sm:grid-cols-3 gap-4">
+          <Bone className="h-11 w-full rounded-lg" />
+          <Bone className="h-11 w-full rounded-lg" />
+          <Bone className="h-11 w-full rounded-lg" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
         <div className="p-6 rounded-xl border-l-4 border-emerald-500 shadow-sm bg-white">
           <Bone className="h-3 w-28 mb-3" />
           <Bone className="h-8 w-16" />
@@ -189,11 +202,14 @@ export const AdminAppSkeleton = () => (
           <Bone className="h-8 w-16" />
         </div>
       </div>
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-        <Bone className="h-4 w-32 mb-4" />
-        <div className="flex items-center gap-2">
-          <Bone className="w-2.5 h-2.5 rounded-full" />
-          <Bone className="h-3 w-24" />
+
+      <div className="border-t border-slate-200 pt-8 mb-6">
+        <Bone className="h-6 w-48 mb-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="p-6 rounded-xl border-l-4 border-red-500 shadow-sm bg-white">
+            <Bone className="h-3 w-28 mb-3" />
+            <Bone className="h-8 w-16" />
+          </div>
         </div>
       </div>
     </div>

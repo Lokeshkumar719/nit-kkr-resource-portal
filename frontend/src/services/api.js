@@ -32,8 +32,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Do not intercept on login or refresh token routes to prevent infinite loops
-    if (originalRequest.url === "/auth/login" || originalRequest.url === "/auth/refresh-token") {
+    // Do not intercept on login, refresh token, or session check routes to prevent infinite loops / unwanted redirects
+    if (
+      originalRequest.url === "/auth/login" ||
+      originalRequest.url === "/auth/refresh-token" ||
+      originalRequest.url === "/auth/me"
+    ) {
       return Promise.reject(error);
     }
 
@@ -62,9 +66,8 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue(err, null);
         
-        // If refresh token fails (expired/invalid), log the user out
+        // If refresh token fails (expired/invalid), clear cached user
         localStorage.removeItem("nitkkr_user");
-        window.location.href = "/login";
         
         return Promise.reject(err);
       }
@@ -85,8 +88,8 @@ export const authApi = {
 export const login = (email, password) =>
   api.post("/auth/login", { email, password });
 
-export const register = (email, username, password) =>
-  api.post("/auth/register", { email, username, password });
+export const register = (email, password) =>
+  api.post("/auth/register", { email, password });
 
 export const verifyOTP = (email, otp) =>
   api.post("/auth/verify-otp", { email, otp });
@@ -96,6 +99,18 @@ export const resendOTP = (email) =>
 
 export const verifyAuth = () => api.get("/auth/me");
 export const logout = () => api.post("/auth/logout");
+
+export const forgotPassword = (email) =>
+  api.post("/auth/forgot-password", { email });
+
+export const verifyForgotPasswordOTP = (email, otp) =>
+  api.post("/auth/verify-forgot-password-otp", { email, otp });
+
+export const resetPassword = (email, otp, password) =>
+  api.post("/auth/reset-password", { email, otp, password });
+
+export const changePassword = (oldPassword, newPassword) =>
+  api.patch("/auth/change-password", { oldPassword, newPassword });
 
 // ── Subjects / Branches API ──────────────────────
 export const getSubjects = (semester,branch) =>
@@ -129,6 +144,9 @@ export const getResourceDownloadUrl = (resourceId) =>
 export const deleteResource = (resourceId) =>
   api.delete(`/resources/${resourceId}`);
 
+export const updateResource = (resourceId, data) =>
+  api.patch(`/resources/${resourceId}`, data);
+
 // For my old premium UI compatibility:
 export const resourceApi = {
   getByBranchAndSem: (branch, sem) => getSubjects(sem, branch),
@@ -136,6 +154,11 @@ export const resourceApi = {
 };
 
 // ── Seniors / Mentors API ──────────────────────
+export const getMentors = (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } });
+export const createMentor = (data) => api.post('/mentors', data);
+export const updateMentor = (id, data) => api.patch(`/mentors/${id}`, data);
+export const deleteMentor = (id) => api.delete(`/mentors/${id}`);
+
 export const seniorApi = {
   getByFilter: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),
   getByYearAndBranch: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),

@@ -105,6 +105,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
   return new ApiResponse(res, STATUS_CODES.OK, "OTP sent successfully.", data);
 });
 
+const verifyForgotPasswordOTP = asyncHandler(async (req, res) => {
+  authValidator.validateVerifyForgotPasswordOTP(req.body);
+
+  const data = await authService.verifyForgotPasswordOTP(req.body);
+
+  return new ApiResponse(res, STATUS_CODES.OK, "OTP verified successfully.", data);
+});
+
 const resetPassword = asyncHandler(async (req, res) => {
   authValidator.validateResetPassword(req.body);
 
@@ -143,6 +151,7 @@ module.exports = {
   logout,
   getCurrentUser,
   forgotPassword,
+  verifyForgotPasswordOTP,
   resetPassword,
   changePassword,
 };

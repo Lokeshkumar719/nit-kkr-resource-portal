@@ -242,6 +242,30 @@ const forgotPassword = async ({ email }) => {
   };
 };
 
+const verifyForgotPasswordOTP = async ({ email, otp }) => {
+  const user = await authRepository.findUserByEmail(email);
+
+  if (!user) {
+    throw new ApiError(STATUS_CODES.NOT_FOUND, "User not found.");
+  }
+
+  if (!user.forgotPasswordOTP || !user.forgotPasswordOTPExpires) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Reset OTP not found.");
+  }
+
+  if (user.forgotPasswordOTPExpires < new Date()) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "OTP has expired.");
+  }
+
+  const isOTPValid = await bcrypt.compare(otp, user.forgotPasswordOTP);
+
+  if (!isOTPValid) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Invalid OTP.");
+  }
+
+  return { success: true };
+};
+
 const resetPassword = async ({ email, otp, password }) => {
   const user = await authRepository.findUserByEmail(email);
 
@@ -308,6 +332,7 @@ module.exports = {
   logout,
   getCurrentUser,
   forgotPassword,
+  verifyForgotPasswordOTP,
   resetPassword,
   changePassword,
 };

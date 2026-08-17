@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Users, Upload, Shield, GraduationCap, ArrowRight, Sparkles, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
+import { BRANCHES, SEMESTERS } from '../constants';
 
 export default function Home() {
   const { user } = useAuth();
   const dashboardLink = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
+
+  const [resourceStats, setResourceStats] = useState({ total: 0, notes: 0, books: 0, pyqs: 0, lectures: 0 });
+
+  useEffect(() => {
+    api.get('/resources/stats')
+      .then(res => {
+        if (res.data && res.data.data) {
+          setResourceStats(res.data.data);
+        }
+      })
+      .catch(console.error);
+  }, []);
   return (
     <div className="home-page">
       {/* ── Navbar ──────────────────────────── */}
@@ -15,7 +29,7 @@ export default function Home() {
             <div className="home-logo-icon">
               <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR Logo" className="w-8 h-8 object-contain" />
             </div>
-            <span className="home-logo-text">NIT KKR Resources</span>
+            <span className="home-logo-text">NIT KKR Resource Portal</span>
           </Link>
           <div className="home-nav-actions">
             {user ? (
@@ -23,12 +37,9 @@ export default function Home() {
                 Go to Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
-              <>
-                <Link to="/login" className="home-btn-ghost">Log In</Link>
-                <Link to="/login" className="home-btn-primary">
-                  Get Started <ArrowRight className="w-4 h-4" />
-                </Link>
-              </>
+              <Link to="/login" className="home-btn-primary">
+                Get Started <ArrowRight className="w-4 h-4" />
+              </Link>
             )}
           </div>
         </div>
@@ -59,18 +70,37 @@ export default function Home() {
           </div>
           <div className="home-hero-stats">
             <div className="home-stat">
-              <span className="home-stat-value">8+</span>
+              <span className="home-stat-value">{BRANCHES.length}+</span>
               <span className="home-stat-label">Branches</span>
             </div>
             <div className="home-stat-divider" />
             <div className="home-stat">
-              <span className="home-stat-value">8</span>
+              <span className="home-stat-value">{SEMESTERS.length}</span>
               <span className="home-stat-label">Semesters</span>
             </div>
             <div className="home-stat-divider" />
             <div className="home-stat">
-              <span className="home-stat-value">4</span>
-              <span className="home-stat-label">Resource Types</span>
+              <span className="home-stat-value">{resourceStats.total}</span>
+              <span className="home-stat-label">Total Resources</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-8 mt-6 pt-6 border-t border-slate-200 w-full max-w-2xl mx-auto">
+            <div className="home-stat">
+              <span className="home-stat-value text-2xl">{resourceStats.notes}</span>
+              <span className="home-stat-label mt-1">Notes</span>
+            </div>
+            <div className="home-stat">
+              <span className="home-stat-value text-2xl">{resourceStats.books}</span>
+              <span className="home-stat-label mt-1">Books</span>
+            </div>
+            <div className="home-stat">
+              <span className="home-stat-value text-2xl">{resourceStats.pyqs}</span>
+              <span className="home-stat-label mt-1">PYQs</span>
+            </div>
+            <div className="home-stat">
+              <span className="home-stat-value text-2xl">{resourceStats.lectures}</span>
+              <span className="home-stat-label mt-1">Lectures</span>
             </div>
           </div>
         </div>

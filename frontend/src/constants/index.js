@@ -4,7 +4,20 @@
 // do not add values here that the backend doesn't recognize.
 
 // Mirrors backend/src/constants/branches.js exactly
-export const BRANCHES = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
+export const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
+
+export const BRANCH_LABELS = {
+  'CSE': 'Computer Engineering (CSE)',
+  'IT': 'Information Technology (IT)',
+  'AIDS': 'Artificial Intelligence & Data Science (AIDS)',
+  'AIML': 'AI & Machine Learning (AIML)',
+  'MNC': 'Mathematics & Computing (MNC)',
+  'ECE': 'Electronics & Communication (ECE)',
+  'EE': 'Electrical Engineering (EE)',
+  'ME': 'Mechanical Engineering (ME)',
+  'PIE': 'Production & Industrial (PIE)',
+  'CE': 'Civil Engineering (CE)'
+};
 
 // Mirrors backend/src/constants/semesters.js exactly
 export const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];

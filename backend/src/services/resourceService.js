@@ -71,6 +71,20 @@ const getResources = async (filter) => {
   return await resourceRepository.findResources(filter);
 };
 
+const getResourceStats = async () => {
+  const resources = await resourceRepository.findResources({});
+  const stats = { total: resources.length, notes: 0, books: 0, pyqs: 0, lectures: 0 };
+  
+  resources.forEach(r => {
+    if (r.type === RESOURCE_TYPES.NOTES) stats.notes++;
+    else if (r.type === RESOURCE_TYPES.BOOKS) stats.books++;
+    else if (r.type === RESOURCE_TYPES.PYQS) stats.pyqs++;
+    else if (r.type === RESOURCE_TYPES.LECTURES) stats.lectures++;
+  });
+  
+  return stats;
+};
+
 const deleteResource = async (resourceId) => {
   const resource = await resourceRepository.findResourceById(resourceId);
 
@@ -85,9 +99,26 @@ const deleteResource = async (resourceId) => {
   await resourceRepository.deleteResource(resourceId);
 };
 
+const updateResource = async (resourceId, updateData) => {
+  const resource = await resourceRepository.findResourceById(resourceId);
+
+  if (!resource) {
+    throw new ApiError(STATUS_CODES.NOT_FOUND, "Resource not found.");
+  }
+
+  const allowedUpdates = {};
+  if (updateData.title !== undefined) allowedUpdates.title = updateData.title;
+  if (updateData.type !== undefined) allowedUpdates.type = updateData.type;
+  if (updateData.url !== undefined) allowedUpdates.url = updateData.url;
+
+  return await resourceRepository.updateResource(resourceId, allowedUpdates);
+};
+
 module.exports = {
   createResource,
   getResourceById,
   getResources,
+  getResourceStats,
   deleteResource,
+  updateResource,
 };
