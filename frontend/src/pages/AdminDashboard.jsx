@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard,
   BookOpen,
@@ -20,19 +20,24 @@ import {
   Edit2,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  api,
-  getContributionDownloadUrl,
-  deleteResource,
-  getResourceDownloadUrl,
-  updateResource,
-} from '../services/api.js';
-import {
-  ContributionSkeleton,
-  OverviewSkeleton,
-  AdminFormSkeleton,
-} from '../components/ui/Skeleton.jsx';
+import { api, getContributionDownloadUrl, deleteResource, getResourceDownloadUrl, updateResource, deleteMentor, updateMentor, updateSubject, deleteSubject } from '../services/api.js';
+import { ContributionSkeleton, OverviewSkeleton, AdminFormSkeleton } from '../components/ui/Skeleton.jsx';
 import toast from 'react-hot-toast';
+import { parseRateLimitError } from '../utils/rateLimitUtils.js';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown.js';
+import { MENTOR_TAGS } from '../constants/index.js';
+import useStickyState from '../hooks/useStickyState.js';
+
+// Helper to extract direct image URL if a Google Drive sharing link is provided
+const processImageUrl = (url) => {
+  if (!url) return null;
+  const driveRegex = /drive\.google\.com\/file\/d\/([^/]+)/;
+  const match = url.match(driveRegex);
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+  return url;
+};
 
 // Matches backend constants/branches.js exactly
 const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
@@ -55,6 +60,13 @@ export default function AdminDashboard() {
     }
   };
   const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('admin_')) sessionStorage.removeItem(key);
+    });
+    navigate(-1);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -79,55 +91,21 @@ export default function AdminDashboard() {
       <aside className="bg-white w-full md:w-64 shadow-sm border-r border-slate-300 z-10 flex flex-col md:min-h-screen">
         <div className="p-6 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center justify-center w-8 h-8 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 hover:text-nit-primary transition-all group shrink-0"
-              title="Go Back"
-            >
+            <button onClick={handleGoBack} className="flex items-center justify-center w-8 h-8 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 hover:text-nit-primary transition-all group shrink-0" title="Go Back">
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
             </button>
             <div>
               <h2 className="text-xl font-bold text-nit-primary leading-tight">Admin Panel</h2>
-              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Resource Portal</p>
+              <p className="text-xs text-gray-500 mt-0.5">NIT KKR Academic Portal</p>
             </div>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
-          <SidebarItem
-            icon={<LayoutDashboard size={18} />}
-            label="Overview"
-            id="overview"
-            active={activeTab}
-            set={setActiveTab}
-          />
-          <SidebarItem
-            icon={<BookOpen size={18} />}
-            label="Manage Resources"
-            id="resources"
-            active={activeTab}
-            set={setActiveTab}
-          />
-          <SidebarItem
-            icon={<Users size={18} />}
-            label="Manage Seniors"
-            id="seniors"
-            active={activeTab}
-            set={setActiveTab}
-          />
-          <SidebarItem
-            icon={<MessageSquare size={18} />}
-            label="Contributions"
-            id="contributions"
-            active={activeTab}
-            set={setActiveTab}
-          />
-          <SidebarItem
-            icon={<Bug size={18} />}
-            label="Manage Bugs"
-            id="bugs"
-            active={activeTab}
-            set={setActiveTab}
-          />
+        <nav className="flex-1 p-4 space-y-2">
+          <SidebarItem icon={<LayoutDashboard size={18} />} label="Overview" id="overview" active={activeTab} set={setActiveTab} />
+          <SidebarItem icon={<BookOpen size={18} />} label="Manage Resources" id="resources" active={activeTab} set={setActiveTab} />
+          <SidebarItem icon={<Users size={18} />} label="Manage Seniors" id="seniors" active={activeTab} set={setActiveTab} />
+          <SidebarItem icon={<MessageSquare size={18} />} label="Contributions" id="contributions" active={activeTab} set={setActiveTab} />
+          <SidebarItem icon={<Bug size={18} />} label="Manage Bugs" id="bugs" active={activeTab} set={setActiveTab} />
         </nav>
       </aside>
 
@@ -140,11 +118,13 @@ export default function AdminDashboard() {
 const SidebarItem = ({ icon, label, id, active, set }) => (
   <button
     onClick={() => set(id)}
-    className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-      active === id ? 'bg-nit-primary text-white' : 'text-gray-600 hover:bg-gray-100'
+    className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg border transition-all ${
+      active === id
+        ? 'bg-nit-primary text-white border-nit-primary shadow-sm'
+        : 'bg-white text-gray-700 border-slate-200 hover:border-nit-primary/40 hover:bg-slate-50 hover:shadow-sm'
     }`}
   >
-    <span className="mr-3">{icon}</span>
+    <span className={`mr-3 ${active === id ? 'text-white' : 'text-slate-500'}`}>{icon}</span>
     {label}
   </button>
 );
@@ -160,10 +140,16 @@ const OverviewTab = () => {
   const [loading, setLoading] = useState(true);
   const [errored, setErrored] = useState(false);
 
-  const [branch, setBranch] = useState('');
-  const [semester, setSemester] = useState('');
-  const [subjectId, setSubjectId] = useState('');
+  const [branch, setBranch] = useStickyState('', 'admin_overview_branch');
+  const [semester, setSemester] = useStickyState('', 'admin_overview_sem');
+  const [subjectId, setSubjectId] = useStickyState('', 'admin_overview_subject');
   const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    return () => {
+      ['admin_overview_branch', 'admin_overview_sem', 'admin_overview_subject'].forEach(k => sessionStorage.removeItem(k));
+    };
+  }, []);
 
   useEffect(() => {
     if (branch && semester) {
@@ -319,10 +305,12 @@ const StatCard = ({ title, value, color }) => {
 };
 
 const ResourcesTab = () => {
-  const [mode, setMode] = useState('add_material');
+  const [mode, setMode] = useStickyState('add_material', 'admin_res_mode');
   const [loading, setLoading] = useState(false);
   const [isFetchingSubjects, setIsFetchingSubjects] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  const resourceRateLimit = useRateLimitCountdown('resource');
 
   const [formData, setFormData] = useState({
     branch: '',
@@ -335,13 +323,14 @@ const ResourcesTab = () => {
     resourceLink: '',
   });
   const [resourceFile, setResourceFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [existingSubjects, setExistingSubjects] = useState([]);
 
   // Manage existing state
-  const [manageBranch, setManageBranch] = useState('');
-  const [manageSem, setManageSem] = useState('');
-  const [manageSubjectId, setManageSubjectId] = useState('');
+  const [manageBranch, setManageBranch] = useStickyState('', 'admin_res_manageBranch');
+  const [manageSem, setManageSem] = useStickyState('', 'admin_res_manageSem');
+  const [manageSubjectId, setManageSubjectId] = useStickyState('', 'admin_res_manageSub');
   const [manageSubjects, setManageSubjects] = useState([]);
   const [manageResources, setManageResources] = useState([]);
   const [loadingManage, setLoadingManage] = useState(false);
@@ -352,7 +341,33 @@ const ResourcesTab = () => {
   const [editingResource, setEditingResource] = useState(null);
   const [editFormData, setEditFormData] = useState({ title: '', type: '', url: '' });
   const [savingEditId, setSavingEditId] = useState(null);
-  const [resourceFilter, setResourceFilter] = useState('ALL');
+  const [resourceFilter, setResourceFilter] = useStickyState('ALL', 'admin_res_filter');
+
+  // Subject Edit/Delete state
+  const [editingSubject, setEditingSubject] = useState(null);
+  const [editSubjectData, setEditSubjectData] = useState({ subjectName: '', subjectCode: '' });
+  const [savingSubjectId, setSavingSubjectId] = useState(null);
+  const [deletingSubjectId, setDeletingSubjectId] = useState(null);
+  const [confirmDeleteSubjectId, setConfirmDeleteSubjectId] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      ['admin_res_mode', 'admin_res_manageBranch', 'admin_res_manageSem', 'admin_res_manageSub', 'admin_res_filter'].forEach(k => sessionStorage.removeItem(k));
+    };
+  }, []);
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setManageBranch('');
+    setManageSem('');
+    setManageSubjectId('');
+    setResourceFilter('ALL');
+    setResourceFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    ['admin_res_manageBranch', 'admin_res_manageSem', 'admin_res_manageSub', 'admin_res_filter'].forEach(k => sessionStorage.removeItem(k));
+  };
 
   const fetchSubjects = async () => {
     if (formData.branch && formData.semester) {
@@ -371,7 +386,7 @@ const ResourcesTab = () => {
   };
 
   useEffect(() => {
-    if (mode === 'add_material') fetchSubjects();
+    if (mode === 'add_material' || mode === 'manage_subjects') fetchSubjects();
   }, [mode, formData.branch, formData.semester]);
 
   // Fetch subjects for manage mode
@@ -408,12 +423,54 @@ const ResourcesTab = () => {
       await deleteResource(id);
       setManageResources((prev) => prev.filter((r) => r._id !== id));
       setManageMsg({ type: 'success', text: 'Resource deleted successfully.' });
-      setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
     } catch (err) {
-      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        setManageMsg({ type: 'error', text: `Please wait ${retryAfterSeconds} seconds before trying again.` });
+      } else {
+        setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
+      }
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
+      setTimeout(() => setManageMsg({ type: '', text: '' }), 5000);
+    }
+  };
+
+  const handleEditSubject = (sub) => {
+    setEditingSubject(sub._id);
+    setEditSubjectData({ subjectName: sub.subjectName, subjectCode: sub.subjectCode });
+  };
+
+  const handleSaveSubjectEdit = async (id) => {
+    setSavingSubjectId(id);
+    try {
+      await updateSubject(id, { subjectName: editSubjectData.subjectName, subjectCode: editSubjectData.subjectCode });
+      setExistingSubjects(prev => prev.map(s => s._id === id ? { ...s, subjectName: editSubjectData.subjectName, subjectCode: editSubjectData.subjectCode } : s));
+      toast.success('Subject updated successfully.');
+      setEditingSubject(null);
+      setManageSubjects(prev => prev.map(s => s._id === id ? { ...s, subjectName: editSubjectData.subjectName, subjectCode: editSubjectData.subjectCode } : s));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update subject.');
+    } finally {
+      setSavingSubjectId(null);
+    }
+  };
+
+  const handleDeleteSubject = async (id) => {
+    setDeletingSubjectId(id);
+    try {
+      await deleteSubject(id);
+      setExistingSubjects(prev => prev.filter(s => s._id !== id));
+      toast.success('Subject deleted successfully.');
+      setManageSubjects(prev => prev.filter(s => s._id !== id));
+      if (formData.subjectId === id) setFormData(prev => ({...prev, subjectId: ''}));
+      if (manageSubjectId === id) setManageSubjectId('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete subject.');
+    } finally {
+      setDeletingSubjectId(null);
+      setConfirmDeleteSubjectId(null);
     }
   };
 
@@ -428,10 +485,17 @@ const ResourcesTab = () => {
       await updateResource(id, editFormData);
       setManageResources((prev) => prev.map((r) => (r._id === id ? { ...r, ...editFormData } : r)));
       setEditingResource(null);
-      setManageMsg({ type: 'success', text: 'Resource updated successfully.' });
-      setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
+      toast.success('Resource updated successfully.');
     } catch (err) {
-      setManageMsg({ type: 'error', text: err.response?.data?.message || 'Update failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
+        setManageMsg({ type: 'error', text: `Please wait ${retryAfterSeconds} seconds before trying again.` });
+      } else {
+        const errorMsg = err.response?.data?.message || 'Update failed.';
+        toast.error(errorMsg);
+        setManageMsg({ type: 'error', text: errorMsg });
+      }
     } finally {
       setSavingEditId(null);
     }
@@ -440,7 +504,6 @@ const ResourcesTab = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: '', text: '' });
 
     try {
       if (mode === 'create_subject') {
@@ -451,8 +514,8 @@ const ResourcesTab = () => {
           subjectCode: formData.subjectCode,
         };
         await api.post('/subjects', payload);
-        setMessage({ type: 'success', text: 'Subject created.' });
-        setFormData((prev) => ({ ...prev, subjectName: '', subjectCode: '' }));
+        toast.success('Subject created.');
+        setFormData(prev => ({ ...prev, subjectName: '', subjectCode: '' }));
       } else {
         const fd = new FormData();
         fd.append('subjectId', formData.subjectId);
@@ -466,14 +529,25 @@ const ResourcesTab = () => {
         }
 
         await api.post('/resources', fd);
-        setMessage({ type: 'success', text: 'Resource added.' });
-        setFormData((prev) => ({ ...prev, resourceTitle: '', resourceLink: '' }));
+        toast.success('Resource added.');
+        setFormData(prev => ({ ...prev, resourceTitle: '', resourceLink: '' }));
         setResourceFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
 
       if (formData.branch && formData.semester) fetchSubjects();
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Operation failed.' });
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited && mode === 'add_material') {
+        resourceRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Rate limit reached. Please wait ${retryAfterSeconds} seconds.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Operation failed.';
+        setMessage({ type: 'error', text: errorMsg });
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -485,68 +559,74 @@ const ResourcesTab = () => {
         <h2 className="text-2xl font-bold text-gray-800">Manage Resources</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <button
-          onClick={() => setMode('add_material')}
-          className={`flex items-center gap-3 p-4 rounded-xl border transition ${mode === 'add_material' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}
-        >
-          <div
-            className={`p-2 rounded-lg ${mode === 'add_material' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}
-          >
-            <FileText className="w-5 h-5" />
-          </div>
-          <div className="text-left">
-            <p className="font-bold">Add Material</p>
-            <p className={`text-xs ${mode === 'add_material' ? 'text-blue-100' : 'text-gray-500'}`}>
-              Upload new resources
-            </p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <button onClick={() => handleModeChange('add_material')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'add_material' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'add_material' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><FileText className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Add Material</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'add_material' ? 'text-blue-100' : 'text-gray-500'}`}>Upload resources</p></div>
         </button>
-        <button
-          onClick={() => setMode('create_subject')}
-          className={`flex items-center gap-3 p-4 rounded-xl border transition ${mode === 'create_subject' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}
-        >
-          <div
-            className={`p-2 rounded-lg ${mode === 'create_subject' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}
-          >
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <div className="text-left">
-            <p className="font-bold">Create Subject</p>
-            <p
-              className={`text-xs ${mode === 'create_subject' ? 'text-blue-100' : 'text-gray-500'}`}
-            >
-              Add a new course
-            </p>
-          </div>
+        <button onClick={() => handleModeChange('create_subject')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'create_subject' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'create_subject' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><BookOpen className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Create Subject</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'create_subject' ? 'text-blue-100' : 'text-gray-500'}`}>Add new course</p></div>
         </button>
-        <button
-          onClick={() => setMode('manage_existing')}
-          className={`flex items-center gap-3 p-4 rounded-xl border transition ${mode === 'manage_existing' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}
-        >
-          <div
-            className={`p-2 rounded-lg ${mode === 'manage_existing' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-          </div>
-          <div className="text-left">
-            <p className="font-bold">Manage Existing</p>
-            <p
-              className={`text-xs ${mode === 'manage_existing' ? 'text-blue-100' : 'text-gray-500'}`}
-            >
-              Edit or delete resources
-            </p>
-          </div>
+        <button onClick={() => handleModeChange('manage_subjects')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'manage_subjects' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'manage_subjects' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><Edit2 className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Manage Subjects</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'manage_subjects' ? 'text-blue-100' : 'text-gray-500'}`}>Edit or delete courses</p></div>
+        </button>
+        <button onClick={() => handleModeChange('manage_existing')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'manage_existing' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'manage_existing' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><LayoutDashboard className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Manage Resources</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'manage_existing' ? 'text-blue-100' : 'text-gray-500'}`}>Edit or delete resources</p></div>
         </button>
       </div>
 
       {mode !== 'manage_existing' && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-          {message.text && (
-            <div
-              className={`mb-4 p-3 rounded-md text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}
-            >
-              {message.text}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
+        {message.text && (
+          <div className={`mb-4 p-3 rounded-md text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+            {message.text}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+              <select required className="w-full p-2.5 border border-gray-300 rounded-lg" value={formData.branch} onChange={e => setFormData({ ...formData, branch: e.target.value })}>
+                <option value="">Select Branch</option>
+                {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                <select required className="w-full p-2.5 border border-gray-300 rounded-lg" value={formData.semester} onChange={e => setFormData({ ...formData, semester: e.target.value })}>
+                  {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {mode === 'create_subject' && (
+            <div className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                  <input type="text" required className="w-full p-2.5 border border-gray-300 rounded-lg" value={formData.subjectName} onChange={e => setFormData({ ...formData, subjectName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject Code</label>
+                  <input type="text" required className="w-full p-2.5 border border-gray-300 rounded-lg" value={formData.subjectCode} onChange={e => setFormData({ ...formData, subjectCode: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {mode === 'add_material' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Select Subject</label>
+              <select required className="w-full p-2.5 border border-gray-300 rounded-lg disabled:bg-gray-100" value={formData.subjectId} onChange={e => setFormData({ ...formData, subjectId: e.target.value })} disabled={!formData.branch}>
+                <option value="">{existingSubjects.length ? 'Select a subject' : 'No subjects found for this branch/semester'}</option>
+                {existingSubjects.map(s => <option key={s._id} value={s._id}>{s.subjectName} ({s.subjectCode})</option>)}
+              </select>
             </div>
           )}
 
@@ -619,98 +699,94 @@ const ResourcesTab = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Subject
                 </label>
-                <select
-                  required
-                  className="w-full p-2.5 border border-gray-300 rounded-lg disabled:bg-gray-100"
-                  value={formData.subjectId}
-                  onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                  disabled={!formData.branch}
-                >
-                  <option value="">
-                    {existingSubjects.length
-                      ? 'Select a subject'
-                      : 'No subjects found for this branch/semester'}
-                  </option>
-                  {existingSubjects.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.subjectName} ({s.subjectCode})
-                    </option>
-                  ))}
-                </select>
+                {formData.resourceType === 'LECTURES' ? (
+                  <input type="url" required className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nit-primary outline-none transition" placeholder="https://youtube.com/watch?v=..." value={formData.resourceLink} onChange={e => setFormData({ ...formData, resourceLink: e.target.value })} />
+                ) : (
+                  <input ref={fileInputRef} type="file" required accept=".zip" className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-nit-primary outline-none transition" onChange={e => setResourceFile(e.target.files?.[0] || null)} />
+                )}
               </div>
             )}
 
-            {mode === 'add_material' && (
-              <div className="border-t border-slate-200 pt-4 mt-4 space-y-4">
-                <h3 className="font-semibold text-gray-700 text-sm">Resource Details</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input
-                      type="text"
-                      required
-                      className="w-full p-2.5 border border-gray-300 rounded-lg"
-                      placeholder="e.g. Unit 1 Lecture Notes"
-                      value={formData.resourceTitle}
-                      onChange={(e) => setFormData({ ...formData, resourceTitle: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <select
-                      className="w-full p-2.5 border border-gray-300 rounded-lg"
-                      value={formData.resourceType}
-                      onChange={(e) => setFormData({ ...formData, resourceType: e.target.value })}
-                    >
-                      {RESOURCE_TYPES.map((t) => (
-                        <option key={t} value={t}>
-                          {t.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {formData.resourceType === 'LECTURES' ? 'Link (URL)' : 'Resource File (ZIP)'}
-                  </label>
-                  {formData.resourceType === 'LECTURES' ? (
-                    <input
-                      type="url"
-                      required
-                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nit-primary outline-none transition"
-                      placeholder="https://youtube.com/watch?v=..."
-                      value={formData.resourceLink}
-                      onChange={(e) => setFormData({ ...formData, resourceLink: e.target.value })}
-                    />
-                  ) : (
-                    <input
-                      type="file"
-                      required
-                      accept=".zip"
-                      className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-nit-primary outline-none transition"
-                      onChange={(e) => setResourceFile(e.target.files[0])}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-nit-primary text-white py-2.5 rounded-lg hover:bg-blue-900 transition flex justify-center items-center gap-2"
+          {mode !== 'manage_subjects' && (
+            <button 
+              type="submit" 
+              disabled={loading || (mode === 'add_material' && resourceRateLimit.isRateLimited)} 
+              className="w-full bg-nit-primary text-white py-2.5 rounded-lg hover:bg-blue-900 transition flex justify-center items-center gap-2 mt-6 disabled:opacity-60 disabled:hover:bg-nit-primary"
             >
-              {loading ? (
-                <Loader className="animate-spin w-4 h-4" />
-              ) : mode === 'create_subject' ? (
-                'Create Subject'
-              ) : (
-                'Add Resource'
+              {loading ? <Loader className="animate-spin w-4 h-4" /> : (
+                mode === 'create_subject' ? 'Create Subject' : (
+                  resourceRateLimit.isRateLimited ? `Upload Available in ${resourceRateLimit.formattedCountdown}` : 'Add Resource'
+                )
               )}
             </button>
-          </form>
-        </div>
+          )}
+        </form>
+
+        {/* Existing Subjects List under Manage Subjects Mode */}
+        {mode === 'manage_subjects' && formData.branch && formData.semester && (
+          <div className="mt-2">
+            <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-4">
+              <BookOpen className="w-5 h-5 text-nit-primary" />
+              Existing Subjects ({existingSubjects.length})
+            </h3>
+            {isFetchingSubjects ? (
+              <div className="flex justify-center py-6"><Loader className="w-5 h-5 animate-spin text-nit-primary" /></div>
+            ) : existingSubjects.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-200">No subjects found. Create one above!</p>
+            ) : (
+              <div className="grid gap-3">
+                {existingSubjects.map(sub => {
+                  if (editingSubject === sub._id) {
+                    return (
+                      <div key={sub._id} className="p-4 rounded-xl border border-nit-primary bg-blue-50/50 space-y-3">
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          <input type="text" className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" value={editSubjectData.subjectName} onChange={e => setEditSubjectData({...editSubjectData, subjectName: e.target.value})} placeholder="Subject Name" />
+                          <input type="text" className="w-full p-2.5 border border-gray-300 rounded-lg text-sm" value={editSubjectData.subjectCode} onChange={e => setEditSubjectData({...editSubjectData, subjectCode: e.target.value})} placeholder="Subject Code" />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setEditingSubject(null)} className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                          <button onClick={() => handleSaveSubjectEdit(sub._id)} disabled={savingSubjectId === sub._id} className="px-4 py-1.5 text-sm bg-nit-primary text-white rounded-lg hover:bg-blue-900 transition flex items-center gap-2">
+                            {savingSubjectId === sub._id ? <Loader className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Save
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div key={sub._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:border-nit-primary/30 transition-all gap-4">
+                      <div>
+                        <p className="font-bold text-gray-800 text-sm">{sub.subjectName}</p>
+                        <p className="text-xs text-gray-500 mt-1 font-mono">{sub.subjectCode}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {confirmDeleteSubjectId === sub._id ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-600 font-medium">Delete?</span>
+                            <button onClick={() => setConfirmDeleteSubjectId(null)} className="px-2 py-1 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 rounded">No</button>
+                            <button onClick={() => handleDeleteSubject(sub._id)} disabled={deletingSubjectId === sub._id} className="px-2 py-1 text-xs bg-red-600 text-white hover:bg-red-700 rounded flex items-center">
+                              {deletingSubjectId === sub._id ? <Loader className="w-3 h-3 animate-spin" /> : 'Yes'}
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button onClick={() => handleEditSubject(sub)} className="p-2 text-gray-500 hover:text-nit-primary hover:bg-blue-50 rounded-lg transition" title="Edit Subject">
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setConfirmDeleteSubjectId(sub._id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Subject">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       )}
 
       {/* ── Manage Existing Resources ── */}
@@ -807,8 +883,14 @@ const ResourcesTab = () => {
                   <Loader className="w-5 h-5 animate-spin text-nit-primary" />
                 </div>
               ) : manageResources.length === 0 ? (
-                <div className="text-center py-8 text-gray-400 text-sm">
-                  No resources found for this subject.
+                <div className="text-center py-8 text-gray-400 text-sm">No resources found for this subject.</div>
+              ) : (resourceFilter === 'ALL' ? manageResources : manageResources.filter(r => r.type === resourceFilter)).length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-white shadow-sm border border-slate-200 flex items-center justify-center mb-3">
+                    <FileText className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-500">No {resourceFilter.toLowerCase()} available for this subject.</p>
+                  <p className="text-xs text-gray-400 mt-1">Try selecting a different filter or add new materials.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -997,7 +1079,7 @@ const ResourcesTab = () => {
 };
 
 const SeniorsTab = () => {
-  const [mode, setMode] = useState('add_senior');
+  const [mode, setMode] = useStickyState('add_senior', 'admin_sen_mode');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [formData, setFormData] = useState({
@@ -1014,13 +1096,26 @@ const SeniorsTab = () => {
     tags: [],
   });
 
-  const [manageBranch, setManageBranch] = useState('');
-  const [manageYearFilter, setManageYearFilter] = useState('ALL');
+  const [manageBranch, setManageBranch] = useStickyState('', 'admin_sen_manageBranch');
+  const [manageYearFilter, setManageYearFilter] = useStickyState('ALL', 'admin_sen_manageYear');
   const [manageMentors, setManageMentors] = useState([]);
   const [loadingManage, setLoadingManage] = useState(false);
   const [manageMsg, setManageMsg] = useState({ type: '', text: '' });
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      ['admin_sen_mode', 'admin_sen_manageBranch', 'admin_sen_manageYear'].forEach(k => sessionStorage.removeItem(k));
+    };
+  }, []);
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setManageBranch('');
+    setManageYearFilter('ALL');
+    ['admin_sen_manageBranch', 'admin_sen_manageYear'].forEach(k => sessionStorage.removeItem(k));
+  };
 
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({
@@ -1057,12 +1152,12 @@ const SeniorsTab = () => {
       await deleteMentor(id);
       setManageMentors((prev) => prev.filter((m) => m._id !== id));
       setManageMsg({ type: 'success', text: 'Profile deleted successfully.' });
-      setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
     } catch (err) {
       setManageMsg({ type: 'error', text: err.response?.data?.message || 'Delete failed.' });
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
+      setTimeout(() => setManageMsg({ type: '', text: '' }), 5000);
     }
   };
 
@@ -1143,11 +1238,11 @@ const SeniorsTab = () => {
       setManageMentors((prev) => prev.map((m) => (m._id === id ? { ...m, ...res.data.data } : m)));
       setEditingId(null);
       setManageMsg({ type: 'success', text: 'Profile updated successfully.' });
-      setTimeout(() => setManageMsg({ type: '', text: '' }), 3000);
     } catch (err) {
       setManageMsg({ type: 'error', text: err.response?.data?.message || 'Update failed.' });
     } finally {
       setSavingEditId(null);
+      setTimeout(() => setManageMsg({ type: '', text: '' }), 5000);
     }
   };
 
@@ -1212,40 +1307,14 @@ const SeniorsTab = () => {
         <h2 className="text-2xl font-bold text-gray-800">Manage Seniors</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <button
-          onClick={() => setMode('add_senior')}
-          className={`flex items-center gap-3 p-4 rounded-xl border transition ${mode === 'add_senior' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}
-        >
-          <div
-            className={`p-2 rounded-lg ${mode === 'add_senior' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}
-          >
-            <Users className="w-5 h-5" />
-          </div>
-          <div className="text-left">
-            <p className="font-bold">Add Profile</p>
-            <p className={`text-xs ${mode === 'add_senior' ? 'text-blue-100' : 'text-gray-500'}`}>
-              Add a new senior or alumni
-            </p>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+        <button onClick={() => handleModeChange('add_senior')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'add_senior' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'add_senior' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><Users className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Add Profile</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'add_senior' ? 'text-blue-100' : 'text-gray-500'}`}>Add a new senior or alumni</p></div>
         </button>
-        <button
-          onClick={() => setMode('manage_existing')}
-          className={`flex items-center gap-3 p-4 rounded-xl border transition ${mode === 'manage_existing' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}
-        >
-          <div
-            className={`p-2 rounded-lg ${mode === 'manage_existing' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-          </div>
-          <div className="text-left">
-            <p className="font-bold">Manage Existing</p>
-            <p
-              className={`text-xs ${mode === 'manage_existing' ? 'text-blue-100' : 'text-gray-500'}`}
-            >
-              Edit or delete profiles
-            </p>
-          </div>
+        <button onClick={() => handleModeChange('manage_existing')} className={`flex items-center gap-2.5 p-3 rounded-xl border transition ${mode === 'manage_existing' ? 'bg-nit-primary text-white border-nit-primary shadow-md' : 'bg-white text-gray-700 border-slate-300 hover:border-nit-primary hover:shadow-sm'}`}>
+          <div className={`p-1.5 rounded-lg ${mode === 'manage_existing' ? 'bg-white/20' : 'bg-blue-50 text-nit-primary'}`}><LayoutDashboard className="w-4 h-4" /></div>
+          <div className="text-left"><p className="font-bold text-sm">Manage Existing</p><p className={`text-[11px] leading-tight mt-0.5 ${mode === 'manage_existing' ? 'text-blue-100' : 'text-gray-500'}`}>Edit or delete profiles</p></div>
         </button>
       </div>
 
@@ -1667,11 +1736,7 @@ const SeniorsTab = () => {
                         className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:border-slate-300 transition"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <img
-                            src={m.image || 'https://via.placeholder.com/150'}
-                            alt={m.name}
-                            className="w-8 h-8 rounded-full object-cover bg-gray-200 shrink-0"
-                          />
+                          <img src={processImageUrl(m.image) || 'https://via.placeholder.com/150'} alt={m.name} className="w-8 h-8 rounded-full object-cover bg-gray-200 shrink-0" referrerPolicy="no-referrer" />
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">{m.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -1775,6 +1840,7 @@ const ContributionsTab = () => {
     setProcessing({ id, action: 'approve' });
     try {
       await api.patch(`/contributions/${id}/approve`);
+      toast.success('Contribution approved successfully.');
       fetchContributions();
     } catch (e) {
       toast.error('Approve failed: ' + (e.response?.data?.message || 'Unknown error'));
@@ -1784,9 +1850,11 @@ const ContributionsTab = () => {
   };
 
   const handleReject = async (id) => {
+    if (!window.confirm('Are you sure you want to reject this contribution?')) return;
     setProcessing({ id, action: 'reject' });
     try {
       await api.delete(`/contributions/${id}`);
+      toast.success('Contribution rejected.');
       fetchContributions();
     } catch (e) {
       toast.error('Reject failed: ' + (e.response?.data?.message || 'Unknown error'));
@@ -1804,8 +1872,9 @@ const ContributionsTab = () => {
     if (!editForm.title.trim()) return toast.error('Title is required');
     setProcessing({ id, action: 'edit' });
     try {
-      await api.patch(`/contributions/${id}`, editForm);
+      await api.put(`/contributions/${id}`, editForm);
       setEditingId(null);
+      toast.success('Contribution updated successfully.');
       fetchContributions();
     } catch (e) {
       toast.error('Update failed: ' + (e.response?.data?.message || 'Unknown error'));
@@ -2030,10 +2099,11 @@ const BugsTab = () => {
     }
   };
 
-  const handleResolve = async (id) => {
+  const handleResolveBug = async (id) => {
     setProcessingId(id);
     try {
       await api.patch(`/bugs/${id}/resolve`);
+      toast.success('Bug marked as resolved.');
       fetchBugs();
     } catch (e) {
       toast.error('Resolve failed: ' + (e.response?.data?.message || 'Unknown error'));
@@ -2094,7 +2164,7 @@ const BugsTab = () => {
               </div>
               <div className="flex items-center gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
                 <button
-                  onClick={() => handleResolve(bug._id)}
+                  onClick={() => handleResolveBug(bug._id)}
                   disabled={processingId === bug._id}
                   className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-sm font-medium transition disabled:opacity-50"
                 >

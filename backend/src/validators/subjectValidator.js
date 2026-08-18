@@ -59,9 +59,22 @@ const validateSubjectCode = (subjectCode) => {
   }
 };
 
+const validateUpdateSubject = (data) => {
+  const { subjectCode, subjectName } = data;
+
+  if (subjectCode !== undefined && validator.isEmpty(subjectCode.trim())) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Subject code cannot be empty.");
+  }
+
+  if (subjectName !== undefined && validator.isEmpty(subjectName.trim())) {
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Subject name cannot be empty.");
+  }
+};
+
 module.exports = {
   validateCreateSubject,
   validateGetSubjects,
   validateSubjectId,
   validateSubjectCode,
+  validateUpdateSubject,
 };

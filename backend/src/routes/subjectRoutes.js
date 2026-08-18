@@ -11,4 +11,18 @@ router.post('/', authMiddleware, adminMiddleware, subjectController.createSubjec
 
 router.get('/', authMiddleware, subjectController.getSubjects);
 
+router.patch(
+  "/:subjectId",
+  authMiddleware,
+  adminMiddleware,
+  subjectController.updateSubject,
+);
+
+router.delete(
+  "/:subjectId",
+  authMiddleware,
+  adminMiddleware,
+  subjectController.deleteSubject,
+);
+
 module.exports = router;

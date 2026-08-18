@@ -16,9 +16,12 @@ import {
 import { contributionApi, createContribution, resourceApi } from '../services/api.js';
 import { BRANCHES, BRANCH_LABELS, SEMESTERS } from '../constants/index.js';
 import { Alert } from '../components/ui/Alert.jsx';
+import toast from 'react-hot-toast';
 import { ButtonSpinner } from '../components/ui/Spinner.jsx';
 import { ZipUpload } from '../components/ui/ZipUpload.jsx';
 import { CustomSelect } from '../components/ui/CustomSelect.jsx';
+import { parseRateLimitError } from '../utils/rateLimitUtils.js';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown.js';
 
 export default function Contribute() {
   const navigate = useNavigate();
@@ -53,11 +56,12 @@ export default function Contribute() {
       setSubjectId('');
     }
   }, [branch, semester]);
-
-  // Submission states
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const contributionRateLimit = useRateLimitCountdown('contribution');
 
   const resetState = () => {
     setDescription('');
@@ -92,10 +96,18 @@ export default function Contribute() {
       await contributionApi.submit({ type: 'bug', description });
       setSubmitted(true);
     } catch (err) {
-      if (err.response?.status === 404) {
-        setError('Bug reporting backend endpoint is not currently available.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
+      } else if (err.response?.status === 404) {
+        const errorMsg = 'Bug reporting backend endpoint is not currently available.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       } else {
-        setError('Unable to submit your report. Please try again.');
+        const errorMsg = err.response?.data?.message || 'Unable to submit your report. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);
@@ -127,12 +139,18 @@ export default function Contribute() {
       await createContribution(formData);
       setSubmitted(true);
     } catch (err) {
-      if (err.response?.status === 404) {
-        setError('Resource contribution backend endpoint is not currently available.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
+      } else if (err.response?.status === 404) {
+        const errorMsg = 'Resource contribution backend endpoint is not currently available.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       } else {
-        setError(
-          err.response?.data?.message || 'Unable to submit your contribution. Please try again.'
-        );
+        const errorMsg = err.response?.data?.message || 'Unable to submit your contribution. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);
@@ -243,20 +261,13 @@ export default function Contribute() {
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-800">Bug report submitted successfully.</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Thank you for helping improve NIT KKR Resource Portal.
-            </p>
-            <button
-              onClick={handleBack}
-              className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors"
-            >
+            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Academic Portal.</p>
+            <button onClick={handleBack} className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors">
               Back to Contributions
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmitBug} className="space-y-5">
-            <Alert type="error" message={error} onDismiss={() => setError('')} />
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
               <textarea
@@ -274,11 +285,11 @@ export default function Contribute() {
 
             <button
               type="submit"
-              disabled={loading || !description.trim()}
+              disabled={loading || !description.trim() || contributionRateLimit.isRateLimited}
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary"
             >
-              {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
-              {loading ? 'Submitting...' : 'Submit Bug Report'}
+              {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
+              {loading ? 'Submitting...' : (contributionRateLimit.isRateLimited ? `Submit Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Bug Report')}
             </button>
           </form>
         )}
@@ -468,8 +479,6 @@ export default function Contribute() {
             </div>
           ) : (
             <form onSubmit={handleSubmitResource} className="space-y-6">
-              <Alert type="error" message={error} onDismiss={() => setError('')} />
-
               <div className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -557,11 +566,11 @@ export default function Contribute() {
 
               <button
                 type="submit"
-                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file)}
+                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file) || contributionRateLimit.isRateLimited}
                 className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm"
               >
-                {loading ? <ButtonSpinner /> : <Send className="w-4 h-4" />}
-                {loading ? 'Submitting contribution...' : 'Submit Contribution'}
+                {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
+                {loading ? 'Submitting contribution...' : (contributionRateLimit.isRateLimited ? `Contribute Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Contribution')}
               </button>
             </form>
           )}

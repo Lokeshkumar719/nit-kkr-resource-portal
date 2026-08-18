@@ -52,7 +52,7 @@ export default function Home() {
                 className="w-8 h-8 object-contain"
               />
             </div>
-            <span className="home-logo-text">NIT KKR Resource Portal</span>
+            <span className="home-logo-text">NIT KKR Academic Portal</span>
           </Link>
           <div className="home-nav-actions">
             {user ? (
@@ -209,7 +209,7 @@ export default function Home() {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            <span className="font-semibold text-gray-700">NIT KKR Resource Portal</span>
+            <span className="font-semibold text-gray-700">NIT KKR Academic Portal</span>
           </div>
           <p className="text-sm text-gray-500">
             &copy; {new Date().getFullYear()} NIT Kurukshetra. Academic Resource Portal.

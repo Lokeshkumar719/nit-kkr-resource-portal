@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import { register } from '../services/api';
+import { register } from "../services/api";
+import toast from "react-hot-toast";
 
 function Register({ setActiveTab }) {
   const [formData, setFormData] = useState({
@@ -9,8 +10,6 @@ function Register({ setActiveTab }) {
   });
 
   const [loading, setLoading] = useState(false);
-
-  const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleChange = (event) => {
     setFormData({
@@ -24,21 +23,14 @@ function Register({ setActiveTab }) {
 
     try {
       setLoading(true);
-      setMessage({ type: '', text: '' });
 
       await register(formData.email, formData.password);
 
-      setMessage({
-        type: 'success',
-        text: 'OTP sent successfully. Please verify your email to continue.',
-      });
+      toast.success("OTP sent successfully. Please verify your email to continue.");
 
       setActiveTab('verify');
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'Registration failed.',
-      });
+      toast.error(error.response?.data?.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -78,8 +70,6 @@ function Register({ setActiveTab }) {
           required
         />
       </div>
-
-      {message.text && <div className={`auth-message ${message.type}`}>{message.text}</div>}
 
       <button className="primary-button" type="submit" disabled={loading}>
         {loading ? 'Registering...' : 'Register'}

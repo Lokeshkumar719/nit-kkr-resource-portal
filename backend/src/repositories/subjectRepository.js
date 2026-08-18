@@ -18,9 +18,19 @@ const findSubjects = async (filter) => {
   });
 };
 
+const updateSubject = async (subjectId, updateData) => {
+  return await Subject.findByIdAndUpdate(subjectId, updateData, { new: true, runValidators: true });
+};
+
+const deleteSubject = async (subjectId) => {
+  return await Subject.findByIdAndDelete(subjectId);
+};
+
 module.exports = {
   createSubject,
   findSubjectById,
   findSubjectByCode,
   findSubjects,
+  updateSubject,
+  deleteSubject,
 };

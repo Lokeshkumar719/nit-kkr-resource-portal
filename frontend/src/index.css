@@ -1,12 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ============================================
-   NIT KKR Resource Portal — Design System v2
-   ============================================ */
 
 :root {
   --nit-primary: #0f2b5b;
@@ -41,9 +37,12 @@
 
   /* Shadow System - kept subtle */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -58,14 +57,17 @@ html {
 
 body {
   font-family:
-    'Inter',
+    "Inter",
     -apple-system,
     BlinkMacSystemFont,
-    'Segoe UI',
+    "Segoe UI",
     Roboto,
     sans-serif;
   background: var(--surface-muted);
-  background-image: radial-gradient(rgba(15, 43, 91, 0.04) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(15, 43, 91, 0.04) 1px,
+    transparent 1px
+  );
   background-size: 24px 24px;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -73,17 +75,11 @@ body {
   line-height: 1.6;
 }
 
-/* ============================================
-   Custom Selection
-   ============================================ */
 ::selection {
   background-color: var(--nit-primary);
   color: white;
 }
 
-/* ============================================
-   Scrollbar
-   ============================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -102,10 +98,6 @@ body {
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-
-/* ============================================
-   Utility Animations
-   ============================================ */
 
 @keyframes fadeIn {
   from {
@@ -226,33 +218,39 @@ body {
   animation-delay: 0.3s;
 }
 
-/* ============================================
-   Auth Page Background
-   ============================================ */
-
 .auth-bg {
-  background: linear-gradient(135deg, #0f2b5b 0%, #1e3a6e 30%, #1a365d 60%, #0f2b5b 100%);
+  background: linear-gradient(
+    135deg,
+    #0f2b5b 0%,
+    #1e3a6e 30%,
+    #1a365d 60%,
+    #0f2b5b 100%
+  );
   min-height: 100vh;
   position: relative;
   overflow: hidden;
 }
 
 .auth-bg::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(59, 130, 246, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 70% 80%,
+      rgba(245, 158, 11, 0.05) 0%,
+      transparent 50%
+    );
   pointer-events: none;
 }
-
-/* ============================================
-   Glass Card
-   ============================================ */
 
 .glass-card {
   background: rgba(255, 255, 255, 0.97);
@@ -261,10 +259,6 @@ body {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
 }
-
-/* ============================================
-   Form Inputs
-   ============================================ */
 
 .input-field {
   width: 100%;
@@ -346,14 +340,14 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
 }
 
-/* ============================================
-   Buttons
-   ============================================ */
-
 .btn-primary {
   width: 100%;
   padding: 0.8125rem 1.5rem;
-  background: linear-gradient(135deg, var(--nit-primary) 0%, var(--nit-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--nit-primary) 0%,
+    var(--nit-primary-light) 100%
+  );
   color: white;
   font-weight: 600;
   font-size: 0.9375rem;
@@ -402,12 +396,13 @@ body {
   @apply bg-slate-300;
 }
 
-/* ============================================
-   Navbar
-   ============================================ */
-
 .navbar {
-  background: rgba(15, 43, 91, 0.75); /* More translucent for better glass effect */
+  background: rgba(
+    15,
+    43,
+    91,
+    0.75
+  ); /* More translucent for better glass effect */
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: white;
@@ -440,10 +435,6 @@ body {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* ============================================
-   Spinner
-   ============================================ */
-
 .spinner {
   width: 1.25rem;
   height: 1.25rem;
@@ -457,10 +448,6 @@ body {
   border-color: rgba(0, 0, 0, 0.1);
   border-top-color: var(--nit-primary);
 }
-
-/* ============================================
-   Alert / Error Box
-   ============================================ */
 
 .alert {
   padding: 0.75rem 1rem;
@@ -484,10 +471,6 @@ body {
   border: 1px solid #bbf7d0;
 }
 
-/* ============================================
-   Page Loading
-   ============================================ */
-
 .page-loader {
   display: flex;
   align-items: center;
@@ -501,10 +484,6 @@ body {
   height: 2rem;
   border-width: 3px;
 }
-
-/* ============================================
-   Page Header
-   ============================================ */
 
 .page-header {
   margin-bottom: 1.75rem;
@@ -525,10 +504,6 @@ body {
   line-height: 1.5;
 }
 
-/* ============================================
-   Filter Bar
-   ============================================ */
-
 .filter-bar {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -546,10 +521,6 @@ body {
   color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
-
-/* ============================================
-   Search Bar
-   ============================================ */
 
 .search-bar {
   position: relative;
@@ -584,10 +555,6 @@ body {
   color: var(--text-muted);
   pointer-events: none;
 }
-
-/* ============================================
-   Tab System
-   ============================================ */
 
 .tab-bar {
   display: flex;
@@ -641,10 +608,6 @@ body {
   background: var(--nit-accent-soft);
   color: var(--nit-accent);
 }
-
-/* ============================================
-   Resource List (Library Style)
-   ============================================ */
 
 .resource-list-item {
   display: flex;
@@ -741,10 +704,6 @@ body {
 .subject-item.active .subject-code {
   opacity: 0.7;
 }
-
-/* ============================================
-   Profile Card (Alumni/Senior)
-   ============================================ */
 
 .profile-card {
   background: var(--surface);
@@ -850,10 +809,6 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* ============================================
-   Tags / Badges
-   ============================================ */
-
 .tag {
   display: inline-flex;
   align-items: center;
@@ -881,10 +836,6 @@ body {
   color: #065f46;
 }
 
-/* ============================================
-   Section Divider
-   ============================================ */
-
 .section-heading {
   font-size: 0.6875rem;
   font-weight: 800;
@@ -895,10 +846,6 @@ body {
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--border-light);
 }
-
-/* ============================================
-   Empty State
-   ============================================ */
 
 .empty-state {
   display: flex;
@@ -932,10 +879,6 @@ body {
   max-width: 20rem;
 }
 
-/* ============================================
-   Error Banner
-   ============================================ */
-
 .error-banner {
   padding: 0.875rem 1rem;
   border-radius: var(--radius-sm);
@@ -944,10 +887,6 @@ body {
   font-size: 0.875rem;
   border: 1px solid #fecaca;
 }
-
-/* ============================================
-   Panel / Card Container
-   ============================================ */
 
 .panel {
   background: var(--surface);
@@ -962,16 +901,16 @@ body {
 .panel-header {
   padding: 1.125rem 1.5rem;
   border-bottom: 1.5px solid var(--border);
-  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), rgba(241, 245, 249, 0.4));
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 250, 252, 0.8),
+    rgba(241, 245, 249, 0.4)
+  );
 }
 
 .panel-body {
   padding: 1rem 1.5rem;
 }
-
-/* ============================================
-   Year Section (Senior Support)
-   ============================================ */
 
 .year-section {
   margin-bottom: 2rem;
@@ -994,10 +933,6 @@ body {
   border-radius: 9999px;
   margin-bottom: 1rem;
 }
-
-/* ============================================
-   Responsive
-   ============================================ */
 
 @media (max-width: 640px) {
   .glass-card {
@@ -1031,14 +966,13 @@ body {
   }
 }
 
-/* ============================================
-   Homepage / Landing Page Styles
-   ============================================ */
-
 .home-page {
   min-height: 100vh;
   background: var(--surface-muted);
-  background-image: radial-gradient(rgba(15, 43, 91, 0.04) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(15, 43, 91, 0.04) 1px,
+    transparent 1px
+  );
   background-size: 24px 24px;
   overflow-x: hidden;
 }
@@ -1161,9 +1095,21 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(15, 43, 91, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 50%);
+    radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(15, 43, 91, 0.08) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 80% 20%,
+      rgba(37, 99, 235, 0.06) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 20% 80%,
+      rgba(245, 158, 11, 0.04) 0%,
+      transparent 50%
+    );
   pointer-events: none;
 }
 
@@ -1209,7 +1155,11 @@ body {
 }
 
 .home-hero-highlight {
-  background: linear-gradient(135deg, var(--nit-primary) 0%, var(--nit-accent) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--nit-primary) 0%,
+    var(--nit-accent) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1356,7 +1306,7 @@ body {
 }
 
 .home-feature-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1475,7 +1425,7 @@ body {
 }
 
 .home-cta-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   right: -20%;

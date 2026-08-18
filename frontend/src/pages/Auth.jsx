@@ -21,7 +21,10 @@ import {
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
+import toast from 'react-hot-toast';
 import { ButtonSpinner } from '../components/ui/Spinner';
+import { parseRateLimitError } from '../utils/rateLimitUtils';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -45,17 +48,20 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [resendTimer, setResendTimer] = useState(60);
+  
+  // Custom rate limiting hooks for form actions
+  const loginRateLimit = useRateLimitCountdown('login');
+  const registerRateLimit = useRateLimitCountdown('register');
+  const resendOtpRateLimit = useRateLimitCountdown('resendOtp');
+  const forgotPasswordRateLimit = useRateLimitCountdown('forgotPassword');
 
   useEffect(() => {
+    // Basic local UI timer for the resend OTP UX (distinct from rate limiting)
     let interval;
-    if ((step === 'verify' || step === 'forgot-otp') && resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
+    if ((step === 'verify' || step === 'forgot-otp') && resendOtpRateLimit.countdown > 0) {
+      // we can rely on the hook's countdown instead of local resendTimer
     }
-    return () => clearInterval(interval);
-  }, [step, resendTimer]);
+  }, [step]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -71,7 +77,8 @@ export default function Auth() {
       if (isLogin) {
         const res = await apiLogin(formData.email, formData.password);
         login(res.data.data);
-
+        toast.success('Logged in successfully!');
+        
         if (res.data.data.role === 'ADMIN') {
           navigate('/admin/dashboard');
         } else {
@@ -79,12 +86,25 @@ export default function Auth() {
         }
       } else {
         await apiRegister(formData.email, formData.password);
+        toast.success('OTP sent to your email! Please verify.');
         setSuccess('OTP sent to your email! Please verify.');
-        setResendTimer(60);
+        resendOtpRateLimit.triggerRateLimit(60);
         setStep('verify');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        if (isLogin) {
+          loginRateLimit.triggerRateLimit(retryAfterSeconds);
+        } else {
+          registerRateLimit.triggerRateLimit(retryAfterSeconds);
+        }
+        toast.error(`Rate limited. Please wait ${retryAfterSeconds}s.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Authentication failed. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -97,20 +117,21 @@ export default function Auth() {
 
     try {
       const res = await apiVerifyOTP(formData.email, formData.otp);
-      if (res.data && res.data.data) {
-        login(res.data.data);
-        if (res.data.data.role === 'ADMIN') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+      if(res.data && res.data.data) {
+          login(res.data.data);
+          toast.success('Email verified successfully.');
+          if (res.data.data.role === 'ADMIN') {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
       } else {
-        setSuccess('Verified! You can now log in.');
-        setStep('auth');
-        setIsLogin(true);
+          toast.success('Verified! You can now log in.');
+          setStep('auth');
+          setIsLogin(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Verification failed. Please check the OTP.');
+      toast.error(err.response?.data?.message || 'Verification failed. Please check the OTP.');
     } finally {
       setLoading(false);
     }
@@ -123,10 +144,19 @@ export default function Auth() {
 
     try {
       await apiResendOTP(formData.email);
+      toast.success('A new verification code has been sent to your email.');
       setSuccess('A new verification code has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        resendOtpRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds}s before resending.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Failed to resend OTP. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -141,11 +171,20 @@ export default function Auth() {
 
     try {
       await apiForgotPassword(formData.email);
+      toast.success('A password reset OTP has been sent to your email.');
       setSuccess('A password reset OTP has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
       setStep('forgot-otp');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send reset OTP. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        forgotPasswordRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds}s before requesting a new OTP.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Failed to send reset OTP. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -159,10 +198,10 @@ export default function Auth() {
 
     try {
       await apiVerifyForgotPasswordOTP(formData.email, formData.otp);
-      setSuccess('OTP verified. Please set your new password.');
+      toast.success('OTP verified. Please set your new password.');
       setStep('forgot-reset');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid OTP. Please check and try again.');
+      toast.error(err.response?.data?.message || 'Invalid OTP. Please check and try again.');
     } finally {
       setLoading(false);
     }
@@ -181,9 +220,10 @@ export default function Auth() {
 
     try {
       await apiResetPassword(formData.email, formData.otp, formData.newPassword);
+      toast.success('Password reset successfully.');
       setStep('reset-success');
     } catch (err) {
-      setError(err.response?.data?.message || 'Password reset failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Password reset failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -195,10 +235,19 @@ export default function Auth() {
     setSuccess('');
     try {
       await apiForgotPassword(formData.email);
+      toast.success('A new password reset OTP has been sent to your email.');
       setSuccess('A new password reset OTP has been sent to your email.');
-      setResendTimer(60);
+      resendOtpRateLimit.triggerRateLimit(60);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        resendOtpRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds}s before resending.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Failed to resend OTP.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -271,16 +320,10 @@ export default function Auth() {
 
       <div className="w-full max-w-md animate-slide-up pt-12 sm:pt-0">
         <Link to="/" className="block text-center mb-8 group" title="Go to Homepage">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
-              alt="NIT KKR"
-              className="w-10 h-10 object-contain"
-            />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
+             <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">
-            NIT KKR Resource Portal
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Academic Portal</h1>
           <p className="text-blue-200/80 font-medium">Your academic resource hub</p>
         </Link>
 
@@ -359,9 +402,19 @@ export default function Auth() {
                   )}
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary mt-2">
-                  {loading ? <ButtonSpinner /> : isLogin ? 'Sign In' : 'Create Account'}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
+                <button 
+                  type="submit" 
+                  disabled={loading || (isLogin ? loginRateLimit.isRateLimited : registerRateLimit.isRateLimited)} 
+                  className="btn-primary mt-2"
+                >
+                  {loading ? (
+                    <ButtonSpinner />
+                  ) : (
+                    isLogin 
+                      ? (loginRateLimit.isRateLimited ? `Try Again (${loginRateLimit.formattedCountdown})` : 'Sign In')
+                      : (registerRateLimit.isRateLimited ? `Register (${registerRateLimit.formattedCountdown})` : 'Create Account')
+                  )}
+                  {!loading && !loginRateLimit.isRateLimited && !registerRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
                 </button>
               </form>
             )}
@@ -394,15 +447,13 @@ export default function Auth() {
                 </button>
 
                 <div className="text-center pt-3">
-                  <button
-                    type="button"
-                    onClick={handleResendOTP}
-                    disabled={loading || resendTimer > 0}
+                  <button 
+                    type="button" 
+                    onClick={handleResendOTP} 
+                    disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0
-                      ? `Resend code in ${resendTimer}s`
-                      : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>
@@ -427,9 +478,19 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-primary mt-2">
-                  {loading ? <ButtonSpinner /> : 'Send Reset OTP'}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
+                <button 
+                  type="submit" 
+                  disabled={loading || forgotPasswordRateLimit.isRateLimited} 
+                  className="btn-primary mt-2"
+                >
+                  {loading ? (
+                    <ButtonSpinner />
+                  ) : forgotPasswordRateLimit.isRateLimited ? (
+                    `Resend in ${forgotPasswordRateLimit.formattedCountdown}`
+                  ) : (
+                    'Send Reset OTP'
+                  )}
+                  {!loading && !forgotPasswordRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
                 </button>
 
                 <div className="pt-2">
@@ -474,12 +535,10 @@ export default function Auth() {
                   <button
                     type="button"
                     onClick={handleResendForgotOTP}
-                    disabled={loading || resendTimer > 0}
+                    disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0
-                      ? `Resend code in ${resendTimer}s`
-                      : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button

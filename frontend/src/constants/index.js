@@ -22,6 +22,7 @@ export const RESOURCE_TYPES = [
   { value: 'NOTES', label: 'Notes' },
 ];
 
+// Mirrors backend/src/models/Mentor.js -> year enum exactly.
 export const SENIOR_YEARS = ['2nd Year', '3rd Year', '4th Year'];
 export const ALUMNI_YEAR_VALUE = 'Alumni';
 export const ALL_MENTOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];

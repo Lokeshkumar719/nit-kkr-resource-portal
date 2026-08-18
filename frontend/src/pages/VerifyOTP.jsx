@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-import { verifyOTP, resendOTP } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { verifyOTP, resendOTP } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 function VerifyOTP({ setActiveTab }) {
   const { checkAuth } = useAuth();
@@ -14,24 +15,17 @@ function VerifyOTP({ setActiveTab }) {
 
   const [resendLoading, setResendLoading] = useState(false);
 
-  const [message, setMessage] = useState({ type: '', text: '' });
-
   const handleVerify = async (event) => {
     event.preventDefault();
 
     try {
       setLoading(true);
-      setMessage({ type: '', text: '' });
 
       await verifyOTP(email, otp);
+      toast.success("Email verified successfully.");
       await checkAuth();
-
-      setMessage({ type: 'success', text: 'Email verified successfully.' });
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'OTP verification failed.',
-      });
+      toast.error(error.response?.data?.message || "OTP verification failed.");
     } finally {
       setLoading(false);
     }
@@ -39,28 +33,18 @@ function VerifyOTP({ setActiveTab }) {
 
   const handleResendOTP = async () => {
     if (!email) {
-      setMessage({
-        type: 'error',
-        text: 'Enter your email first to resend the OTP.',
-      });
+      toast.error("Enter your email first to resend the OTP.");
       return;
     }
 
     try {
       setResendLoading(true);
-      setMessage({ type: '', text: '' });
 
       await resendOTP(email);
 
-      setMessage({
-        type: 'success',
-        text: 'A new OTP has been sent to your email.',
-      });
+      toast.success("A new OTP has been sent to your email.");
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'Unable to resend OTP.',
-      });
+      toast.error(error.response?.data?.message || "Unable to resend OTP.");
     } finally {
       setResendLoading(false);
     }
@@ -100,8 +84,6 @@ function VerifyOTP({ setActiveTab }) {
           required
         />
       </div>
-
-      {message.text && <div className={`auth-message ${message.type}`}>{message.text}</div>}
 
       <button className="primary-button" type="submit" disabled={loading}>
         {loading ? 'Verifying...' : 'Verify OTP'}

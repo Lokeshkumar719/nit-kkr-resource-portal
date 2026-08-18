@@ -59,9 +59,7 @@ export const Layout = ({ children }) => {
                   className="w-7 h-7 object-contain"
                 />
               </div>
-              <span className="font-bold text-lg tracking-wide hidden sm:block">
-                NIT KKR Resource Portal
-              </span>
+              <span className="font-bold text-lg tracking-wide hidden sm:block">NIT KKR Academic Portal</span>
             </Link>
 
             {/* Desktop Navigation Links */}

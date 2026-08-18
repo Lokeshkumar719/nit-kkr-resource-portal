@@ -18,6 +18,7 @@ import { BRANCHES, BRANCH_LABELS, SEMESTERS, RESOURCE_TYPES } from '../constants
 import { ResourceSkeleton } from '../components/ui/Skeleton.jsx';
 import { CustomSelect } from '../components/ui/CustomSelect.jsx';
 import toast from 'react-hot-toast';
+import useStickyState from '../hooks/useStickyState';
 
 const TYPE_ICONS = {
   LECTURES: Video,
@@ -42,17 +43,28 @@ const EmptyState = ({ icon: Icon = FolderOpen, title, message }) => (
 );
 
 export default function Resources() {
-  const [branch, setBranch] = useState('');
-  const [sem, setSem] = useState('');
+  const [branch, setBranch] = useStickyState('', 'res_branch');
+  const [sem, setSem] = useStickyState('', 'res_sem');
   const [subjects, setSubjects] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useStickyState(null, 'res_subject');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [activeType, setActiveType] = useState('LECTURES');
+  const [activeType, setActiveType] = useStickyState('LECTURES', 'res_type');
   const [subjectResources, setSubjectResources] = useState([]);
   const [loadingResources, setLoadingResources] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => {
+      ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach(key => sessionStorage.removeItem(key));
+    };
+  }, []);
+
+  const handleGoBack = () => {
+    ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach(key => sessionStorage.removeItem(key));
+    navigate(-1);
+  };
 
   useEffect(() => {
     if (branch && sem) {
@@ -69,7 +81,6 @@ export default function Resources() {
     try {
       const res = await resourceApi.getByBranchAndSem(branch, sem);
       setSubjects(res.data.data || []);
-      setSelectedSubject(null);
     } catch (err) {
       setSubjects([]);
       setError('Could not load resources right now.');
@@ -120,11 +131,7 @@ export default function Resources() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
-              title="Go Back"
-            >
+            <button onClick={handleGoBack} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
             </button>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
@@ -145,8 +152,8 @@ export default function Resources() {
             <label className="filter-label">Branch</label>
             <CustomSelect
               value={branch}
-              onChange={setBranch}
-              options={BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))}
+              onChange={(val) => { setBranch(val); setSelectedSubject(null); setActiveType('LECTURES'); }}
+              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
               placeholder="Choose branch"
               id="resource-branch-filter"
             />
@@ -155,8 +162,8 @@ export default function Resources() {
             <label className="filter-label">Semester</label>
             <CustomSelect
               value={sem}
-              onChange={(val) => setSem(Number(val))}
-              options={SEMESTERS.map((s) => ({ value: s, label: `Semester ${s}` }))}
+              onChange={(val) => { setSem(Number(val)); setSelectedSubject(null); setActiveType('LECTURES'); }}
+              options={SEMESTERS.map(s => ({ value: s, label: `Semester ${s}` }))}
               placeholder="Choose semester"
               id="resource-sem-filter"
             />

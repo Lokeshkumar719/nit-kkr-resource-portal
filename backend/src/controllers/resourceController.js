@@ -58,7 +58,8 @@ const getDownloadUrl = asyncHandler(async (req, res) => {
     );
   }
 
-  const downloadUrl = await getFileUrl(resource.fileKey);
+  const { getFileUrl } = require("../services/fileService");
+  const downloadUrl = await getFileUrl(resource.fileKey, resource.title);
 
   return new ApiResponse(res, STATUS_CODES.OK, 'Download URL generated successfully.', {
     downloadUrl,

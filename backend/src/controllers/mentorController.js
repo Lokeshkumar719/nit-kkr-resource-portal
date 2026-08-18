@@ -11,8 +11,13 @@ const getMentors = asyncHandler(async (req, res) => {
   mentorValidator.validateGetMentors(req.query);
 
   const mentors = await mentorService.getMentors(req.query);
-
-  return new ApiResponse(res, STATUS_CODES.OK, 'Mentors fetched successfully.', mentors);
+  
+  return new ApiResponse(
+    res,
+    STATUS_CODES.OK,
+    "Mentors fetched successfully.",
+    mentors,
+  );
 });
 
 const getMentor = asyncHandler(async (req, res) => {

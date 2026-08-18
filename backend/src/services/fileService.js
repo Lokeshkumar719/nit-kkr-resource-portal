@@ -45,11 +45,19 @@ const deleteFile = async (fileKey) => {
   await r2Client.send(command);
 };
 
-const getFileUrl = async (fileKey) => {
-  const command = new GetObjectCommand({
+const getFileUrl = async (fileKey, downloadName = null) => {
+  const params = {
     Bucket: process.env.R2_BUCKET_NAME,
     Key: fileKey,
-  });
+  };
+
+  if (downloadName) {
+    // Sanitize the filename to prevent header injection or invalid characters
+    const safeName = downloadName.replace(/[^a-zA-Z0-9.\-_ ]/g, "").trim();
+    params.ResponseContentDisposition = `attachment; filename="${safeName}.zip"`;
+  }
+
+  const command = new GetObjectCommand(params);
 
   return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
 };

@@ -5,6 +5,9 @@ import { changePassword as apiChangePassword } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
+import { parseRateLimitError } from '../utils/rateLimitUtils';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown';
+import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const changePasswordRateLimit = useRateLimitCountdown('changePassword');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,13 +47,22 @@ export default function ChangePassword() {
     try {
       await apiChangePassword(oldPassword, newPassword);
       setSuccess(true);
+      toast.success('Password changed successfully.');
       // Backend clears cookies on change-password, so we log the user out on the frontend as well
       setTimeout(async () => {
         await logout();
         navigate('/login');
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        changePasswordRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
+      } else {
+        const errorMsg = err.response?.data?.message || 'Failed to change password. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -184,11 +198,11 @@ export default function ChangePassword() {
 
             <button
               type="submit"
-              disabled={loading || !oldPassword || !newPassword || !confirmPassword}
+              disabled={loading || !oldPassword || !newPassword || !confirmPassword || changePasswordRateLimit.isRateLimited}
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-semibold hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm mt-2"
             >
-              {loading ? <ButtonSpinner /> : 'Update Password'}
-              {!loading && <ArrowRight className="w-4 h-4" />}
+              {loading ? <ButtonSpinner /> : (changePasswordRateLimit.isRateLimited ? `Update Password (${changePasswordRateLimit.formattedCountdown})` : 'Update Password')}
+              {!loading && !changePasswordRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
         </div>
