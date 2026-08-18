@@ -9,10 +9,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [
-        /^[a-zA-Z0-9._%+-]+@nitkkr\.ac\.in$/,
-        'Please use a valid @nitkkr.ac.in email',
-      ],
+      match: [/^[a-zA-Z0-9._%+-]+@nitkkr\.ac\.in$/, 'Please use a valid @nitkkr.ac.in email'],
     },
 
     password: {
@@ -37,6 +34,16 @@ const userSchema = new mongoose.Schema(
     },
 
     emailVerificationOTPExpires: {
+      type: Date,
+      default: null,
+    },
+
+    forgotPasswordOTP: {
+      type: String,
+      default: null,
+    },
+
+    forgotPasswordOTPExpires: {
       type: Date,
       default: null,
     },

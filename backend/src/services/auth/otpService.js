@@ -1,6 +1,7 @@
 const resend = require('../../config/resend');
 
 const verificationOTPTemplate = require('../../templates/emails/verificationOTPTemplate');
+const forgotPasswordOTPTemplate = require('../../templates/emails/forgotPasswordOTPTemplate');
 
 const sendVerificationOTP = async (email, otp) => {
   try {
@@ -17,6 +18,16 @@ const sendVerificationOTP = async (email, otp) => {
   }
 };
 
+const sendForgotPasswordOTP = async (email, otp) => {
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: 'Reset Your Password',
+    html: forgotPasswordOTPTemplate(otp),
+  });
+};
+
 module.exports = {
   sendVerificationOTP,
+  sendForgotPasswordOTP,
 };

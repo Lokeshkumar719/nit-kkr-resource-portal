@@ -1,30 +1,58 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-const contributionSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: ['bug', 'resource'],
-    required: true
+const RESOURCE_TYPES = require('../constants/resourceTypes');
+const CONTRIBUTION_STATUS = require('../constants/contributionStatus');
+
+const contributionSchema = new mongoose.Schema(
+  {
+    subjectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subject',
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: Object.values(RESOURCE_TYPES),
+    },
+    fileName: {
+      type: String,
+      trim: true,
+    },
+    fileKey: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    url: {
+      type: String,
+      trim: true,
+      match: /^https?:\/\/.+/,
+    },
+    contributedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: Object.values(CONTRIBUTION_STATUS),
+      default: CONTRIBUTION_STATUS.PENDING,
+    },
   },
-  description: String,
-  details: {
-    branch: String,
-    semester: Number,
-    subjectName: String,
-    link: String
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
-  },
-  submittedBy: {
-    type: String // User email or ID
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  {
+    timestamps: true,
   }
+);
+
+contributionSchema.index({
+  subjectId: 1,
+  status: 1,
 });
 
-export const Contribution = mongoose.model('Contribution', contributionSchema);
+module.exports = mongoose.model('Contribution', contributionSchema);

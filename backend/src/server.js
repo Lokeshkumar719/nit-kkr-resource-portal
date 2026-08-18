@@ -5,9 +5,14 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const connectDB = require('./config/db');
-const {redisClient,connectRedis } = require('./config/redis');
+const { redisClient, connectRedis } = require('./config/redis');
 
 const authRoutes = require('./routes/authRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
+const resourceRoutes = require('./routes/resourceRoutes');
+const contributionRoutes = require('./routes/contributionRoutes');
+const mentorRoutes = require('./routes/mentorRoutes');
+const bugRoutes = require('./routes/bugRoutes');
 
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
@@ -18,6 +23,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
+  'http://localhost:5175',
 ].filter(Boolean);
 
 app.use(
@@ -44,6 +50,14 @@ app.use(
 
 app.use(cookieParser());
 
+// Prevent caching for all API routes (Cloudflare, browser, etc.)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -51,13 +65,15 @@ app.get('/', (req, res) => {
   });
 });
 
-// Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/subjects', subjectRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/contributions', contributionRoutes);
+app.use('/api/mentors', mentorRoutes);
+app.use('/api/bugs', bugRoutes);
 
-// Error Middleware
 app.use(errorMiddleware);
 
-// Graceful Shutdown
 process.on('SIGINT', async () => {
   try {
     await redisClient.quit();
@@ -70,17 +86,15 @@ process.on('SIGINT', async () => {
 
 const initialiseConnection = async () => {
   try {
-    await Promise.all([
-      connectDB(),
-      connectRedis(),
-    ]);
+    await Promise.all([connectDB(), connectRedis()]);
 
     console.log('Database Connected');
 
+    const setupCronJobs = require('./utils/cronJobs');
+    setupCronJobs();
+
     app.listen(process.env.PORT, () => {
-      console.log(
-        `Server running on port ${process.env.PORT}`
-      );
+      console.log(`Server running on port ${process.env.PORT}`);
     });
   } catch (error) {
     console.error('Startup Error:', error);

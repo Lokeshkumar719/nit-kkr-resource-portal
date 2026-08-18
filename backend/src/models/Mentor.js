@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const { BRANCHES } = require('../constants/branches');
+
+const { CURRENT_YEARS, TAGS } = require('../constants/mentorTags');
 
 const mentorSchema = new mongoose.Schema(
   {
@@ -8,46 +11,85 @@ const mentorSchema = new mongoose.Schema(
       trim: true,
     },
 
+    email: {
+      type: String,
+      lowercase: true,
+    },
+
     branch: {
       type: String,
       required: true,
-      trim: true,
-      uppercase: true,
+      enum: BRANCHES,
     },
 
-    year: {
+    currentYear: {
       type: String,
-      enum: ['2nd Year', '3rd Year', '4th Year', 'Alumni'],
       required: true,
-    },
-
-    company: {
-      type: String,
       trim: true,
-      default: null,
-    },
-
-    linkedin: {
-      type: String,
-      trim: true,
-      default: null,
-    },
-
-    imageUrl: {
-      type: String,
-      default: null,
     },
 
     email: {
       type: String,
-      trim: true,
       lowercase: true,
-      default: null,
     },
+
+    branch: {
+      type: String,
+      required: true,
+      enum: BRANCHES,
+    },
+
+    currentYear: {
+      type: String,
+      required: true,
+      enum: CURRENT_YEARS,
+    },
+
+    batch: {
+      type: String,
+    },
+
+    image: {
+      type: String,
+    },
+
+    linkedin: {
+      type: String,
+    },
+
+    tags: [
+      {
+        type: String,
+        enum: TAGS,
+      },
+    ],
+
+    experiences: [
+      {
+        company: String,
+        role: String,
+        type: {
+          type: String,
+          enum: ['Internship', 'Placement', 'Research'],
+        },
+      },
+    ],
+
+    achievements: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+mentorSchema.index({ currentYear: 1 });
+
+mentorSchema.index({ branch: 1 });
+
+mentorSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Mentor', mentorSchema);
