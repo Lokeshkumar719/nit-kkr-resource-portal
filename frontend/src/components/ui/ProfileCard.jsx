@@ -4,7 +4,21 @@ import { Building2, Mail, Award, ExternalLink } from 'lucide-react';
 export default function ProfileCard({ data, index, variant = 'alumni', customGradient }) {
   const isAlumni = variant === 'alumni';
 
-  const avatarUrl = data.image || data.imageUrl ||
+  // Helper to extract direct image URL if a Google Drive sharing link is provided
+  const processImageUrl = (url) => {
+    if (!url) return null;
+    const driveRegex = /drive\.google\.com\/file\/d\/([^/]+)/;
+    const match = url.match(driveRegex);
+    if (match && match[1]) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
+  };
+
+  const rawUrl = data.image || data.imageUrl || '';
+  const processedUrl = processImageUrl(rawUrl);
+
+  const avatarUrl = processedUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0f2b5b&color=fff&bold=true&size=128`;
 
   const bannerGradient = customGradient || (isAlumni 
@@ -29,6 +43,7 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
           alt={data.name}
           className="card-avatar"
           loading="lazy"
+          referrerPolicy="no-referrer"
           onError={(e) => {
             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0f2b5b&color=fff&bold=true&size=128`;
           }}

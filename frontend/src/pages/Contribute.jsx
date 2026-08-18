@@ -4,6 +4,7 @@ import { Bug, BookUp, Send, CheckCircle2, ArrowLeft, ArrowRight, AlertCircle, Fi
 import { contributionApi, createContribution, resourceApi } from '../services/api.js';
 import { BRANCHES, BRANCH_LABELS, SEMESTERS } from '../constants/index.js';
 import { Alert } from '../components/ui/Alert.jsx';
+import toast from 'react-hot-toast';
 import { ButtonSpinner } from '../components/ui/Spinner.jsx';
 import { ZipUpload } from '../components/ui/ZipUpload.jsx';
 import { CustomSelect } from '../components/ui/CustomSelect.jsx';
@@ -85,10 +86,15 @@ export default function Contribute() {
       const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
       if (isRateLimited) {
         contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
       } else if (err.response?.status === 404) {
-        setError('Bug reporting backend endpoint is not currently available.');
+        const errorMsg = 'Bug reporting backend endpoint is not currently available.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       } else {
-        setError('Unable to submit your report. Please try again.');
+        const errorMsg = err.response?.data?.message || 'Unable to submit your report. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);
@@ -123,10 +129,15 @@ export default function Contribute() {
       const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
       if (isRateLimited) {
         contributionRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
       } else if (err.response?.status === 404) {
-        setError('Resource contribution backend endpoint is not currently available.');
+        const errorMsg = 'Resource contribution backend endpoint is not currently available.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       } else {
-        setError(err.response?.data?.message || 'Unable to submit your contribution. Please try again.');
+        const errorMsg = err.response?.data?.message || 'Unable to submit your contribution. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);
@@ -212,15 +223,13 @@ export default function Contribute() {
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-800">Bug report submitted successfully.</h3>
-            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Resource Portal.</p>
+            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Academic Portal.</p>
             <button onClick={handleBack} className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors">
               Back to Contributions
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmitBug} className="space-y-5">
-            <Alert type="error" message={error} onDismiss={() => setError('')} />
-            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
               <textarea
@@ -409,8 +418,6 @@ export default function Contribute() {
             </div>
           ) : (
             <form onSubmit={handleSubmitResource} className="space-y-6">
-              <Alert type="error" message={error} onDismiss={() => setError('')} />
-              
               <div className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>

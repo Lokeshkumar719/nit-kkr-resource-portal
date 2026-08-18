@@ -10,7 +10,7 @@ const findResourceById = async (resourceId) => {
 
 const findResources = async (filter) => {
   return await Resource.find(filter).sort({
-    createdAt: -1,
+    createdAt: 1,
   });
 };
 
@@ -22,10 +22,15 @@ const updateResource = async (resourceId, updateData) => {
   return await Resource.findByIdAndUpdate(resourceId, updateData, { new: true });
 };
 
+const countResourcesBySubject = async (subjectId) => {
+  return await Resource.countDocuments({ subjectId: subjectId });
+};
+
 module.exports = {
   createResource,
   findResourceById,
   findResources,
   deleteResource,
   updateResource,
+  countResourcesBySubject,
 };

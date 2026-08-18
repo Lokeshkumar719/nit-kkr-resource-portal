@@ -43,6 +43,11 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('nitkkr_user', JSON.stringify(userData));
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('rateLimit_anon_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
   };
 
   const handleLogout = async () => {
@@ -53,6 +58,11 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null);
       localStorage.removeItem('nitkkr_user');
+      Object.keys(sessionStorage).forEach((key) => {
+        if (key.startsWith('rateLimit_') || key.startsWith('admin_')) {
+          sessionStorage.removeItem(key);
+        }
+      });
     }
   };
 

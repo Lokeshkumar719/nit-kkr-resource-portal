@@ -64,10 +64,14 @@ end
 if tokens >= requested then
   tokens = tokens - requested
   redis.call("HMSET", key, "tokens", tokens, "last_refill", last_refill)
+  local ttl = math.max(3600, math.ceil(capacity / refill_rate / 1000) * 2)
+  redis.call("EXPIRE", key, ttl)
   return {1, tokens, 0}
 else
   redis.call("HMSET", key, "tokens", tokens, "last_refill", last_refill)
   local wait_ms = math.ceil((requested - tokens) / refill_rate)
+  local ttl = math.max(3600, math.ceil(wait_ms / 1000) * 2)
+  redis.call("EXPIRE", key, ttl)
   return {0, tokens, wait_ms}
 end
 `;
@@ -135,7 +139,8 @@ const registerLimiter = new RateLimiterRedis({
 });
 
 const limitResource = async (req, res, next) => {
-  const key = `rl:resource:${req.user._id.toString()}`;
+  const userId = req.user?._id?.toString() || req.ip;
+  const key = `rl:resource:${userId}`;
 
   try {
     const { allowed, remaining, waitMs } = await consumeTokenBucket(
@@ -159,7 +164,8 @@ const limitResource = async (req, res, next) => {
 };
 
 const limitContribution = async (req, res, next) => {
-  const key = `rl:contribution:${req.user._id.toString()}`;
+  const userId = req.user?._id?.toString() || req.ip;
+  const key = `rl:contribution:${userId}`;
 
   try {
     const { allowed, remaining, waitMs } = await consumeTokenBucket(
@@ -199,7 +205,8 @@ const limitLogin = async (req, res, next) => {
 };
 
 const limitChangePassword = async (req, res, next) => {
-  const key = req.user._id.toString(); // ← authenticated user, not IP
+  const userId = req.user?._id?.toString() || req.ip;
+  const key = userId;
   try {
     const result = await changePasswordLimiter.consume(key);
     res.set(buildHeaders(CHANGE_PASSWORD_LIMIT, result.remainingPoints));

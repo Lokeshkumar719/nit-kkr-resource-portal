@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 import "../styles/auth.css";
 
@@ -13,23 +14,18 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleLogin = async (event) => {
     event.preventDefault();
 
     try {
       setLoading(true);
-      setMessage({ type: "", text: "" });
 
       await login(email, password);
+      toast.success("Logged in successfully!");
       await checkAuth();
     } catch (error) {
-      setMessage({
-        type: "error",
-        text:
-          error.response?.data?.message || "Login failed. Please try again.",
-      });
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -87,10 +83,6 @@ function Login() {
           </button>
         </div>
       </div>
-
-      {message.text && (
-        <div className={`auth-message ${message.type}`}>{message.text}</div>
-      )}
 
       <button className="primary-button" type="submit" disabled={loading}>
         {loading ? "Logging in..." : "Login"}

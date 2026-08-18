@@ -7,6 +7,7 @@ import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
 import { parseRateLimitError } from '../utils/rateLimitUtils';
 import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown';
+import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function ChangePassword() {
     try {
       await apiChangePassword(oldPassword, newPassword);
       setSuccess(true);
+      toast.success('Password changed successfully.');
       // Backend clears cookies on change-password, so we log the user out on the frontend as well
       setTimeout(async () => {
         await logout();
@@ -55,8 +57,11 @@ export default function ChangePassword() {
       const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
       if (isRateLimited) {
         changePasswordRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
       } else {
-        setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+        const errorMsg = err.response?.data?.message || 'Failed to change password. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);

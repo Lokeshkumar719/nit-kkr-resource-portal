@@ -1,29 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatCountdown } from '../utils/rateLimitUtils';
+import { useAuth } from '../context/AuthContext';
 
 export const useRateLimitCountdown = (actionKey) => {
+  let user = null;
+  try {
+    const auth = useAuth();
+    user = auth?.user;
+  } catch (e) {
+    user = null;
+  }
+
   const [countdown, setCountdown] = useState(0);
   const intervalRef = useRef(null);
 
-  const storageKey = `rateLimit_${actionKey}`;
-
-  // Initialize from sessionStorage on mount
-  useEffect(() => {
-    const storedUntil = sessionStorage.getItem(storageKey);
-    if (storedUntil) {
-      const untilMs = parseInt(storedUntil, 10);
-      const remaining = Math.ceil((untilMs - Date.now()) / 1000);
-      
-      if (remaining > 0) {
-        setCountdown(remaining);
-        startTimer();
-      } else {
-        sessionStorage.removeItem(storageKey);
-      }
-    }
-
-    return () => clearInterval(intervalRef.current);
-  }, [actionKey]);
+  const userId = user?._id || user?.id || 'anon';
+  const storageKey = `rateLimit_${userId}_${actionKey}`;
 
   const startTimer = () => {
     clearInterval(intervalRef.current);
@@ -38,6 +30,28 @@ export const useRateLimitCountdown = (actionKey) => {
       });
     }, 1000);
   };
+
+  // Initialize and react to storageKey / actionKey / user changes
+  useEffect(() => {
+    clearInterval(intervalRef.current);
+    const storedUntil = sessionStorage.getItem(storageKey);
+    if (storedUntil) {
+      const untilMs = parseInt(storedUntil, 10);
+      const remaining = Math.ceil((untilMs - Date.now()) / 1000);
+      
+      if (remaining > 0) {
+        setCountdown(remaining);
+        startTimer();
+      } else {
+        sessionStorage.removeItem(storageKey);
+        setCountdown(0);
+      }
+    } else {
+      setCountdown(0);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [storageKey]);
 
   const triggerRateLimit = (seconds) => {
     if (seconds <= 0) return;

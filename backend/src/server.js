@@ -50,6 +50,14 @@ app.use(
 
 app.use(cookieParser());
 
+// Prevent caching for all API routes (Cloudflare, browser, etc.)
+app.use("/api", (req, res, next) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
