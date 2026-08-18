@@ -57,12 +57,16 @@ export default function Resources() {
 
   useEffect(() => {
     return () => {
-      ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach(key => sessionStorage.removeItem(key));
+      ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach((key) =>
+        sessionStorage.removeItem(key)
+      );
     };
   }, []);
 
   const handleGoBack = () => {
-    ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach(key => sessionStorage.removeItem(key));
+    ['res_branch', 'res_sem', 'res_subject', 'res_type'].forEach((key) =>
+      sessionStorage.removeItem(key)
+    );
     navigate(-1);
   };
 
@@ -131,7 +135,11 @@ export default function Resources() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
           <div className="flex items-center gap-3 shrink-0">
-            <button onClick={handleGoBack} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+            <button
+              onClick={handleGoBack}
+              className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
+              title="Go Back"
+            >
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
             </button>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
@@ -152,8 +160,12 @@ export default function Resources() {
             <label className="filter-label">Branch</label>
             <CustomSelect
               value={branch}
-              onChange={(val) => { setBranch(val); setSelectedSubject(null); setActiveType('LECTURES'); }}
-              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+              onChange={(val) => {
+                setBranch(val);
+                setSelectedSubject(null);
+                setActiveType('LECTURES');
+              }}
+              options={BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))}
               placeholder="Choose branch"
               id="resource-branch-filter"
             />
@@ -162,8 +174,12 @@ export default function Resources() {
             <label className="filter-label">Semester</label>
             <CustomSelect
               value={sem}
-              onChange={(val) => { setSem(Number(val)); setSelectedSubject(null); setActiveType('LECTURES'); }}
-              options={SEMESTERS.map(s => ({ value: s, label: `Semester ${s}` }))}
+              onChange={(val) => {
+                setSem(Number(val));
+                setSelectedSubject(null);
+                setActiveType('LECTURES');
+              }}
+              options={SEMESTERS.map((s) => ({ value: s, label: `Semester ${s}` }))}
               placeholder="Choose semester"
               id="resource-sem-filter"
             />

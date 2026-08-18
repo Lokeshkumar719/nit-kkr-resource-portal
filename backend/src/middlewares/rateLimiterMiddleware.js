@@ -17,7 +17,7 @@ const {
   CONTRIBUTION_REFILL_RATE_PER_SEC,
 } = require('../constants/rateLimiterConstants');
 
-const {TOO_MANY_REQUEST} = require("../constants/statusCodes");
+const { TOO_MANY_REQUEST } = require('../constants/statusCodes');
 
 const buildHeaders = (limit, remaining, retryAfterMs = null) => {
   const headers = {
@@ -273,5 +273,5 @@ module.exports = {
   limitRegister,
   limitChangePassword,
   limitForgotPassword,
-  limitResendOtp
+  limitResendOtp,
 };

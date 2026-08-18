@@ -59,7 +59,8 @@ export default function ChangePassword() {
         changePasswordRateLimit.triggerRateLimit(retryAfterSeconds);
         toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
       } else {
-        const errorMsg = err.response?.data?.message || 'Failed to change password. Please try again.';
+        const errorMsg =
+          err.response?.data?.message || 'Failed to change password. Please try again.';
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -198,11 +199,25 @@ export default function ChangePassword() {
 
             <button
               type="submit"
-              disabled={loading || !oldPassword || !newPassword || !confirmPassword || changePasswordRateLimit.isRateLimited}
+              disabled={
+                loading ||
+                !oldPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                changePasswordRateLimit.isRateLimited
+              }
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-semibold hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm mt-2"
             >
-              {loading ? <ButtonSpinner /> : (changePasswordRateLimit.isRateLimited ? `Update Password (${changePasswordRateLimit.formattedCountdown})` : 'Update Password')}
-              {!loading && !changePasswordRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
+              {loading ? (
+                <ButtonSpinner />
+              ) : changePasswordRateLimit.isRateLimited ? (
+                `Update Password (${changePasswordRateLimit.formattedCountdown})`
+              ) : (
+                'Update Password'
+              )}
+              {!loading && !changePasswordRateLimit.isRateLimited && (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
           </form>
         </div>

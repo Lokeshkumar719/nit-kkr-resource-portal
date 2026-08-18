@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-import { login } from "../services/api";
-import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { login } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 import '../styles/auth.css';
 
@@ -22,10 +22,10 @@ function Login() {
       setLoading(true);
 
       await login(email, password);
-      toast.success("Logged in successfully!");
+      toast.success('Logged in successfully!');
       await checkAuth();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed. Please try again.");
+      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

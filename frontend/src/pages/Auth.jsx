@@ -48,7 +48,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Custom rate limiting hooks for form actions
   const loginRateLimit = useRateLimitCountdown('login');
   const registerRateLimit = useRateLimitCountdown('register');
@@ -78,7 +78,7 @@ export default function Auth() {
         const res = await apiLogin(formData.email, formData.password);
         login(res.data.data);
         toast.success('Logged in successfully!');
-        
+
         if (res.data.data.role === 'ADMIN') {
           navigate('/admin/dashboard');
         } else {
@@ -117,18 +117,18 @@ export default function Auth() {
 
     try {
       const res = await apiVerifyOTP(formData.email, formData.otp);
-      if(res.data && res.data.data) {
-          login(res.data.data);
-          toast.success('Email verified successfully.');
-          if (res.data.data.role === 'ADMIN') {
-            navigate('/admin/dashboard');
-          } else {
-            navigate('/dashboard');
-          }
+      if (res.data && res.data.data) {
+        login(res.data.data);
+        toast.success('Email verified successfully.');
+        if (res.data.data.role === 'ADMIN') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-          toast.success('Verified! You can now log in.');
-          setStep('auth');
-          setIsLogin(true);
+        toast.success('Verified! You can now log in.');
+        setStep('auth');
+        setIsLogin(true);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Verification failed. Please check the OTP.');
@@ -181,7 +181,8 @@ export default function Auth() {
         forgotPasswordRateLimit.triggerRateLimit(retryAfterSeconds);
         toast.error(`Please wait ${retryAfterSeconds}s before requesting a new OTP.`);
       } else {
-        const errorMsg = err.response?.data?.message || 'Failed to send reset OTP. Please try again.';
+        const errorMsg =
+          err.response?.data?.message || 'Failed to send reset OTP. Please try again.';
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -321,9 +322,15 @@ export default function Auth() {
       <div className="w-full max-w-md animate-slide-up pt-12 sm:pt-0">
         <Link to="/" className="block text-center mb-8 group" title="Go to Homepage">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl backdrop-blur-md mb-4 shadow-xl border border-white/20 group-hover:scale-105 transition-transform">
-             <img src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png" alt="NIT KKR" className="w-10 h-10 object-contain" />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/en/7/75/National_Institute_of_Technology%2C_Kurukshetra_Logo.png"
+              alt="NIT KKR"
+              className="w-10 h-10 object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">NIT KKR Academic Portal</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight group-hover:text-blue-100 transition-colors">
+            NIT KKR Academic Portal
+          </h1>
           <p className="text-blue-200/80 font-medium">Your academic resource hub</p>
         </Link>
 
@@ -402,19 +409,30 @@ export default function Auth() {
                   )}
                 </div>
 
-                <button 
-                  type="submit" 
-                  disabled={loading || (isLogin ? loginRateLimit.isRateLimited : registerRateLimit.isRateLimited)} 
+                <button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    (isLogin ? loginRateLimit.isRateLimited : registerRateLimit.isRateLimited)
+                  }
                   className="btn-primary mt-2"
                 >
                   {loading ? (
                     <ButtonSpinner />
+                  ) : isLogin ? (
+                    loginRateLimit.isRateLimited ? (
+                      `Try Again (${loginRateLimit.formattedCountdown})`
+                    ) : (
+                      'Sign In'
+                    )
+                  ) : registerRateLimit.isRateLimited ? (
+                    `Register (${registerRateLimit.formattedCountdown})`
                   ) : (
-                    isLogin 
-                      ? (loginRateLimit.isRateLimited ? `Try Again (${loginRateLimit.formattedCountdown})` : 'Sign In')
-                      : (registerRateLimit.isRateLimited ? `Register (${registerRateLimit.formattedCountdown})` : 'Create Account')
+                    'Create Account'
                   )}
-                  {!loading && !loginRateLimit.isRateLimited && !registerRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
+                  {!loading &&
+                    !loginRateLimit.isRateLimited &&
+                    !registerRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
                 </button>
               </form>
             )}
@@ -447,13 +465,15 @@ export default function Auth() {
                 </button>
 
                 <div className="text-center pt-3">
-                  <button 
-                    type="button" 
-                    onClick={handleResendOTP} 
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
                     disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited
+                      ? `Resend code in ${resendOtpRateLimit.formattedCountdown}`
+                      : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>
@@ -478,9 +498,9 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
-                  disabled={loading || forgotPasswordRateLimit.isRateLimited} 
+                <button
+                  type="submit"
+                  disabled={loading || forgotPasswordRateLimit.isRateLimited}
                   className="btn-primary mt-2"
                 >
                   {loading ? (
@@ -490,7 +510,9 @@ export default function Auth() {
                   ) : (
                     'Send Reset OTP'
                   )}
-                  {!loading && !forgotPasswordRateLimit.isRateLimited && <ArrowRight className="w-4 h-4" />}
+                  {!loading && !forgotPasswordRateLimit.isRateLimited && (
+                    <ArrowRight className="w-4 h-4" />
+                  )}
                 </button>
 
                 <div className="pt-2">
@@ -538,7 +560,9 @@ export default function Auth() {
                     disabled={loading || resendOtpRateLimit.isRateLimited}
                     className="text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendOtpRateLimit.isRateLimited ? `Resend code in ${resendOtpRateLimit.formattedCountdown}` : "Didn't receive the code? Resend"}
+                    {resendOtpRateLimit.isRateLimited
+                      ? `Resend code in ${resendOtpRateLimit.formattedCountdown}`
+                      : "Didn't receive the code? Resend"}
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button

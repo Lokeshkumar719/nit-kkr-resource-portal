@@ -18,7 +18,8 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
   const rawUrl = data.image || data.imageUrl || '';
   const processedUrl = processImageUrl(rawUrl);
 
-  const avatarUrl = processedUrl ||
+  const avatarUrl =
+    processedUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0f2b5b&color=fff&bold=true&size=128`;
 
   const bannerGradient =

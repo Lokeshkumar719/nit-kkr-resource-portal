@@ -38,7 +38,7 @@ export const useRateLimitCountdown = (actionKey) => {
     if (storedUntil) {
       const untilMs = parseInt(storedUntil, 10);
       const remaining = Math.ceil((untilMs - Date.now()) / 1000);
-      
+
       if (remaining > 0) {
         setCountdown(remaining);
         startTimer();
@@ -55,7 +55,7 @@ export const useRateLimitCountdown = (actionKey) => {
 
   const triggerRateLimit = (seconds) => {
     if (seconds <= 0) return;
-    
+
     const untilMs = Date.now() + seconds * 1000;
     sessionStorage.setItem(storageKey, untilMs.toString());
     setCountdown(seconds);
@@ -66,6 +66,6 @@ export const useRateLimitCountdown = (actionKey) => {
     isRateLimited: countdown > 0,
     countdown,
     formattedCountdown: formatCountdown(countdown),
-    triggerRateLimit
+    triggerRateLimit,
   };
 };

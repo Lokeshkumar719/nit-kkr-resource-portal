@@ -7,7 +7,7 @@ const { uploadResourceFile } = require('../middlewares/uploadResourceFileMiddlew
 
 const resourceController = require('../controllers/resourceController');
 
-const { limitResource } = require("../middlewares/rateLimiterMiddleware");
+const { limitResource } = require('../middlewares/rateLimiterMiddleware');
 
 const router = express.Router();
 
@@ -29,19 +29,19 @@ router.get('/:resourceId', authMiddleware, resourceController.getResourceById);
 router.get('/:resourceId/download', authMiddleware, resourceController.getDownloadUrl);
 
 router.delete(
-  "/:resourceId",
+  '/:resourceId',
   authMiddleware,
   adminMiddleware,
   limitResource,
-  resourceController.deleteResource,
+  resourceController.deleteResource
 );
 
 router.patch(
-  "/:resourceId",
+  '/:resourceId',
   authMiddleware,
   adminMiddleware,
   limitResource,
-  resourceController.updateResource,
+  resourceController.updateResource
 );
 
 module.exports = router;

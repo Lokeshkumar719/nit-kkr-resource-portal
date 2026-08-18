@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { register } from "../services/api";
-import toast from "react-hot-toast";
+import { register } from '../services/api';
+import toast from 'react-hot-toast';
 
 function Register({ setActiveTab }) {
   const [formData, setFormData] = useState({
@@ -26,11 +26,11 @@ function Register({ setActiveTab }) {
 
       await register(formData.email, formData.password);
 
-      toast.success("OTP sent successfully. Please verify your email to continue.");
+      toast.success('OTP sent successfully. Please verify your email to continue.');
 
       setActiveTab('verify');
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed.");
+      toast.error(error.response?.data?.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }

@@ -53,7 +53,7 @@ const getFileUrl = async (fileKey, downloadName = null) => {
 
   if (downloadName) {
     // Sanitize the filename to prevent header injection or invalid characters
-    const safeName = downloadName.replace(/[^a-zA-Z0-9.\-_ ]/g, "").trim();
+    const safeName = downloadName.replace(/[^a-zA-Z0-9.\-_ ]/g, '').trim();
     params.ResponseContentDisposition = `attachment; filename="${safeName}.zip"`;
   }
 

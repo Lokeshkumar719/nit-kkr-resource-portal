@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-import { verifyOTP, resendOTP } from "../services/api";
-import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { verifyOTP, resendOTP } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 function VerifyOTP({ setActiveTab }) {
   const { checkAuth } = useAuth();
@@ -22,10 +22,10 @@ function VerifyOTP({ setActiveTab }) {
       setLoading(true);
 
       await verifyOTP(email, otp);
-      toast.success("Email verified successfully.");
+      toast.success('Email verified successfully.');
       await checkAuth();
     } catch (error) {
-      toast.error(error.response?.data?.message || "OTP verification failed.");
+      toast.error(error.response?.data?.message || 'OTP verification failed.');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ function VerifyOTP({ setActiveTab }) {
 
   const handleResendOTP = async () => {
     if (!email) {
-      toast.error("Enter your email first to resend the OTP.");
+      toast.error('Enter your email first to resend the OTP.');
       return;
     }
 
@@ -42,9 +42,9 @@ function VerifyOTP({ setActiveTab }) {
 
       await resendOTP(email);
 
-      toast.success("A new OTP has been sent to your email.");
+      toast.success('A new OTP has been sent to your email.');
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to resend OTP.");
+      toast.error(error.response?.data?.message || 'Unable to resend OTP.');
     } finally {
       setResendLoading(false);
     }

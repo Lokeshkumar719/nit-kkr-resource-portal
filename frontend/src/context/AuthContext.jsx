@@ -3,7 +3,6 @@ import { verifyAuth, logout as apiLogout } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem('nitkkr_user');

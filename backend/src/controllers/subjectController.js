@@ -44,12 +44,7 @@ const updateSubject = asyncHandler(async (req, res) => {
 
   const subject = await subjectService.updateSubject(req.params.subjectId, req.body);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Subject updated successfully.",
-    subject,
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Subject updated successfully.', subject);
 });
 
 const deleteSubject = asyncHandler(async (req, res) => {
@@ -57,11 +52,7 @@ const deleteSubject = asyncHandler(async (req, res) => {
 
   await subjectService.deleteSubject(req.params.subjectId);
 
-  return new ApiResponse(
-    res,
-    STATUS_CODES.OK,
-    "Subject deleted successfully.",
-  );
+  return new ApiResponse(res, STATUS_CODES.OK, 'Subject deleted successfully.');
 });
 
 module.exports = {

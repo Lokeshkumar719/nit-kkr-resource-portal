@@ -56,7 +56,7 @@ export default function Contribute() {
       setSubjectId('');
     }
   }, [branch, semester]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -105,7 +105,8 @@ export default function Contribute() {
         setError(errorMsg);
         toast.error(errorMsg);
       } else {
-        const errorMsg = err.response?.data?.message || 'Unable to submit your report. Please try again.';
+        const errorMsg =
+          err.response?.data?.message || 'Unable to submit your report. Please try again.';
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -148,7 +149,8 @@ export default function Contribute() {
         setError(errorMsg);
         toast.error(errorMsg);
       } else {
-        const errorMsg = err.response?.data?.message || 'Unable to submit your contribution. Please try again.';
+        const errorMsg =
+          err.response?.data?.message || 'Unable to submit your contribution. Please try again.';
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -261,8 +263,13 @@ export default function Contribute() {
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-800">Bug report submitted successfully.</h3>
-            <p className="text-sm text-gray-500 mt-1">Thank you for helping improve NIT KKR Academic Portal.</p>
-            <button onClick={handleBack} className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors">
+            <p className="text-sm text-gray-500 mt-1">
+              Thank you for helping improve NIT KKR Academic Portal.
+            </p>
+            <button
+              onClick={handleBack}
+              className="mt-6 text-sm font-semibold text-nit-primary hover:text-nit-accent transition-colors"
+            >
               Back to Contributions
             </button>
           </div>
@@ -288,8 +295,16 @@ export default function Contribute() {
               disabled={loading || !description.trim() || contributionRateLimit.isRateLimited}
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary"
             >
-              {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
-              {loading ? 'Submitting...' : (contributionRateLimit.isRateLimited ? `Submit Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Bug Report')}
+              {loading ? (
+                <ButtonSpinner />
+              ) : (
+                !contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />
+              )}
+              {loading
+                ? 'Submitting...'
+                : contributionRateLimit.isRateLimited
+                  ? `Submit Again in ${contributionRateLimit.formattedCountdown}`
+                  : 'Submit Bug Report'}
             </button>
           </form>
         )}
@@ -566,11 +581,24 @@ export default function Contribute() {
 
               <button
                 type="submit"
-                disabled={loading || !subjectId || (view === 'lecture' ? !url : !file) || contributionRateLimit.isRateLimited}
+                disabled={
+                  loading ||
+                  !subjectId ||
+                  (view === 'lecture' ? !url : !file) ||
+                  contributionRateLimit.isRateLimited
+                }
                 className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-medium hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm"
               >
-                {loading ? <ButtonSpinner /> : (!contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />)}
-                {loading ? 'Submitting contribution...' : (contributionRateLimit.isRateLimited ? `Contribute Again in ${contributionRateLimit.formattedCountdown}` : 'Submit Contribution')}
+                {loading ? (
+                  <ButtonSpinner />
+                ) : (
+                  !contributionRateLimit.isRateLimited && <Send className="w-4 h-4" />
+                )}
+                {loading
+                  ? 'Submitting contribution...'
+                  : contributionRateLimit.isRateLimited
+                    ? `Contribute Again in ${contributionRateLimit.formattedCountdown}`
+                    : 'Submit Contribution'}
               </button>
             </form>
           )}

@@ -105,7 +105,7 @@ export const getSubjects = (semester, branch) =>
     },
   });
 
-export const createSubject = (data) => api.post("/subjects", data);
+export const createSubject = (data) => api.post('/subjects', data);
 export const updateSubject = (id, data) => api.patch(`/subjects/${id}`, data);
 export const deleteSubject = (id) => api.delete(`/subjects/${id}`);
 
