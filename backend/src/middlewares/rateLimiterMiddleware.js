@@ -221,7 +221,7 @@ const limitChangePassword = async (req, res, next) => {
 };
 
 const limitForgotPassword = async (req, res, next) => {
-  const key = req.ip; // usually rate limit by IP for unauthenticated routes
+  const key = req.ip; // rate limit by IP for unauthenticated routes
   try {
     const result = await forgotPasswordLimiter.consume(key);
     res.set(buildHeaders(FORGOT_PASSWORD_LIMIT, result.remainingPoints));
@@ -236,7 +236,7 @@ const limitForgotPassword = async (req, res, next) => {
 };
 
 const limitResendOtp = async (req, res, next) => {
-  const key = req.ip; // usually rate limit by IP for unauthenticated routes
+  const key = req.ip; // rate limit by IP for unauthenticated routes
   try {
     const result = await resendOtpLimiter.consume(key);
     res.set(buildHeaders(RESEND_OTP_LIMIT, result.remainingPoints));

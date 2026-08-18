@@ -31,8 +31,6 @@ export const RESOURCE_TYPES = [
 ];
 
 // Mirrors backend/src/models/Mentor.js -> year enum exactly.
-// Senior Support should only ever show the first three;
-// 'Alumni' is reserved for the Alumni Network section.
 export const SENIOR_YEARS = ['2nd Year', '3rd Year', '4th Year'];
 export const ALUMNI_YEAR_VALUE = 'Alumni';
 export const ALL_MENTOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];
@@ -40,10 +38,6 @@ export const ALL_MENTOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];
 // Mirrors backend/src/constants/roles.js exactly
 export const USER_ROLES = { USER: 'USER', ADMIN: 'ADMIN' };
 
-// Professional skill tags for Alumni/Senior profile cards.
-// Frontend-only categorization, no backend enum for this yet —
-// used purely for optional display/filtering, never sent to the API
-// unless the profile data itself contains a `skills` array.
 export const MENTOR_TAGS = [
   "Competitive Programming",
   "Frontend Development",

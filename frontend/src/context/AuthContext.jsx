@@ -3,7 +3,7 @@ import { verifyAuth, logout as apiLogout } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-// Synchronously hydrate from localStorage to prevent flash/redirect on refresh
+
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem('nitkkr_user');

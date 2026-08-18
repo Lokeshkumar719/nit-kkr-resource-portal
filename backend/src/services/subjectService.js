@@ -4,6 +4,7 @@ const STATUS_CODES = require("../constants/statusCodes");
 
 const subjectRepository = require("../repositories/subjectRepository");
 const resourceRepository = require("../repositories/resourceRepository");
+const contributionRepository = require("../repositories/contributionRepository");
 
 const createSubject = async (subjectData) => {
   const existingSubject = await subjectRepository.findSubjectByCode(
@@ -56,6 +57,7 @@ const updateSubject = async (subjectId, subjectData) => {
     if (existingSubject) {
       throw new ApiError(STATUS_CODES.CONFLICT, "Subject with this code already exists.");
     }
+    
   }
 
   return await subjectRepository.updateSubject(subjectId, subjectData);
@@ -77,6 +79,15 @@ const deleteSubject = async (subjectId) => {
     }
     await resourceRepository.deleteResource(resource._id);
   }
+
+  // also delete all contributions attached to this subject
+  const contributions = await contributionRepository.findContributions({ subjectId });
+  for (const contribution of contributions) {
+    if (contribution.fileKey) {
+      await fileService.deleteFile(contribution.fileKey);
+    }
+    await contributionRepository.deleteContribution(contribution._id);
+  }   
 
   return await subjectRepository.deleteSubject(subjectId);
 };

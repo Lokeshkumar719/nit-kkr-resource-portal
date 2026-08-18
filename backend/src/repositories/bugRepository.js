@@ -10,7 +10,7 @@ const findBugById = async (bugId) => {
 
 const findBugs = async (filter) => {
   return await Bug.find(filter).populate("reportedBy", "username email").sort({
-    createdAt: -1,
+    createdAt: 1,
   });
 };
 
