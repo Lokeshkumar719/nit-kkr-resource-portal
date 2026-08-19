@@ -25,7 +25,10 @@ export const ResourceSkeleton = ({ rows = 5 }) => (
 export const ProfileSkeleton = ({ count = 4 }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
     {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden">
+      <div
+        key={i}
+        className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden"
+      >
         <Bone className="h-16 w-full rounded-none" />
         <div className="px-5 -mt-8">
           <Bone className="w-16 h-16 rounded-full border-4 border-white" />
@@ -44,7 +47,10 @@ export const ProfileSkeleton = ({ count = 4 }) => (
 export const ContributionSkeleton = ({ rows = 3 }) => (
   <div className="space-y-4">
     {Array.from({ length: rows }).map((_, i) => (
-      <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-slate-300 flex flex-col md:flex-row justify-between items-start gap-4">
+      <div
+        key={i}
+        className="bg-white p-5 rounded-xl shadow-sm border border-slate-300 flex flex-col md:flex-row justify-between items-start gap-4"
+      >
         <div className="flex-1 w-full">
           <div className="flex items-center gap-2 mb-2">
             <Bone className="h-5 w-14 rounded" />
@@ -182,7 +188,7 @@ export const AdminAppSkeleton = () => (
     {/* Main Content — matches OverviewTab */}
     <div className="flex-1 p-6 md:p-8 space-y-6">
       <Bone className="h-7 w-32 mb-2" />
-      
+
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-300 space-y-4">
         <Bone className="h-4 w-32" />
         <div className="grid sm:grid-cols-3 gap-4">

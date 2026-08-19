@@ -18,21 +18,19 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
   const rawUrl = data.image || data.imageUrl || '';
   const processedUrl = processImageUrl(rawUrl);
 
-  const avatarUrl = processedUrl ||
+  const avatarUrl =
+    processedUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0f2b5b&color=fff&bold=true&size=128`;
 
-  const bannerGradient = customGradient || (isAlumni 
-    ? "from-amber-500 via-orange-500 to-nit-primary" 
-    : "from-nit-primary to-blue-600");
+  const bannerGradient =
+    customGradient ||
+    (isAlumni ? 'from-amber-500 via-orange-500 to-nit-primary' : 'from-nit-primary to-blue-600');
 
-  const badgeText = isAlumni ? "Alumni" : data.year;
-  const badgeClass = isAlumni ? "tag tag-amber" : "tag";
+  const badgeText = isAlumni ? 'Alumni' : data.year;
+  const badgeClass = isAlumni ? 'tag tag-amber' : 'tag';
 
   return (
-    <div
-      className="profile-card animate-fade-in"
-      style={{ animationDelay: `${index * 0.05}s` }}
-    >
+    <div className="profile-card animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
       {/* Banner gradient */}
       <div className={`card-banner bg-gradient-to-r ${bannerGradient}`} />
 
@@ -85,11 +83,11 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
         {data.tags && data.tags.length > 0 && (
           <div className="card-tags">
             {data.tags.slice(0, 3).map((tag, i) => (
-              <span key={i} className="tag tag-blue">{tag}</span>
+              <span key={i} className="tag tag-blue">
+                {tag}
+              </span>
             ))}
-            {data.tags.length > 3 && (
-              <span className="tag">+{data.tags.length - 3}</span>
-            )}
+            {data.tags.length > 3 && <span className="tag">+{data.tags.length - 3}</span>}
           </div>
         )}
 
@@ -107,14 +105,9 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
 
         {/* External Link */}
         {data.linkedin && (
-          <a
-            href={data.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="card-link"
-          >
+          <a href={data.linkedin} target="_blank" rel="noopener noreferrer" className="card-link">
             <ExternalLink className="w-3.5 h-3.5" />
-            {isAlumni ? "Connect on LinkedIn" : "View Profile"}
+            {isAlumni ? 'Connect on LinkedIn' : 'View Profile'}
           </a>
         )}
       </div>

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const BRANCHES = require("../constants/branches");
+const BRANCHES = require('../constants/branches');
 
 const subjectSchema = new mongoose.Schema(
   {
@@ -30,9 +30,9 @@ const subjectSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 subjectSchema.index({ branch: 1, semester: 1 });
 
-module.exports = mongoose.model("Subject", subjectSchema);
+module.exports = mongoose.model('Subject', subjectSchema);

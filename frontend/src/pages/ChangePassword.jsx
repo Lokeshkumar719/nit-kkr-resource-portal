@@ -5,6 +5,8 @@ import { changePassword as apiChangePassword } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { ButtonSpinner } from '../components/ui/Spinner';
+import { parseRateLimitError } from '../utils/rateLimitUtils';
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown';
 import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
@@ -22,6 +24,8 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const changePasswordRateLimit = useRateLimitCountdown('changePassword');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,8 +54,16 @@ export default function ChangePassword() {
         navigate('/login');
       }, 3000);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to change password. Please try again.');
-      setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+      const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
+      if (isRateLimited) {
+        changePasswordRateLimit.triggerRateLimit(retryAfterSeconds);
+        toast.error(`Please wait ${retryAfterSeconds} seconds before trying again.`);
+      } else {
+        const errorMsg =
+          err.response?.data?.message || 'Failed to change password. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -108,7 +120,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={oldPassword}
-                  onChange={(e) => { setOldPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setOldPassword(e.target.value);
+                    setError('');
+                  }}
                   required
                 />
                 <button
@@ -131,7 +146,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={newPassword}
-                  onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    setError('');
+                  }}
                   required
                 />
                 <button
@@ -149,7 +167,9 @@ export default function ChangePassword() {
 
             {/* Confirm New Password */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 ml-0.5">Confirm New Password</label>
+              <label className="text-sm font-medium text-gray-700 ml-0.5">
+                Confirm New Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -157,7 +177,10 @@ export default function ChangePassword() {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-nit-primary/20 focus:border-nit-primary outline-none transition"
                   value={confirmPassword}
-                  onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setError('');
+                  }}
                   onPaste={(e) => {
                     e.preventDefault();
                     setError('Copy-pasting passwords is not allowed. Please type it manually.');
@@ -176,11 +199,25 @@ export default function ChangePassword() {
 
             <button
               type="submit"
-              disabled={loading || !oldPassword || !newPassword || !confirmPassword}
+              disabled={
+                loading ||
+                !oldPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                changePasswordRateLimit.isRateLimited
+              }
               className="w-full bg-nit-primary text-white py-2.5 rounded-lg font-semibold hover:bg-blue-900 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:bg-nit-primary shadow-sm mt-2"
             >
-              {loading ? <ButtonSpinner /> : 'Update Password'}
-              {!loading && <ArrowRight className="w-4 h-4" />}
+              {loading ? (
+                <ButtonSpinner />
+              ) : changePasswordRateLimit.isRateLimited ? (
+                `Update Password (${changePasswordRateLimit.formattedCountdown})`
+              ) : (
+                'Update Password'
+              )}
+              {!loading && !changePasswordRateLimit.isRateLimited && (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
           </form>
         </div>

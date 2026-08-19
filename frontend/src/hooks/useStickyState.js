@@ -14,7 +14,7 @@ export default function useStickyState(defaultValue, key) {
     try {
       window.sessionStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.warn("Error setting sessionStorage", error);
+      console.warn('Error setting sessionStorage', error);
     }
   }, [key, value]);
 

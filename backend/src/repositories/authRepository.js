@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require('../models/User');
 
 const findUserByEmail = async (email) => {
   return await User.findOne({ email });
@@ -19,7 +19,7 @@ const updateEmailVerificationOTP = async (email, hashedOTP, expiresAt) => {
       emailVerificationOTP: hashedOTP,
       emailVerificationOTPExpires: expiresAt,
     },
-    { new: true },
+    { new: true }
   );
 };
 
@@ -31,7 +31,7 @@ const verifyUser = async (email) => {
       emailVerificationOTP: null,
       emailVerificationOTPExpires: null,
     },
-    { new: true },
+    { new: true }
   );
 };
 
@@ -44,7 +44,7 @@ const updateForgotPasswordOTP = async (email, hashedOTP, expiresAt) => {
     },
     {
       new: true,
-    },
+    }
   );
 };
 
@@ -58,7 +58,7 @@ const resetPassword = async (email, hashedPassword) => {
     },
     {
       new: true,
-    },
+    }
   );
 };
 
@@ -70,7 +70,7 @@ const changePassword = async (userId, hashedPassword) => {
     },
     {
       new: true,
-    },
+    }
   );
 };
 
@@ -82,5 +82,5 @@ module.exports = {
   verifyUser,
   updateForgotPasswordOTP,
   resetPassword,
-  changePassword
+  changePassword,
 };

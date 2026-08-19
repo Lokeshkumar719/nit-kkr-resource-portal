@@ -1,9 +1,9 @@
-const ApiError = require("../utils/ApiError");
+const ApiError = require('../utils/ApiError');
 
-const STATUS_CODES = require("../constants/statusCodes");
-const BUG_STATUS = require("../constants/bugStatus");
+const STATUS_CODES = require('../constants/statusCodes');
+const BUG_STATUS = require('../constants/bugStatus');
 
-const bugRepository = require("../repositories/bugRepository");
+const bugRepository = require('../repositories/bugRepository');
 
 const createBug = async (bugData, user) => {
   return await bugRepository.createBug({
@@ -20,7 +20,7 @@ const resolveBug = async (bugId) => {
   const bug = await bugRepository.findBugById(bugId);
 
   if (!bug) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Bug not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Bug not found.');
   }
 
   return await bugRepository.updateBug(bugId, {
@@ -32,7 +32,7 @@ const deleteBug = async (bugId) => {
   const bug = await bugRepository.findBugById(bugId);
 
   if (!bug) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Bug not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Bug not found.');
   }
 
   await bugRepository.deleteBug(bugId);

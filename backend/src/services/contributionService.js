@@ -1,13 +1,13 @@
-const ApiError = require("../utils/ApiError");
+const ApiError = require('../utils/ApiError');
 
-const STATUS_CODES = require("../constants/statusCodes");
-const RESOURCE_TYPES = require("../constants/resourceTypes");
+const STATUS_CODES = require('../constants/statusCodes');
+const RESOURCE_TYPES = require('../constants/resourceTypes');
 
-const contributionRepository = require("../repositories/contributionRepository");
-const subjectRepository = require("../repositories/subjectRepository");
-const resourceRepository = require("../repositories/resourceRepository");
+const contributionRepository = require('../repositories/contributionRepository');
+const subjectRepository = require('../repositories/subjectRepository');
+const resourceRepository = require('../repositories/resourceRepository');
 
-const fileService = require("./fileService");
+const fileService = require('./fileService');
 
 const createContribution = async (contributionData, file, user) => {
   const { subjectId, title, type, url } = contributionData;
@@ -15,12 +15,12 @@ const createContribution = async (contributionData, file, user) => {
   const subject = await subjectRepository.findSubjectById(subjectId);
 
   if (!subject) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Subject not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Subject not found.');
   }
 
   if (type === RESOURCE_TYPES.LECTURES) {
     if (!url) {
-      throw new ApiError(STATUS_CODES.BAD_REQUEST, "Lecture URL is required.");
+      throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Lecture URL is required.');
     }
 
     return await contributionRepository.createContribution({
@@ -33,14 +33,14 @@ const createContribution = async (contributionData, file, user) => {
   }
 
   if (!file) {
-    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Resource file is required.");
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Resource file is required.');
   }
 
   const { fileKey } = await fileService.uploadFile(
     file.buffer,
     file.originalname,
     file.mimetype,
-    "resources",
+    'resources'
   );
 
   try {
@@ -63,11 +63,10 @@ const getContributions = async (filter) => {
 };
 
 const approveContribution = async (contributionId) => {
-  const contribution =
-    await contributionRepository.findContributionById(contributionId);
+  const contribution = await contributionRepository.findContributionById(contributionId);
 
   if (!contribution) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Contribution not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Contribution not found.');
   }
 
   const resource = await resourceRepository.createResource({
@@ -86,11 +85,10 @@ const approveContribution = async (contributionId) => {
 };
 
 const deleteContribution = async (contributionId) => {
-  const contribution =
-    await contributionRepository.findContributionById(contributionId);
+  const contribution = await contributionRepository.findContributionById(contributionId);
 
   if (!contribution) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Contribution not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Contribution not found.');
   }
 
   if (contribution.fileKey) {
@@ -104,7 +102,7 @@ const updateContribution = async (contributionId, updateData) => {
   const contribution = await contributionRepository.findContributionById(contributionId);
 
   if (!contribution) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, "Contribution not found.");
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Contribution not found.');
   }
 
   const allowedUpdates = {};

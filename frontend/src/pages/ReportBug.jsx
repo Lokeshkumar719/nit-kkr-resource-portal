@@ -1,17 +1,17 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { createBug } from "../services/api";
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { createBug } from '../services/api';
 
 function ReportBug() {
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState('');
 
   const submit = async () => {
     try {
       await createBug(description);
-      toast.success("Bug reported.");
-      setDescription("");
+      toast.success('Bug reported.');
+      setDescription('');
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to report bug.");
+      toast.error(err.response?.data?.message || 'Failed to report bug.');
     }
   };
 

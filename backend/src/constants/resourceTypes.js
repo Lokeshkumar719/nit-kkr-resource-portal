@@ -1,8 +1,8 @@
 const RESOURCE_TYPES = {
-    BOOKS: 'BOOKS',
-    NOTES: 'NOTES',
-    PYQS: 'PYQS',
-    LECTURES: 'LECTURES',
+  BOOKS: 'BOOKS',
+  NOTES: 'NOTES',
+  PYQS: 'PYQS',
+  LECTURES: 'LECTURES',
 };
 
 module.exports = RESOURCE_TYPES;

@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ExternalLink, Briefcase, Mail, GraduationCap,
-  Search, Building2, MapPin, Award, Calendar, ArrowLeft
+  ExternalLink,
+  Briefcase,
+  Mail,
+  GraduationCap,
+  Search,
+  Building2,
+  MapPin,
+  Award,
+  Calendar,
+  ArrowLeft,
 } from 'lucide-react';
 import { seniorApi } from '../services/api.js';
 import { BRANCHES, BRANCH_LABELS, ALUMNI_YEAR_VALUE } from '../constants/index.js';
@@ -52,10 +60,11 @@ export default function Alumni() {
   const filteredAlumni = useMemo(() => {
     if (!search.trim()) return alumni;
     const q = search.trim().toLowerCase();
-    return alumni.filter(a =>
-      a.name?.toLowerCase().includes(q) ||
-      a.company?.toLowerCase().includes(q) ||
-      a.email?.toLowerCase().includes(q)
+    return alumni.filter(
+      (a) =>
+        a.name?.toLowerCase().includes(q) ||
+        a.company?.toLowerCase().includes(q) ||
+        a.email?.toLowerCase().includes(q)
     );
   }, [alumni, search]);
 
@@ -65,7 +74,11 @@ export default function Alumni() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-1">
           <div className="flex items-center gap-3 shrink-0">
-            <button onClick={() => navigate(-1)} className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group" title="Go Back">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
+              title="Go Back"
+            >
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
             </button>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-amber-500/20">
@@ -74,7 +87,9 @@ export default function Alumni() {
           </div>
           <div>
             <h1>Alumni Network</h1>
-            <p>Connect with NIT KKR graduates — see where they are now and reach out for guidance.</p>
+            <p>
+              Connect with NIT KKR graduates — see where they are now and reach out for guidance.
+            </p>
           </div>
         </div>
       </div>
@@ -87,7 +102,7 @@ export default function Alumni() {
             <CustomSelect
               value={branch}
               onChange={setBranch}
-              options={BRANCHES.map(b => ({ value: b, label: BRANCH_LABELS[b] }))}
+              options={BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))}
               placeholder="Select branch"
               id="alumni-branch-filter"
             />
@@ -127,10 +142,11 @@ export default function Alumni() {
         <div className="error-banner">{error}</div>
       ) : filteredAlumni.length === 0 ? (
         <EmptyState
-          title={search ? "No matching alumni" : "No alumni listed yet"}
-          message={search
-            ? "Try a different search term."
-            : `We're still adding alumni profiles for ${branch}.`
+          title={search ? 'No matching alumni' : 'No alumni listed yet'}
+          message={
+            search
+              ? 'Try a different search term.'
+              : `We're still adding alumni profiles for ${branch}.`
           }
         />
       ) : (

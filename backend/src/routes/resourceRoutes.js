@@ -1,44 +1,47 @@
-const express = require("express");
+const express = require('express');
 
-const authMiddleware = require("../middlewares/authMiddleware");
-const adminMiddleware = require("../middlewares/adminMiddleware");
+const authMiddleware = require('../middlewares/authMiddleware');
+const adminMiddleware = require('../middlewares/adminMiddleware');
 
-const {
-  uploadResourceFile,
-} = require("../middlewares/uploadResourceFileMiddleware");
+const { uploadResourceFile } = require('../middlewares/uploadResourceFileMiddleware');
 
-const resourceController = require("../controllers/resourceController");
+const resourceController = require('../controllers/resourceController');
+
+const { limitResource } = require('../middlewares/rateLimiterMiddleware');
 
 const router = express.Router();
 
 router.post(
-  "/",
+  '/',
   authMiddleware,
   adminMiddleware,
+  limitResource,
   uploadResourceFile,
-  resourceController.createResource,
+  resourceController.createResource
 );
 
-router.get("/", authMiddleware, resourceController.getResources);
+router.get('/', authMiddleware, resourceController.getResources);
 
-router.get("/stats", resourceController.getResourceStats);
+router.get('/stats', resourceController.getResourceStats);
 
-router.get("/:resourceId", authMiddleware, resourceController.getResourceById);
+router.get('/:resourceId', authMiddleware, resourceController.getResourceById);
 
-router.get("/:resourceId/download", authMiddleware, resourceController.getDownloadUrl);
+router.get('/:resourceId/download', authMiddleware, resourceController.getDownloadUrl);
 
 router.delete(
-  "/:resourceId",
+  '/:resourceId',
   authMiddleware,
   adminMiddleware,
-  resourceController.deleteResource,
+  limitResource,
+  resourceController.deleteResource
 );
 
 router.patch(
-  "/:resourceId",
+  '/:resourceId',
   authMiddleware,
   adminMiddleware,
-  resourceController.updateResource,
+  limitResource,
+  resourceController.updateResource
 );
 
 module.exports = router;

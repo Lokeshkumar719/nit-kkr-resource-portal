@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 
-export function CustomSelect({ value, onChange, options, placeholder = "Select...", className = "", id }) {
+export function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = 'Select...',
+  className = '',
+  id,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -16,7 +23,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selectedOption = options.find(opt => opt.value === value);
+  const selectedOption = options.find((opt) => opt.value === value);
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef} id={id}>
@@ -28,7 +35,9 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
         <span className={selectedOption ? 'text-slate-800 font-medium' : 'text-slate-500'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (

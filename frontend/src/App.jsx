@@ -37,7 +37,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   if (allowedRole && user.role !== allowedRole) {
     // Admins can access User routes
     if (!(user.role === 'ADMIN' && allowedRole === 'USER')) {
-      return <Navigate to={user.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />;
+      return <Navigate to={user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />;
     }
   }
 
@@ -59,7 +59,7 @@ const PublicRoute = ({ children }) => {
   }
 
   if (user) {
-    return <Navigate to={user.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />;
+    return <Navigate to={user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />;
   }
 
   return children;
@@ -73,27 +73,79 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Public Authentication Route */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <Auth />
-            </PublicRoute>
-          } />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Auth />
+              </PublicRoute>
+            }
+          />
 
           {/* Default Route - Landing Page */}
           <Route path="/" element={<Home />} />
 
           {/* User Routes */}
-          <Route path="/dashboard" element={<ProtectedRoute allowedRole="USER"><Dashboard /></ProtectedRoute>} />
-          <Route path="/resources" element={<ProtectedRoute allowedRole="USER"><Resources /></ProtectedRoute>} />
-          <Route path="/seniors" element={<ProtectedRoute allowedRole="USER"><Seniors /></ProtectedRoute>} />
-          <Route path="/alumni" element={<ProtectedRoute allowedRole="USER"><Alumni /></ProtectedRoute>} />
-          <Route path="/contribute" element={<ProtectedRoute allowedRole="USER"><Contribute /></ProtectedRoute>} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRole="USER">
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute allowedRole="USER">
+                <Resources />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seniors"
+            element={
+              <ProtectedRoute allowedRole="USER">
+                <Seniors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alumni"
+            element={
+              <ProtectedRoute allowedRole="USER">
+                <Alumni />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contribute"
+            element={
+              <ProtectedRoute allowedRole="USER">
+                <Contribute />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Shared Routes (both Student & Admin) */}
-          <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRole="ADMIN"><AdminDashboard /></ProtectedRoute>} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRole="ADMIN">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

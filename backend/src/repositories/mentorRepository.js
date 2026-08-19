@@ -1,4 +1,4 @@
-const Mentor = require("../models/Mentor");
+const Mentor = require('../models/Mentor');
 
 const findMentors = async (filter, page, limit) => {
   const mentors = await Mentor.find(filter)

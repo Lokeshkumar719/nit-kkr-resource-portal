@@ -11,28 +11,28 @@ export function AccountDropdown() {
   const dropdownRef = useRef(null);
 
   const displayName = user?.email?.split('@')[0] || 'User';
-  
+
   // Format role from backend (e.g. USER -> Student, ADMIN -> Administrator)
   const displayRole = user?.role === 'ADMIN' ? 'Administrator' : 'Student';
 
   // Handle clicking outside to close and 3-second auto-close
   useEffect(() => {
     let timeoutId;
-    
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     if (isOpen) {
       timeoutId = setTimeout(() => {
         setIsOpen(false);
       }, 3000);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       if (timeoutId) clearTimeout(timeoutId);
@@ -65,19 +65,24 @@ export function AccountDropdown() {
         </div>
         <div className="hidden sm:flex flex-col items-start leading-none max-w-[120px]">
           <span className="text-sm font-semibold text-white truncate w-full">{displayName}</span>
-          <span className="text-[10px] text-blue-200 font-medium tracking-wide uppercase">{displayRole}</span>
+          <span className="text-[10px] text-blue-200 font-medium tracking-wide uppercase">
+            {displayRole}
+          </span>
         </div>
-        <ChevronDown className={`hidden sm:block w-3.5 h-3.5 text-blue-200 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`hidden sm:block w-3.5 h-3.5 text-blue-200 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200 py-2 z-50 animate-fade-in origin-top-right transform transition-all overflow-hidden">
-          
           {/* Header (visible on mobile only) */}
           <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 sm:hidden mb-1">
             <p className="text-sm font-bold text-gray-800 truncate">{displayName}</p>
-            <p className="text-[10px] font-bold text-nit-primary uppercase tracking-wider mt-0.5">{displayRole}</p>
+            <p className="text-[10px] font-bold text-nit-primary uppercase tracking-wider mt-0.5">
+              {displayRole}
+            </p>
           </div>
 
           {/* Change Password */}

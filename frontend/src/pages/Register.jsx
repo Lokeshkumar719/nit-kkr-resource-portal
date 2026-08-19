@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { register } from "../services/api";
-import toast from "react-hot-toast";
+import { register } from '../services/api';
+import toast from 'react-hot-toast';
 
 function Register({ setActiveTab }) {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -26,11 +26,11 @@ function Register({ setActiveTab }) {
 
       await register(formData.email, formData.password);
 
-      toast.success("OTP sent successfully. Please verify your email to continue.");
+      toast.success('OTP sent successfully. Please verify your email to continue.');
 
-      setActiveTab("verify");
+      setActiveTab('verify');
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed.");
+      toast.error(error.response?.data?.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
@@ -72,16 +72,12 @@ function Register({ setActiveTab }) {
       </div>
 
       <button className="primary-button" type="submit" disabled={loading}>
-        {loading ? "Registering..." : "Register"}
+        {loading ? 'Registering...' : 'Register'}
       </button>
 
       <div className="form-helper">
         <span>Already have an account?</span>
-        <button
-          type="button"
-          className="form-link"
-          onClick={() => setActiveTab("login")}
-        >
+        <button type="button" className="form-link" onClick={() => setActiveTab('login')}>
           Sign in
         </button>
       </div>
@@ -90,4 +86,3 @@ function Register({ setActiveTab }) {
 }
 
 export default Register;
-
