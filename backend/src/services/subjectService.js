@@ -40,7 +40,7 @@ const getSubjects = async ({ branch, semester }) => {
   const filter = {};
   if (branch) filter.branch = branch;
   if (semester) filter.semester = Number(semester);
-  
+
   return await subjectRepository.findSubjects(filter);
 };
 

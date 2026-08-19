@@ -1,4 +1,19 @@
-export const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE', 'IIOT', 'SET', 'VLSI', 'ROBOTICS'];
+export const BRANCHES = [
+  'CSE',
+  'IT',
+  'AIDS',
+  'AIML',
+  'MNC',
+  'ECE',
+  'EE',
+  'ME',
+  'PIE',
+  'CE',
+  'IIOT',
+  'SET',
+  'VLSI',
+  'ROBOTICS',
+];
 
 export const BRANCH_LABELS = {
   CSE: 'Computer Engineering (CSE)',

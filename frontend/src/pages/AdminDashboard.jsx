@@ -35,7 +35,22 @@ import SeniorManagementTab from '../components/SeniorManagement/SeniorManagement
 import { useSubjects } from '../components/SubjectManagement/hooks/useSubjects.js';
 
 // Matches backend constants/branches.js exactly
-const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE', 'IIOT', 'SET', 'VLSI', 'ROBOTICS'];
+const BRANCHES = [
+  'CSE',
+  'IT',
+  'AIDS',
+  'AIML',
+  'MNC',
+  'ECE',
+  'EE',
+  'ME',
+  'PIE',
+  'CE',
+  'IIOT',
+  'SET',
+  'VLSI',
+  'ROBOTICS',
+];
 const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 // Matches Mentor model's `year` enum exactly
 const SENIOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];
@@ -289,9 +304,7 @@ const OverviewTab = () => {
               onChange={(e) => setSubjectId(e.target.value)}
               disabled={!subjects.length && !loading}
             >
-              <option value="">
-                {subjects.length ? 'Select Subject' : 'No subjects found'}
-              </option>
+              <option value="">{subjects.length ? 'Select Subject' : 'No subjects found'}</option>
               {subjects.map((s) => (
                 <option key={s._id} value={s._id}>
                   {s.subjectName} ({s.subjectCode})

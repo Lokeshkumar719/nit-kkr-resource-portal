@@ -60,16 +60,16 @@ const createContribution = async (contributionData, file, user) => {
 
 const getContributions = async (query = {}) => {
   const filter = { ...query };
-  
+
   if (!filter.subjectId && (filter.branch || filter.semester)) {
     const subjectsFilter = {};
     if (filter.branch) subjectsFilter.branch = filter.branch;
     if (filter.semester) subjectsFilter.semester = Number(filter.semester);
-    
+
     const subjects = await subjectRepository.findSubjects(subjectsFilter);
-    filter.subjectId = { $in: subjects.map(s => s._id) };
+    filter.subjectId = { $in: subjects.map((s) => s._id) };
   }
-  
+
   delete filter.branch;
   delete filter.semester;
 

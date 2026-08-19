@@ -103,7 +103,8 @@ export default function EditContributionModal({ contribution, onSave, onCancel, 
                   try {
                     const { getContributionDownloadUrl } = await import('../../services/api');
                     const res = await getContributionDownloadUrl(contribution._id);
-                    if (res.data?.data?.downloadUrl) window.location.href = res.data.data.downloadUrl;
+                    if (res.data?.data?.downloadUrl)
+                      window.location.href = res.data.data.downloadUrl;
                   } catch (err) {
                     toast.error('Could not generate download link.');
                   }
@@ -112,8 +113,8 @@ export default function EditContributionModal({ contribution, onSave, onCancel, 
               >
                 {contribution.fileName}
               </button>
-              ). File replacement is not supported during edit. To
-              replace the file, you must reject this and ask the contributor to re-upload.
+              ). File replacement is not supported during edit. To replace the file, you must reject
+              this and ask the contributor to re-upload.
             </div>
           )}
         </div>

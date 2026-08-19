@@ -9,9 +9,7 @@ export const ResetSuccess = ({ authFlow }) => {
       <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full mb-5 border border-emerald-100">
         <ShieldCheck className="w-8 h-8 text-emerald-600" />
       </div>
-      <h3 className="text-lg font-bold text-gray-800 mb-1">
-        Password Reset Successfully!
-      </h3>
+      <h3 className="text-lg font-bold text-gray-800 mb-1">Password Reset Successfully!</h3>
       <p className="text-sm text-gray-500 mb-6">
         Your password has been updated. Please sign in with your new password.
       </p>

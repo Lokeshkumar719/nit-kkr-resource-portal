@@ -21,7 +21,7 @@ export const useAuthFlow = () => {
 
   const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState(AUTH_STEPS.AUTH);
-  
+
   const [formData, setFormData] = useState(DEFAULT_FORM_STATE);
 
   const [loading, setLoading] = useState(false);

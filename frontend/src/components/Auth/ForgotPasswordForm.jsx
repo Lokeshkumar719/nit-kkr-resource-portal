@@ -4,8 +4,14 @@ import { ButtonSpinner } from '../ui/Spinner';
 import { EmailField } from './fields/EmailField';
 
 export const ForgotPasswordForm = ({ authFlow }) => {
-  const { formData, handleChange, handleForgotSubmit, loading, forgotPasswordRateLimit, goBackToLogin } =
-    authFlow;
+  const {
+    formData,
+    handleChange,
+    handleForgotSubmit,
+    loading,
+    forgotPasswordRateLimit,
+    goBackToLogin,
+  } = authFlow;
 
   return (
     <form onSubmit={handleForgotSubmit} className="space-y-4">

@@ -4,8 +4,14 @@ import { ButtonSpinner } from '../ui/Spinner';
 import { OtpField } from './fields/OtpField';
 
 export const VerifyOtpForm = ({ authFlow }) => {
-  const { formData, handleChange, handleVerifySubmit, handleResendOTP, loading, resendOtpRateLimit } =
-    authFlow;
+  const {
+    formData,
+    handleChange,
+    handleVerifySubmit,
+    handleResendOTP,
+    loading,
+    resendOtpRateLimit,
+  } = authFlow;
 
   return (
     <form onSubmit={handleVerifySubmit} className="space-y-4">
