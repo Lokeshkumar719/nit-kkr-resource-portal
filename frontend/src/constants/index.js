@@ -1,4 +1,4 @@
-export const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
+export const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE', 'IIOT', 'SET', 'VLSI', 'ROBOTICS'];
 
 export const BRANCH_LABELS = {
   CSE: 'Computer Engineering (CSE)',
@@ -11,6 +11,10 @@ export const BRANCH_LABELS = {
   ME: 'Mechanical Engineering (ME)',
   PIE: 'Production & Industrial (PIE)',
   CE: 'Civil Engineering (CE)',
+  IIOT: 'Industrial Internet of Things (IIOT)',
+  SET: 'Sustainable Energy Technologies (SET)',
+  VLSI: 'VLSI Design (VLSI)',
+  ROBOTICS: 'Robotics & Automation (ROBOTICS)',
 };
 
 export const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];

@@ -64,10 +64,10 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
         </p>
 
         {/* Company / Internship info */}
-        {data.company && (
+        {(data.company || data.experiences?.[0]?.company) && (
           <div className="card-detail">
             <Building2 />
-            <span className="truncate">{data.company}</span>
+            <span className="truncate">{data.company || data.experiences[0].company}</span>
           </div>
         )}
 

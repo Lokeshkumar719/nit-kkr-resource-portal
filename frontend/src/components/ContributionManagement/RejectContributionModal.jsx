@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AlertCircle, X } from 'lucide-react';
 import ConfirmModal from '../admin/modals/ConfirmModal.jsx';
 
@@ -8,8 +8,6 @@ export default function RejectContributionModal({
   onCancel,
   isRejecting,
 }) {
-  const [reason, setReason] = useState('');
-
   if (!contribution) return null;
 
   return (
@@ -25,19 +23,9 @@ export default function RejectContributionModal({
       }
       confirmText="Reject"
       confirmIcon={X}
-      onConfirm={() => onConfirm(contribution._id, reason)}
+      onConfirm={() => onConfirm(contribution._id)}
       onCancel={onCancel}
       isLoading={isRejecting}
-    >
-      <div className="mt-4 text-left">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Reason (Optional)</label>
-        <textarea
-          className="w-full p-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-red-500 resize-none h-24"
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Provide a reason for rejection to help the contributor..."
-        />
-      </div>
-    </ConfirmModal>
+    />
   );
 }
