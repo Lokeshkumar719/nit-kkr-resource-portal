@@ -5,8 +5,45 @@ const ApiError = require('../utils/ApiError');
 const STATUS_CODES = require('../constants/statusCodes');
 const BRANCHES = require('../constants/branches');
 
+const validateOfferedTo = (offeredTo) => {
+  if (!Array.isArray(offeredTo) || offeredTo.length === 0) {
+    throw new ApiError(
+      STATUS_CODES.BAD_REQUEST,
+      'At least one branch-semester combination is required.'
+    );
+  }
+
+  const combinations = new Set();
+
+  offeredTo.forEach(({ branch, semester }) => {
+    if (!branch || !BRANCHES.includes(branch)) {
+      throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Invalid branch.');
+    }
+
+    if (
+      semester === undefined ||
+      !Number.isInteger(Number(semester)) ||
+      Number(semester) < 1 ||
+      Number(semester) > 8
+    ) {
+      throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Semester must be between 1 and 8.');
+    }
+
+    const key = `${branch}-${semester}`;
+
+    if (combinations.has(key)) {
+      throw new ApiError(
+        STATUS_CODES.BAD_REQUEST,
+        'Duplicate branch-semester combinations are not allowed.'
+      );
+    }
+
+    combinations.add(key);
+  });
+};
+
 const validateCreateSubject = (data) => {
-  const { subjectCode, subjectName, branch, semester } = data;
+  const { subjectCode, subjectName, offeredTo } = data;
 
   if (!subjectCode || validator.isEmpty(subjectCode.trim())) {
     throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Subject code is required.');
@@ -16,18 +53,7 @@ const validateCreateSubject = (data) => {
     throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Subject name is required.');
   }
 
-  if (!branch || !BRANCHES.includes(branch)) {
-    throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Invalid branch.');
-  }
-
-  if (
-    semester === undefined ||
-    !Number.isInteger(Number(semester)) ||
-    Number(semester) < 1 ||
-    Number(semester) > 8
-  ) {
-    throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Semester must be between 1 and 8.');
-  }
+  validateOfferedTo(offeredTo);
 };
 
 const validateGetSubjects = (data) => {
@@ -60,7 +86,7 @@ const validateSubjectCode = (subjectCode) => {
 };
 
 const validateUpdateSubject = (data) => {
-  const { subjectCode, subjectName } = data;
+  const { subjectCode, subjectName, offeredTo } = data;
 
   if (subjectCode !== undefined && validator.isEmpty(subjectCode.trim())) {
     throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Subject code cannot be empty.');
@@ -68,6 +94,10 @@ const validateUpdateSubject = (data) => {
 
   if (subjectName !== undefined && validator.isEmpty(subjectName.trim())) {
     throw new ApiError(STATUS_CODES.BAD_REQUEST, 'Subject name cannot be empty.');
+  }
+
+  if (offeredTo !== undefined) {
+    validateOfferedTo(offeredTo);
   }
 };
 

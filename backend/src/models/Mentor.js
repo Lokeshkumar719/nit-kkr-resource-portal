@@ -25,23 +25,6 @@ const mentorSchema = new mongoose.Schema(
     currentYear: {
       type: String,
       required: true,
-      trim: true,
-    },
-
-    email: {
-      type: String,
-      lowercase: true,
-    },
-
-    branch: {
-      type: String,
-      required: true,
-      enum: BRANCHES,
-    },
-
-    currentYear: {
-      type: String,
-      required: true,
       enum: CURRENT_YEARS,
     },
 
