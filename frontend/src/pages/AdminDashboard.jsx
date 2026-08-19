@@ -35,7 +35,22 @@ import SeniorManagementTab from '../components/SeniorManagement/SeniorManagement
 import { useSubjects } from '../components/SubjectManagement/hooks/useSubjects.js';
 
 // Matches backend constants/branches.js exactly
-const BRANCHES = ['CSE', 'IT', 'AIDS', 'AIML', 'MNC', 'ECE', 'EE', 'ME', 'PIE', 'CE'];
+const BRANCHES = [
+  'CSE',
+  'IT',
+  'AIDS',
+  'AIML',
+  'MNC',
+  'ECE',
+  'EE',
+  'ME',
+  'PIE',
+  'CE',
+  'IIOT',
+  'SET',
+  'VLSI',
+  'ROBOTICS',
+];
 const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 // Matches Mentor model's `year` enum exactly
 const SENIOR_YEARS = ['2nd Year', '3rd Year', '4th Year', 'Alumni'];
@@ -193,16 +208,16 @@ const OverviewTab = () => {
   }, []);
 
   useEffect(() => {
-    if (branch && semester) {
-      api
-        .get('/subjects', { params: { branch, semester } })
-        .then((res) => setSubjects(res.data?.data?.subjects || res.data?.data || []))
-        .catch(() => setSubjects([]));
-    } else {
-      setSubjects([]);
-      setSubjectId('');
-    }
-  }, [branch, semester]);
+    setSubjectId('');
+    const params = {};
+    if (branch) params.branch = branch;
+    if (semester) params.semester = semester;
+
+    api
+      .get('/subjects', { params })
+      .then((res) => setSubjects(res.data?.data?.subjects || res.data?.data || []))
+      .catch(() => setSubjects([]));
+  }, [branch, semester, setSubjectId]);
 
   const fetchStats = React.useCallback(async () => {
     setLoading(true);
@@ -212,21 +227,20 @@ const OverviewTab = () => {
       let pendingContributions = 0;
       let pendingBugs = 0;
 
-      if (subjectId) {
-        const resourcesRes = await api.get('/resources', { params: { subjectId } });
-        totalResources = resourcesRes.data.data ? resourcesRes.data.data.length : 0;
-
-        const contributionsRes = await api.get('/contributions', {
-          params: { status: 'PENDING', subjectId },
-        });
-        pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
-      } else {
-        const statsRes = await api.get('/resources/stats');
-        totalResources = statsRes.data.data ? statsRes.data.data.total : 0;
-
-        const contributionsRes = await api.get('/contributions', { params: { status: 'PENDING' } });
-        pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
+      const params = {};
+      if (subjectId) params.subjectId = subjectId;
+      else {
+        if (branch) params.branch = branch;
+        if (semester) params.semester = semester;
       }
+
+      const statsRes = await api.get('/resources/stats', { params });
+      totalResources = statsRes.data.data ? statsRes.data.data.total : 0;
+
+      const contributionsRes = await api.get('/contributions', {
+        params: { status: 'PENDING', ...params },
+      });
+      pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
 
       try {
         const bugsRes = await getBugs({ status: 'OPEN' });
@@ -242,7 +256,7 @@ const OverviewTab = () => {
     } finally {
       setLoading(false);
     }
-  }, [subjectId]);
+  }, [subjectId, branch, semester]);
 
   useEffect(() => {
     fetchStats();
@@ -288,11 +302,9 @@ const OverviewTab = () => {
               className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white disabled:opacity-50"
               value={subjectId}
               onChange={(e) => setSubjectId(e.target.value)}
-              disabled={!subjects.length}
+              disabled={!subjects.length && !loading}
             >
-              <option value="">
-                {subjects.length ? 'Select Subject' : 'Select Branch & Sem first'}
-              </option>
+              <option value="">{subjects.length ? 'Select Subject' : 'No subjects found'}</option>
               {subjects.map((s) => (
                 <option key={s._id} value={s._id}>
                   {s.subjectName} ({s.subjectCode})

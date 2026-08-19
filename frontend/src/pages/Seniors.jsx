@@ -90,7 +90,9 @@ export default function Seniors() {
         (s) =>
           s.name?.toLowerCase().includes(q) ||
           s.company?.toLowerCase().includes(q) ||
-          s.email?.toLowerCase().includes(q)
+          s.experiences?.some((exp) => exp.company?.toLowerCase().includes(q)) ||
+          s.email?.toLowerCase().includes(q) ||
+          s.tags?.some((tag) => tag.toLowerCase().includes(q))
       );
     }
     return filtered;
@@ -146,7 +148,7 @@ export default function Seniors() {
                 <Search className="search-icon w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by name, company..."
+                  placeholder="Search by name, company, tags..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   id="senior-search"

@@ -95,8 +95,26 @@ export default function EditContributionModal({ contribution, onSave, onCancel, 
           {contribution.fileName && (
             <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-700">
               <span className="font-semibold">Note:</span> This contribution contains an uploaded
-              file ({contribution.fileName}). File replacement is not supported during edit. To
-              replace the file, you must reject this and ask the contributor to re-upload.
+              file (
+              <button
+                type="button"
+                className="font-bold underline cursor-pointer hover:text-blue-900"
+                onClick={async () => {
+                  try {
+                    const { getContributionDownloadUrl } = await import('../../services/api');
+                    const res = await getContributionDownloadUrl(contribution._id);
+                    if (res.data?.data?.downloadUrl)
+                      window.location.href = res.data.data.downloadUrl;
+                  } catch (err) {
+                    toast.error('Could not generate download link.');
+                  }
+                }}
+                title="Download File"
+              >
+                {contribution.fileName}
+              </button>
+              ). File replacement is not supported during edit. To replace the file, you must reject
+              this and ask the contributor to re-upload.
             </div>
           )}
         </div>

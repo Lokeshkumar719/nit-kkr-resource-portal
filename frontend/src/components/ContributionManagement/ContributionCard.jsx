@@ -47,9 +47,9 @@ export default function ContributionCard({
           <span className="text-xs text-gray-500 font-medium">
             {new Date(contribution.createdAt).toLocaleDateString()}
           </span>
-          {contribution.contributor && (
+          {contribution.contributedBy && (
             <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded-full">
-              By: {contribution.contributor?.name || 'Unknown'}
+              Contributed by: {contribution.contributedBy?.email || 'Unknown'}
             </span>
           )}
         </div>

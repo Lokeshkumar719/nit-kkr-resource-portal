@@ -12,15 +12,12 @@ const findSubjectByCode = async (subjectCode) => {
   return await Subject.findOne({ subjectCode });
 };
 
-const findSubjects = async ({ branch, semester }) => {
-  return await Subject.find({
-    offeredTo: {
-      $elemMatch: {
-        branch,
-        semester,
-      },
-    },
-  }).sort({
+const findSubjects = async (filter) => {
+  const query = {};
+  if (Object.keys(filter).length > 0) {
+    query.offeredTo = { $elemMatch: filter };
+  }
+  return await Subject.find(query).sort({
     subjectName: 1,
   });
 };

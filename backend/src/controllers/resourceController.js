@@ -33,7 +33,7 @@ const getResources = asyncHandler(async (req, res) => {
 });
 
 const getResourceStats = asyncHandler(async (req, res) => {
-  const stats = await resourceService.getResourceStats();
+  const stats = await resourceService.getResourceStats(req.query);
 
   return new ApiResponse(res, STATUS_CODES.OK, 'Resource stats fetched successfully.', stats);
 });

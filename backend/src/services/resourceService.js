@@ -71,8 +71,20 @@ const getResources = async (filter) => {
   return await resourceRepository.findResources(filter);
 };
 
-const getResourceStats = async () => {
-  const resources = await resourceRepository.findResources({});
+const getResourceStats = async (query = {}) => {
+  let filter = {};
+  if (query.subjectId) {
+    filter.subjectId = query.subjectId;
+  } else if (query.branch || query.semester) {
+    const subjectsFilter = {};
+    if (query.branch) subjectsFilter.branch = query.branch;
+    if (query.semester) subjectsFilter.semester = Number(query.semester);
+
+    const subjects = await subjectRepository.findSubjects(subjectsFilter);
+    filter.subjectId = { $in: subjects.map((s) => s._id) };
+  }
+
+  const resources = await resourceRepository.findResources(filter);
   const stats = { total: resources.length, notes: 0, books: 0, pyqs: 0, lectures: 0 };
 
   resources.forEach((r) => {

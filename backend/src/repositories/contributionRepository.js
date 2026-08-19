@@ -9,7 +9,9 @@ const findContributionById = async (contributionId) => {
 };
 
 const findContributions = async (filter) => {
-  return await Contribution.find(filter).sort({ createdAt: -1 });
+  return await Contribution.find(filter)
+    .populate('contributedBy', 'name email')
+    .sort({ createdAt: -1 });
 };
 
 const deleteContribution = async (contributionId) => {

@@ -64,7 +64,9 @@ export default function Alumni() {
       (a) =>
         a.name?.toLowerCase().includes(q) ||
         a.company?.toLowerCase().includes(q) ||
-        a.email?.toLowerCase().includes(q)
+        a.experiences?.some((exp) => exp.company?.toLowerCase().includes(q)) ||
+        a.email?.toLowerCase().includes(q) ||
+        a.tags?.some((tag) => tag.toLowerCase().includes(q))
     );
   }, [alumni, search]);
 
@@ -115,7 +117,7 @@ export default function Alumni() {
                 <Search className="search-icon w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by name, company..."
+                  placeholder="Search by name, company, tags..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   id="alumni-search"
