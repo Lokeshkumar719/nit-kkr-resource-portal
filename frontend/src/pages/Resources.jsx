@@ -84,7 +84,7 @@ export default function Resources() {
     setError('');
     try {
       const res = await resourceApi.getByBranchAndSem(branch, sem);
-      setSubjects(res.data.data || []);
+      setSubjects(res.data?.data?.subjects || res.data?.data || []);
     } catch (err) {
       setSubjects([]);
       setError('Could not load resources right now.');
@@ -138,6 +138,7 @@ export default function Resources() {
             <button
               onClick={handleGoBack}
               className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
+              aria-label="Go Back"
               title="Go Back"
             >
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />

@@ -13,13 +13,24 @@ const findSubjectByCode = async (subjectCode) => {
 };
 
 const findSubjects = async (filter) => {
-  return await Subject.find(filter).sort({
+  const query = {};
+  if (Object.keys(filter).length > 0) {
+    query.offeredTo = { $elemMatch: filter };
+  }
+  return await Subject.find(query).sort({
     subjectName: 1,
   });
 };
 
+const findAllSubjects = async () => {
+  return await Subject.find({}).sort({ subjectName: 1 });
+};
+
 const updateSubject = async (subjectId, updateData) => {
-  return await Subject.findByIdAndUpdate(subjectId, updateData, { new: true, runValidators: true });
+  return await Subject.findByIdAndUpdate(subjectId, updateData, {
+    new: true,
+    runValidators: true,
+  });
 };
 
 const deleteSubject = async (subjectId) => {
@@ -31,6 +42,7 @@ module.exports = {
   findSubjectById,
   findSubjectByCode,
   findSubjects,
+  findAllSubjects,
   updateSubject,
   deleteSubject,
 };

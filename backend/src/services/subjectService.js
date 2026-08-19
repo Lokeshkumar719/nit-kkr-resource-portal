@@ -36,8 +36,16 @@ const getSubjectByCode = async (subjectCode) => {
   return subject;
 };
 
-const getSubjects = async (filter) => {
+const getSubjects = async ({ branch, semester }) => {
+  const filter = {};
+  if (branch) filter.branch = branch;
+  if (semester) filter.semester = Number(semester);
+
   return await subjectRepository.findSubjects(filter);
+};
+
+const getAllSubjects = async () => {
+  return await subjectRepository.findAllSubjects();
 };
 
 const updateSubject = async (subjectId, subjectData) => {
@@ -91,6 +99,7 @@ module.exports = {
   getSubjectById,
   getSubjectByCode,
   getSubjects,
+  getAllSubjects,
   updateSubject,
   deleteSubject,
 };

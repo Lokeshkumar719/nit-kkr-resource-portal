@@ -38,6 +38,12 @@ const getSubjects = asyncHandler(async (req, res) => {
   return new ApiResponse(res, STATUS_CODES.OK, 'Subjects fetched successfully.', subjects);
 });
 
+const getAllSubjects = asyncHandler(async (req, res) => {
+  const subjects = await subjectService.getAllSubjects();
+
+  return new ApiResponse(res, STATUS_CODES.OK, 'All subjects fetched successfully.', subjects);
+});
+
 const updateSubject = asyncHandler(async (req, res) => {
   subjectValidator.validateSubjectId(req.params.subjectId);
   subjectValidator.validateUpdateSubject(req.body);
@@ -60,6 +66,7 @@ module.exports = {
   getSubjectById,
   getSubjectByCode,
   getSubjects,
+  getAllSubjects,
   updateSubject,
   deleteSubject,
 };

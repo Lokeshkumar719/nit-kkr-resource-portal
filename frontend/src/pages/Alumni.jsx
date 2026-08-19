@@ -64,7 +64,9 @@ export default function Alumni() {
       (a) =>
         a.name?.toLowerCase().includes(q) ||
         a.company?.toLowerCase().includes(q) ||
-        a.email?.toLowerCase().includes(q)
+        a.experiences?.some((exp) => exp.company?.toLowerCase().includes(q)) ||
+        a.email?.toLowerCase().includes(q) ||
+        a.tags?.some((tag) => tag.toLowerCase().includes(q))
     );
   }, [alumni, search]);
 
@@ -77,6 +79,7 @@ export default function Alumni() {
             <button
               onClick={() => navigate(-1)}
               className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-nit-primary hover:border-nit-primary/30 transition-all shadow-sm group"
+              aria-label="Go Back"
               title="Go Back"
             >
               <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-nit-primary group-hover:-translate-x-0.5 transition-all" />
@@ -114,7 +117,7 @@ export default function Alumni() {
                 <Search className="search-icon w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by name, company..."
+                  placeholder="Search by name, company, tags..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   id="alumni-search"
