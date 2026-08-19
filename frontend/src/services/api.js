@@ -141,7 +141,6 @@ export const updateMentor = (id, data) => api.patch(`/mentors/${id}`, data);
 export const deleteMentor = (id) => api.delete(`/mentors/${id}`);
 
 export const seniorApi = {
-  getByFilter: (year, branch) => api.get('/mentors', { params: { currentYear: year, branch } }),
   getByYearAndBranch: (year, branch) =>
     api.get('/mentors', { params: { currentYear: year, branch } }),
 };
@@ -168,7 +167,7 @@ export const createBug = (description) =>
     description,
   });
 
-export const getBugs = () => api.get('/bugs');
+export const getBugs = (params) => api.get('/bugs', { params });
 
 export const resolveBug = (bugId) => api.patch(`/bugs/${bugId}/resolve`);
 

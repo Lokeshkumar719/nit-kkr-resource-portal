@@ -142,7 +142,25 @@ const login = async ({ email, password }) => {
   }
 
   if (!user.isVerified) {
-    throw new ApiError(STATUS_CODES.FORBIDDEN, 'Please verify your email before logging in.');
+    const { otp, hashedOTP, expiresAt } = await createOTP();
+    await authRepository.updateEmailVerificationOTP(email, hashedOTP, expiresAt);
+
+    try {
+      await sendVerificationOTP(email, otp);
+    } catch (error) {
+      throw new ApiError(
+        STATUS_CODES.INTERNAL_SERVER_ERROR,
+        'Failed to send verification OTP. Please try again.'
+      );
+    }
+
+    const error = new ApiError(
+      STATUS_CODES.FORBIDDEN,
+      'Your email is not verified. A new verification code has been sent.'
+    );
+    error.code = 'ACCOUNT_UNVERIFIED';
+    error.data = { email };
+    throw error;
   }
 
   const { accessToken, refreshToken } = generateTokens(user);

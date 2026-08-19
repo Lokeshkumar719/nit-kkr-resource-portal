@@ -101,9 +101,17 @@ export default function Auth() {
         }
         toast.error(`Rate limited. Please wait ${retryAfterSeconds}s.`);
       } else {
-        const errorMsg = err.response?.data?.message || 'Authentication failed. Please try again.';
-        setError(errorMsg);
-        toast.error(errorMsg);
+        const responseData = err.response?.data;
+        if (responseData?.code === 'ACCOUNT_UNVERIFIED') {
+          toast.success('A verification code has been sent to your email.');
+          setSuccess('A verification code has been sent to your email.');
+          resendOtpRateLimit.triggerRateLimit(60);
+          setStep('verify');
+        } else {
+          const errorMsg = responseData?.message || 'Authentication failed. Please try again.';
+          setError(errorMsg);
+          toast.error(errorMsg);
+        }
       }
     } finally {
       setLoading(false);

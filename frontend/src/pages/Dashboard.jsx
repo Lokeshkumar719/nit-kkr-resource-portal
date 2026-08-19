@@ -60,6 +60,7 @@ export default function Dashboard() {
             <button
               onClick={() => navigate('/')}
               className="flex items-center justify-center w-8 h-8 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all group"
+              aria-label="Go Back"
               title="Go Back"
             >
               <ArrowLeft className="w-4 h-4 text-white/70 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
