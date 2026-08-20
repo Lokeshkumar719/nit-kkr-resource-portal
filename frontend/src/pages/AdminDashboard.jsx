@@ -20,7 +20,7 @@ import {
   Edit2,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api, updateSubject, deleteSubject, getBugs, resolveBug } from '../services/api.js';
+import { api, updateSubject, deleteSubject, getBugs, resolveBug, getBugDownloadUrl } from '../services/api.js';
 import { ContributionSkeleton, OverviewSkeleton } from '../components/ui/Skeleton.jsx';
 import toast from 'react-hot-toast';
 import { parseRateLimitError } from '../utils/rateLimitUtils.js';
@@ -391,6 +391,18 @@ const BugsTab = () => {
     }
   };
 
+  const handleDownloadAttachment = async (bugId) => {
+    try {
+      const res = await getBugDownloadUrl(bugId);
+      const url = res.data?.data?.downloadUrl;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } catch (e) {
+      toast.error('Failed to get download link: ' + (e.response?.data?.message || e.message));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-300">
@@ -440,6 +452,15 @@ const BugsTab = () => {
                   </span>
                 </div>
                 <p className="text-gray-800 text-sm mb-1 whitespace-pre-wrap">{bug.description}</p>
+                {bug.fileKey && (
+                  <button
+                    onClick={() => handleDownloadAttachment(bug._id)}
+                    className="mt-2 flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    View Attachment ({bug.fileName})
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0">
                 <button
