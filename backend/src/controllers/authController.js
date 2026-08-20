@@ -49,7 +49,7 @@ const login = asyncHandler(async (req, res) => {
     refreshToken,
   });
 });
-
+// when access token expired then refresh token is used to renew the acess token
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } = await authService.refreshAccessToken(
     req.cookies.refreshToken
@@ -70,6 +70,7 @@ const logout = asyncHandler(async (req, res) => {
   return new ApiResponse(res, STATUS_CODES.OK, 'Logout successful.');
 });
 
+// called when page refresh
 const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await authService.getCurrentUser(req.user.id);
 
