@@ -19,6 +19,22 @@ const bugSchema = new mongoose.Schema(
       enum: Object.values(BUG_STATUS),
       default: BUG_STATUS.OPEN,
     },
+    fileKey: {
+      type: String,
+      default: null,
+    },
+    fileName: {
+      type: String,
+      default: null,
+    },
+    mimeType: {
+      type: String,
+      default: null,
+    },
+    fileSize: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

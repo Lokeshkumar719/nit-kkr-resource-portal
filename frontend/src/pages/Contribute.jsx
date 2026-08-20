@@ -75,6 +75,35 @@ export default function Contribute() {
     setSubmitted(false);
   };
 
+  const handleBugFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      const allowedMimeTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/webp',
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+      ];
+      if (!allowedMimeTypes.includes(selected.type)) {
+        toast.error('Unsupported file type. Only images, PDFs, and ZIP files are allowed.');
+        e.target.value = '';
+        setFile(null);
+        return;
+      }
+      if (selected.size > 5 * 1024 * 1024) {
+        toast.error('File size exceeds the 5MB limit.');
+        e.target.value = '';
+        setFile(null);
+        return;
+      }
+      setFile(selected);
+    } else {
+      setFile(null);
+    }
+  };
+
   const handleBack = () => {
     if (view === 'notes' || view === 'book' || view === 'pyq' || view === 'lecture') {
       setView('resource-select');
@@ -93,7 +122,7 @@ export default function Contribute() {
 
     try {
       // Trying the actual backend API. Since the controller doesn't exist, this will throw 404.
-      await contributionApi.submit({ type: 'bug', description });
+      await contributionApi.submit({ type: 'bug', description, file });
       setSubmitted(true);
     } catch (err) {
       const { isRateLimited, retryAfterSeconds } = parseRateLimitError(err);
@@ -288,6 +317,19 @@ export default function Contribute() {
                 placeholder="Describe the issue you encountered..."
                 required
                 disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Attach screenshot/file (optional, max 5MB)
+              </label>
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,.pdf,.zip"
+                onChange={handleBugFileChange}
+                disabled={loading}
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white"
               />
             </div>
 
