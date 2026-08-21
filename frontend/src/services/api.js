@@ -117,11 +117,7 @@ export const getResources = (subjectId) =>
   });
 
 export const uploadResource = (formData) =>
-  api.post('/resources', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  api.post('/resources', formData);
 
 export const getResourceDownloadUrl = (resourceId) => api.get(`/resources/${resourceId}/download`);
 
@@ -150,11 +146,7 @@ export const alumniApi = {
 };
 
 export const createContribution = (formData) =>
-  api.post('/contributions', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  api.post('/contributions', formData);
 
 export const getContributions = (params) => api.get('/contributions', { params });
 export const approveContribution = (id) => api.patch(`/contributions/${id}/approve`);
@@ -164,11 +156,7 @@ export const getContributionDownloadUrl = (id) => api.get(`/contributions/${id}/
 
 export const createBug = (formData) => {
   if (formData instanceof FormData) {
-    return api.post('/bugs', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    return api.post('/bugs', formData);
   }
   return api.post('/bugs', { description: formData }); // Fallback
 };
