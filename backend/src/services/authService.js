@@ -132,7 +132,7 @@ const login = async ({ email, password }) => {
   const user = await authRepository.findUserByEmail(email);
 
   if (!user) {
-    throw new ApiError(STATUS_CODES.UNAUTHORIZED, 'Invalid email or password.');
+    throw new ApiError(STATUS_CODES.UNAUTHORIZED, 'First Register your account before logging in.');
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
