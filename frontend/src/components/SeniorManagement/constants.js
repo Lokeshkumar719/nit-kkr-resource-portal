@@ -8,6 +8,6 @@ export const DEFAULT_FORM_STATE = {
   imageUrl: '',
   batchStart: '',
   batchEnd: '',
-  achievements: '',
+  achievements: [],
   tags: [],
 };

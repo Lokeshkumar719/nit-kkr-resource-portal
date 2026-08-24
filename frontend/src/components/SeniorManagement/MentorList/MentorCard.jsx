@@ -59,7 +59,7 @@ export default function MentorCard({ mentor, onEdit, onDelete }) {
               </h4>
               <ul className="text-sm text-gray-600 space-y-0.5 list-inside list-disc">
                 {mentor.achievements.map((ach, idx) => (
-                  <li key={idx} className="truncate">
+                  <li key={idx} title={ach} className="break-words">
                     {ach}
                   </li>
                 ))}
