@@ -28,11 +28,8 @@ export const formatMentorPayload = (formData) => {
     payload.experiences = [];
   }
 
-  if (formData.achievements?.trim()) {
-    payload.achievements = formData.achievements
-      .split(',')
-      .map((a) => a.trim())
-      .filter((a) => a);
+  if (formData.achievements && formData.achievements.length > 0) {
+    payload.achievements = formData.achievements.map((a) => a.trim()).filter(Boolean);
   } else {
     payload.achievements = [];
   }
@@ -65,7 +62,7 @@ export const parseMentorToForm = (m) => {
     company: m.experiences?.[0]?.company || '',
     linkedin: m.linkedin || '',
     imageUrl: m.image || '',
-    achievements: m.achievements ? m.achievements.join(', ') : '',
+    achievements: m.achievements || [],
     tags: m.tags || [],
     batchStart,
     batchEnd,

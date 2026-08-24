@@ -94,12 +94,17 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
         {/* Achievements */}
         {data.achievements && data.achievements.length > 0 && (
           <div className="mt-3 space-y-1">
-            {data.achievements.slice(0, 2).map((ach, i) => (
+            {data.achievements.slice(0, 3).map((ach, i) => (
               <div key={i} className="flex items-start gap-1.5 text-xs text-slate-500">
                 <Award className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
-                <span className="line-clamp-1">{ach}</span>
+                <span title={ach} className="leading-snug">{ach}</span>
               </div>
             ))}
+            {data.achievements.length > 3 && (
+              <div className="text-[10px] text-slate-400 pl-4.5 font-medium">
+                +{data.achievements.length - 3} more
+              </div>
+            )}
           </div>
         )}
 
