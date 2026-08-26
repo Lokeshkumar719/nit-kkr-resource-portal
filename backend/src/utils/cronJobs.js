@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const Mentor = require('../models/Mentor');
+const User = require('../models/User');
 
 const setupCronJobs = () => {
   cron.schedule('0 0 1 6 *', async () => {
@@ -37,6 +38,24 @@ const setupCronJobs = () => {
   });
 
   console.log('[CRON] Scheduled annual mentor promotion job for June 1st.');
+
+  cron.schedule('0 * * * *', async () => {
+    console.log('[CRON] Starting unverified users cleanup script...');
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const result = await User.deleteMany({ 
+        isVerified: false,
+        createdAt: { $lt: oneDayAgo }
+      });
+      if (result.deletedCount > 0) {
+        console.log(`[CRON] Deleted ${result.deletedCount} unverified users older than 24 hours.`);
+      }
+    } catch (error) {
+      console.error('[CRON] Error during unverified users cleanup:', error);
+    }
+  });
+
+  console.log('[CRON] Scheduled hourly unverified users cleanup job.');
 };
 
 module.exports = setupCronJobs;

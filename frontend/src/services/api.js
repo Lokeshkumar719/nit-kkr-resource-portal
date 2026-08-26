@@ -117,11 +117,7 @@ export const getResources = (subjectId) =>
   });
 
 export const uploadResource = (formData) =>
-  api.post('/resources', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  api.post('/resources', formData);
 
 export const getResourceDownloadUrl = (resourceId) => api.get(`/resources/${resourceId}/download`);
 
@@ -150,11 +146,7 @@ export const alumniApi = {
 };
 
 export const createContribution = (formData) =>
-  api.post('/contributions', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  api.post('/contributions', formData);
 
 export const getContributions = (params) => api.get('/contributions', { params });
 export const approveContribution = (id) => api.patch(`/contributions/${id}/approve`);
@@ -162,10 +154,12 @@ export const rejectContribution = (id) => api.delete(`/contributions/${id}`);
 export const updateContribution = (id, data) => api.patch(`/contributions/${id}`, data);
 export const getContributionDownloadUrl = (id) => api.get(`/contributions/${id}/download`);
 
-export const createBug = (description) =>
-  api.post('/bugs', {
-    description,
-  });
+export const createBug = (formData) => {
+  if (formData instanceof FormData) {
+    return api.post('/bugs', formData);
+  }
+  return api.post('/bugs', { description: formData }); // Fallback
+};
 
 export const getBugs = (params) => api.get('/bugs', { params });
 
@@ -173,13 +167,20 @@ export const resolveBug = (bugId) => api.patch(`/bugs/${bugId}/resolve`);
 
 export const deleteBug = (bugId) => api.delete(`/bugs/${bugId}`);
 
+export const getBugDownloadUrl = (bugId) => api.get(`/bugs/${bugId}/download`);
+
 export const contributionApi = {
   submit: (formData) => {
     if (formData instanceof FormData) {
       return createContribution(formData);
     } else {
       if (formData.type === 'bug') {
-        return createBug(formData.description);
+        const bugFormData = new FormData();
+        bugFormData.append('description', formData.description);
+        if (formData.file) {
+          bugFormData.append('file', formData.file);
+        }
+        return createBug(bugFormData);
       }
     }
     return Promise.reject('Invalid contribution type');

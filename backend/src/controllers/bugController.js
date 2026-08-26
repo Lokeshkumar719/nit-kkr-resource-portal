@@ -9,7 +9,7 @@ const bugValidator = require('../validators/bugValidator');
 const createBug = asyncHandler(async (req, res) => {
   bugValidator.validateCreateBug(req.body);
 
-  const bug = await bugService.createBug(req.body, req.user);
+  const bug = await bugService.createBug(req.body, req.file, req.user);
 
   return new ApiResponse(res, STATUS_CODES.CREATED, 'Bug reported successfully.', bug);
 });
@@ -36,9 +36,16 @@ const deleteBug = asyncHandler(async (req, res) => {
   return new ApiResponse(res, STATUS_CODES.OK, 'Bug deleted successfully.');
 });
 
+const downloadBugAttachment = asyncHandler(async (req, res) => {
+  bugValidator.validateBugId(req.params.bugId);
+  const downloadUrl = await bugService.getBugDownloadUrl(req.params.bugId);
+  return new ApiResponse(res, STATUS_CODES.OK, 'Download URL generated.', { downloadUrl });
+});
+
 module.exports = {
   createBug,
   getBugs,
   resolveBug,
   deleteBug,
+  downloadBugAttachment,
 };
