@@ -20,7 +20,14 @@ import {
   Edit2,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api, updateSubject, deleteSubject, getBugs, resolveBug, getBugDownloadUrl } from '../services/api.js';
+import {
+  api,
+  updateSubject,
+  deleteSubject,
+  getBugs,
+  resolveBug,
+  getBugDownloadUrl,
+} from '../services/api.js';
 import { ContributionSkeleton, OverviewSkeleton } from '../components/ui/Skeleton.jsx';
 import toast from 'react-hot-toast';
 import { parseRateLimitError } from '../utils/rateLimitUtils.js';

@@ -97,7 +97,9 @@ export default function ProfileCard({ data, index, variant = 'alumni', customGra
             {data.achievements.slice(0, 3).map((ach, i) => (
               <div key={i} className="flex items-start gap-1.5 text-xs text-slate-500">
                 <Award className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
-                <span title={ach} className="leading-snug">{ach}</span>
+                <span title={ach} className="leading-snug">
+                  {ach}
+                </span>
               </div>
             ))}
             {data.achievements.length > 3 && (

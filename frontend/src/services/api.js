@@ -116,8 +116,7 @@ export const getResources = (subjectId) =>
     },
   });
 
-export const uploadResource = (formData) =>
-  api.post('/resources', formData);
+export const uploadResource = (formData) => api.post('/resources', formData);
 
 export const getResourceDownloadUrl = (resourceId) => api.get(`/resources/${resourceId}/download`);
 
@@ -145,8 +144,7 @@ export const alumniApi = {
   getAll: (branch) => api.get('/alumni', { params: { branch } }),
 };
 
-export const createContribution = (formData) =>
-  api.post('/contributions', formData);
+export const createContribution = (formData) => api.post('/contributions', formData);
 
 export const getContributions = (params) => api.get('/contributions', { params });
 export const approveContribution = (id) => api.patch(`/contributions/${id}/approve`);
