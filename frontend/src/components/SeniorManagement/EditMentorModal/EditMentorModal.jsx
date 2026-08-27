@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Loader } from 'lucide-react';
+import ModalLayout from '../../admin/modals/ModalLayout.jsx';
 import BasicInfoSection from '../CreateMentor/BasicInfoSection.jsx';
 import ExperienceSection from '../CreateMentor/ExperienceSection.jsx';
 import AchievementSection from '../CreateMentor/AchievementSection.jsx';
@@ -34,8 +35,8 @@ export default function EditMentorModal({ mentor, onSave, onCancel, isSaving }) 
   if (!mentor || !formData) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <ModalLayout className="max-w-3xl">
+      <div className="flex flex-col max-h-[90vh]">
         <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h2 className="text-xl font-bold text-gray-800">Edit Profile</h2>
           <button
@@ -72,6 +73,6 @@ export default function EditMentorModal({ mentor, onSave, onCancel, isSaving }) 
           </button>
         </div>
       </div>
-    </div>
+    </ModalLayout>
   );
 }

@@ -40,6 +40,7 @@ const EmptyState = ({ title, message }) => (
 
 export default function Seniors() {
   const [branch, setBranch] = useState('');
+  const [yearFilter, setYearFilter] = useState('All Years');
   const [seniorsByYear, setSeniorsByYear] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -47,11 +48,7 @@ export default function Seniors() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (branch) {
-      fetchAllYears();
-    } else {
-      setSeniorsByYear({});
-    }
+    fetchAllYears();
   }, [branch]);
 
   const fetchAllYears = async () => {
@@ -79,13 +76,23 @@ export default function Seniors() {
     [seniorsByYear]
   );
 
-  // Apply search filter across all years
+  // Apply year and search filters across all years
   const filteredByYear = useMemo(() => {
-    if (!search.trim()) return seniorsByYear;
     const q = search.trim().toLowerCase();
     const filtered = {};
     for (const year of SENIOR_YEARS) {
+      if (yearFilter !== 'All Years' && year !== yearFilter) {
+        filtered[year] = [];
+        continue;
+      }
+
       const list = seniorsByYear[year] || [];
+      
+      if (!q) {
+        filtered[year] = list;
+        continue;
+      }
+
       filtered[year] = list.filter(
         (s) =>
           s.name?.toLowerCase().includes(q) ||
@@ -96,7 +103,7 @@ export default function Seniors() {
       );
     }
     return filtered;
-  }, [seniorsByYear, search]);
+  }, [seniorsByYear, search, yearFilter]);
 
   const filteredTotal = useMemo(
     () => Object.values(filteredByYear).reduce((sum, arr) => sum + arr.length, 0),
@@ -130,42 +137,48 @@ export default function Seniors() {
 
       {/* Filter & Search */}
       <div className="filter-bar">
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="filter-label">Branch</label>
             <CustomSelect
               value={branch}
               onChange={setBranch}
-              options={BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))}
+              options={[{ value: '', label: 'All Branches' }, ...BRANCHES.map((b) => ({ value: b, label: BRANCH_LABELS[b] }))]}
               placeholder="Select branch"
               id="senior-branch-filter"
             />
           </div>
-          {branch && (
-            <div>
-              <label className="filter-label">Search</label>
-              <div className="search-bar">
-                <Search className="search-icon w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by name, company, tags..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  id="senior-search"
-                />
-              </div>
-            </div>
-          )}
+          <div>
+            <label className="filter-label">Year</label>
+            <CustomSelect
+              value={yearFilter}
+              onChange={setYearFilter}
+              options={[
+                { value: 'All Years', label: 'All Years' },
+                ...SENIOR_YEARS.map((y) => ({ value: y, label: y })),
+              ]}
+              placeholder="Select year"
+              id="senior-year-filter"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="filter-label">Search</label>
+          <div className="search-bar">
+            <Search className="search-icon w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by name, company, tags..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              id="senior-search"
+            />
+          </div>
         </div>
       </div>
 
       {/* Results */}
-      {!branch ? (
-        <EmptyState
-          title="Select a branch"
-          message="Choose your branch above to see seniors organized by year."
-        />
-      ) : loading ? (
+      {loading ? (
         <div className="space-y-8">
           <div className="year-section">
             <div className="flex items-center gap-3 mb-4 pl-1">
@@ -179,10 +192,10 @@ export default function Seniors() {
       ) : totalCount === 0 ? (
         <EmptyState
           title="No seniors listed yet"
-          message={`We're still adding senior profiles for ${branch}.`}
+          message={branch ? `We're still adding senior profiles for ${BRANCH_LABELS[branch] || branch}.` : "We're still adding senior profiles."}
         />
-      ) : filteredTotal === 0 && search ? (
-        <EmptyState title="No matching seniors" message="Try a different search term." />
+      ) : filteredTotal === 0 ? (
+        <EmptyState title="No matching seniors" message="Try adjusting your filters or search term." />
       ) : (
         <div className="space-y-8">
           {/* Year sections — displayed in reverse order (4th first) */}

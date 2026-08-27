@@ -22,6 +22,13 @@ const TYPE_COLORS = {
   NOTES: 'bg-emerald-100 text-emerald-700',
 };
 
+const getSemesterLabel = (sem) => {
+  if (sem === 1) return '1st Semester';
+  if (sem === 2) return '2nd Semester';
+  if (sem === 3) return '3rd Semester';
+  return `${sem}th Semester`;
+};
+
 export default function ContributionCard({
   contribution,
   onEdit,
@@ -73,6 +80,22 @@ export default function ContributionCard({
               {contribution.url}
             </a>
           </p>
+        )}
+
+        {contribution.subjectId?.offeredTo && contribution.subjectId.offeredTo.length > 0 ? (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {contribution.subjectId.offeredTo.map((offer, idx) => (
+              <span key={idx} className="text-xs text-gray-600 bg-gray-50 border border-gray-200 px-2 py-1 rounded-md font-medium">
+                {offer.branch} • {getSemesterLabel(offer.semester)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 mt-2">
+            <span className="text-xs text-gray-500 bg-gray-50 border border-gray-200 px-2 py-1 rounded-md italic">
+              Branch & Semester not specified
+            </span>
+          </div>
         )}
       </div>
 
