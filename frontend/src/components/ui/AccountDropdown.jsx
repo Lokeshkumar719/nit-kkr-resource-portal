@@ -3,9 +3,11 @@ import { LogOut, KeyRound, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { getAvatarEmoji } from '../../utils/avatarEmoji.js';
 
 export function AccountDropdown() {
   const { user, logout } = useAuth();
+  const avatarEmoji = getAvatarEmoji(user?._id);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -58,9 +60,9 @@ export function AccountDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 pl-2 pr-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-all focus:outline-none focus:ring-2 focus:ring-white/30"
       >
-        <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-          <span className="text-sm font-bold text-nit-primary uppercase">
-            {displayName.charAt(0)}
+        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+          <span className="text-lg leading-none" role="img" aria-label="avatar">
+            {avatarEmoji}
           </span>
         </div>
         <div className="hidden sm:flex flex-col items-start leading-none max-w-[120px]">

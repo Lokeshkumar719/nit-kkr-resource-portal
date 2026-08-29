@@ -11,6 +11,7 @@ const findContributionById = async (contributionId) => {
 const findContributions = async (filter) => {
   return await Contribution.find(filter)
     .populate('contributedBy', 'name email')
+    .populate('subjectId', 'offeredTo')
     .sort({ createdAt: -1 });
 };
 
