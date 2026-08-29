@@ -30,7 +30,7 @@ export default function AchievementSection({ formData, setFormData }) {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Notable Achievements</label>
-        
+
         <div className="flex gap-2 mb-3">
           <input
             type="text"
@@ -58,7 +58,10 @@ export default function AchievementSection({ formData, setFormData }) {
         {formData.achievements && formData.achievements.length > 0 && (
           <ul className="space-y-2">
             {formData.achievements.map((ach, idx) => (
-              <li key={idx} className="flex items-start justify-between gap-3 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+              <li
+                key={idx}
+                className="flex items-start justify-between gap-3 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+              >
                 <span className="text-slate-700 flex-1 break-words leading-snug">{ach}</span>
                 <button
                   type="button"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Loader } from 'lucide-react';
 import { RESOURCE_TYPES } from '../../constants/index.js';
+import ModalLayout from '../admin/modals/ModalLayout.jsx';
 import toast from 'react-hot-toast';
 
 export default function EditContributionModal({ contribution, onSave, onCancel, isSaving }) {
@@ -38,8 +39,8 @@ export default function EditContributionModal({ contribution, onSave, onCancel, 
   if (!contribution) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <ModalLayout className="max-w-lg">
+      <div className="flex flex-col max-h-[90vh]">
         <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h2 className="text-xl font-bold text-gray-800">Edit Contribution</h2>
           <button
@@ -137,6 +138,6 @@ export default function EditContributionModal({ contribution, onSave, onCancel, 
           </button>
         </div>
       </div>
-    </div>
+    </ModalLayout>
   );
 }

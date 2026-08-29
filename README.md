@@ -286,7 +286,6 @@ Bug entities include:
 
 ---
 
-
 ## Full application flow
 
 ```mermaid
@@ -546,12 +545,15 @@ This helps reduce abuse and brute-force activity while keeping user experience s
 The application runs several automated background tasks:
 
 ### 1. Annual Mentor Promotion
+
 Runs on June 1st every year to align with student progression:
+
 - 4th-Year mentors are promoted to Alumni.
 - 3rd-Year mentors are promoted to 4th Year.
 - 2nd-Year mentors are promoted to 3rd Year.
 
 ### 2. Unverified User Cleanup
+
 Runs **hourly** to delete unverified user accounts that are older than 24 hours. This keeps the database clean of abandoned registrations.
 
 ---
