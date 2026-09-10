@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { Loader } from 'lucide-react';
 import { BRANCHES, SEMESTERS } from '../../constants/index.js';
 import toast from 'react-hot-toast';
 
-export default function CreateSubjectForm({ createSubject }) {
+export default function CreateSubjectForm({ createSubject, isCreating }) {
   const [formData, setFormData] = useState({
     subjectName: '',
     subjectCode: '',
@@ -139,9 +140,17 @@ export default function CreateSubjectForm({ createSubject }) {
 
         <button
           type="submit"
-          className="px-6 py-2 bg-nit-primary text-white rounded-lg hover:bg-blue-900 transition font-medium"
+          disabled={isCreating}
+          className="px-6 py-2 bg-nit-primary text-white rounded-lg hover:bg-blue-900 transition font-medium flex items-center gap-2 disabled:opacity-70"
         >
-          Create Subject
+          {isCreating ? (
+            <>
+              <Loader className="w-4 h-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            'Create Subject'
+          )}
         </button>
       </form>
     </div>
