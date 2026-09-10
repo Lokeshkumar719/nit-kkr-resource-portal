@@ -8,6 +8,7 @@ const {
   storeRefreshSession,
   getRefreshSession,
   removeRefreshSession,
+  blacklistAccessToken,
 } = require('./auth/sessionService');
 
 const { sendVerificationOTP, sendForgotPasswordOTP } = require('./auth/otpService');
@@ -209,7 +210,8 @@ const refreshAccessToken = async (refreshToken) => {
   };
 };
 
-const logout = async (userId) => {
+const logout = async (userId, accessToken) => {
+  await blacklistAccessToken(accessToken);
   await removeRefreshSession(userId);
 };
 
@@ -305,7 +307,7 @@ const resetPassword = async ({ email, otp, password }) => {
   return;
 };
 
-const changePassword = async ({ userId, oldPassword, newPassword }) => {
+const changePassword = async ({ userId, oldPassword, newPassword, accessToken }) => {
   const user = await authRepository.findUserById(userId);
 
   if (!user) {
@@ -329,6 +331,7 @@ const changePassword = async ({ userId, oldPassword, newPassword }) => {
 
   await authRepository.changePassword(userId, hashedPassword);
 
+  await blacklistAccessToken(accessToken);
   await removeRefreshSession(userId.toString());
 };
 

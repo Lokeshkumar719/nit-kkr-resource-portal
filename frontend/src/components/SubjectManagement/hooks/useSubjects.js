@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 export const useSubjects = () => {
   const [subjects, setSubjects] = useState([]);
   const [isFetchingSubjects, setIsFetchingSubjects] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState(null);
 
@@ -31,6 +32,7 @@ export const useSubjects = () => {
   }, []);
 
   const createSubject = async (formData, onSuccess) => {
+    setIsCreating(true);
     try {
       const payload = {
         subjectName: formData.subjectName,
@@ -45,6 +47,8 @@ export const useSubjects = () => {
       const errorMsg = err.response?.data?.message || 'Operation failed.';
       toast.error(errorMsg);
       return false;
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -87,6 +91,7 @@ export const useSubjects = () => {
   return {
     subjects,
     isFetchingSubjects,
+    isCreating,
     isSaving,
     isDeletingId,
     fetchSubjectsList,
