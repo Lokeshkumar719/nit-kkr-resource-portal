@@ -63,7 +63,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  await authService.logout(req.user.id);
+  await authService.logout(req.user.id, req.cookies.accessToken);
 
   clearAuthCookies(res);
 
@@ -106,6 +106,7 @@ const changePassword = asyncHandler(async (req, res) => {
 
   await authService.changePassword({
     userId: req.user.id,
+    accessToken: req.cookies.accessToken,
     ...req.body,
   });
 

@@ -11,6 +11,7 @@ export default function SubjectManagementTab() {
   const {
     subjects,
     isFetchingSubjects,
+    isCreating,
     isSaving,
     isDeletingId,
     fetchSubjectsList,
@@ -60,7 +61,7 @@ export default function SubjectManagementTab() {
             isDeletingId={isDeletingId}
           />
         ) : (
-          <CreateSubjectForm createSubject={createSubject} />
+          <CreateSubjectForm createSubject={createSubject} isCreating={isCreating} />
         )}
       </div>
     </div>
