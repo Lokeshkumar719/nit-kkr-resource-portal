@@ -23,9 +23,9 @@ const getBugs = asyncHandler(async (req, res) => {
 const resolveBug = asyncHandler(async (req, res) => {
   bugValidator.validateBugId(req.params.bugId);
 
-  const bug = await bugService.resolveBug(req.params.bugId);
+  await bugService.resolveBug(req.params.bugId);
 
-  return new ApiResponse(res, STATUS_CODES.OK, 'Bug resolved successfully.', bug);
+  return new ApiResponse(res, STATUS_CODES.OK, 'Bug fixed and removed.');
 });
 
 const deleteBug = asyncHandler(async (req, res) => {

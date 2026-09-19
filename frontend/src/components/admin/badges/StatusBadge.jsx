@@ -4,9 +4,7 @@ const colorMap = {
   PENDING: 'bg-amber-100 text-amber-700',
   APPROVED: 'bg-emerald-100 text-emerald-700',
   REJECTED: 'bg-red-100 text-red-700',
-  OPEN: 'bg-red-100 text-red-700',
   CLOSED: 'bg-emerald-100 text-emerald-700',
-  RESOLVED: 'bg-emerald-100 text-emerald-700',
   BUG_REPORT: 'bg-red-100 text-red-700',
   DEFAULT: 'bg-slate-100 text-slate-700',
 };
