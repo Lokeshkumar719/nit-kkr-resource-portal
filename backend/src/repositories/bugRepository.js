@@ -14,10 +14,6 @@ const findBugs = async (filter) => {
   });
 };
 
-const updateBug = async (bugId, updateData) => {
-  return await Bug.findByIdAndUpdate(bugId, updateData, { new: true });
-};
-
 const deleteBug = async (bugId) => {
   return await Bug.findByIdAndDelete(bugId);
 };
@@ -26,6 +22,5 @@ module.exports = {
   createBug,
   findBugById,
   findBugs,
-  updateBug,
   deleteBug,
 };

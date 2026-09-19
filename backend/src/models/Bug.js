@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const BUG_STATUS = require('../constants/bugStatus');
-
 const bugSchema = new mongoose.Schema(
   {
     description: {
@@ -13,11 +11,6 @@ const bugSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
-    status: {
-      type: String,
-      enum: Object.values(BUG_STATUS),
-      default: BUG_STATUS.OPEN,
     },
     fileKey: {
       type: String,
@@ -42,7 +35,6 @@ const bugSchema = new mongoose.Schema(
 );
 
 bugSchema.index({
-  status: 1,
   createdAt: -1,
 });
 

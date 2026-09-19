@@ -250,7 +250,7 @@ const OverviewTab = () => {
       pendingContributions = contributionsRes.data.data ? contributionsRes.data.data.length : 0;
 
       try {
-        const bugsRes = await getBugs({ status: 'OPEN' });
+        const bugsRes = await getBugs();
         pendingBugs = bugsRes.data.data ? bugsRes.data.data.length : 0;
       } catch (e) {
         console.error('Failed to fetch bugs count:', e);
@@ -376,7 +376,7 @@ const BugsTab = () => {
   const fetchBugs = async () => {
     setLoading(true);
     try {
-      const res = await getBugs({ status: 'OPEN' });
+      const res = await getBugs();
       setBugs(res.data.data || []);
     } catch (e) {
       console.error(e);
@@ -389,7 +389,7 @@ const BugsTab = () => {
     setProcessingId(id);
     try {
       await resolveBug(id);
-      toast.success('Bug marked as resolved.');
+      toast.success('Bug fixed');
       fetchBugs();
     } catch (e) {
       toast.error('Resolve failed: ' + (e.response?.data?.message || 'Unknown error'));
