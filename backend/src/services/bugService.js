@@ -1,7 +1,6 @@
 const ApiError = require('../utils/ApiError');
 
 const STATUS_CODES = require('../constants/statusCodes');
-const BUG_STATUS = require('../constants/bugStatus');
 
 const bugRepository = require('../repositories/bugRepository');
 const fileService = require('./fileService');
@@ -42,9 +41,7 @@ const resolveBug = async (bugId) => {
     await fileService.deleteFile(bug.fileKey);
   }
 
-  return await bugRepository.updateBug(bugId, {
-    status: BUG_STATUS.RESOLVED,
-  });
+  await bugRepository.deleteBug(bugId);
 };
 
 const deleteBug = async (bugId) => {
@@ -78,3 +75,4 @@ module.exports = {
   deleteBug,
   getBugDownloadUrl,
 };
+
