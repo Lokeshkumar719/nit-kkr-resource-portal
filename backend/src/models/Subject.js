@@ -29,6 +29,10 @@ const subjectSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       uppercase: true,
+      match: [
+        /^[A-Z]+\d+$/,
+        'Subject code must be uppercase letters followed by digits with no spaces (e.g., CSPC100).',
+      ],
     },
 
     subjectName: {
@@ -61,6 +65,14 @@ const subjectSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Auto-correct subjectCode by removing all spaces before validation
+subjectSchema.pre('validate', function (next) {
+  if (this.subjectCode) {
+    this.subjectCode = this.subjectCode.replace(/\s+/g, '');
+  }
+  next();
+});
 
 subjectSchema.index({
   'offeredTo.branch': 1,

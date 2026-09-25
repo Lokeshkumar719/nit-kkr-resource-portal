@@ -43,9 +43,9 @@ const setupCronJobs = () => {
     console.log('[CRON] Starting unverified users cleanup script...');
     try {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const result = await User.deleteMany({ 
+      const result = await User.deleteMany({
         isVerified: false,
-        createdAt: { $lt: oneDayAgo }
+        createdAt: { $lt: oneDayAgo },
       });
       if (result.deletedCount > 0) {
         console.log(`[CRON] Deleted ${result.deletedCount} unverified users older than 24 hours.`);

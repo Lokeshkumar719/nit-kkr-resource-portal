@@ -16,6 +16,11 @@ router.patch('/:bugId/resolve', authMiddleware, adminMiddleware, bugController.r
 
 router.delete('/:bugId', authMiddleware, adminMiddleware, bugController.deleteBug);
 
-router.get('/:bugId/download', authMiddleware, adminMiddleware, bugController.downloadBugAttachment);
+router.get(
+  '/:bugId/download',
+  authMiddleware,
+  adminMiddleware,
+  bugController.downloadBugAttachment
+);
 
 module.exports = router;

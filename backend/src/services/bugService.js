@@ -9,8 +9,13 @@ const createBug = async (bugData, file, user) => {
   let fileData = {};
 
   if (file) {
-    const uploadedFile = await fileService.uploadFile(file.buffer, file.originalname, file.mimetype, 'bugs');
-    
+    const uploadedFile = await fileService.uploadFile(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+      'bugs'
+    );
+
     fileData = {
       fileKey: uploadedFile.fileKey,
       fileName: file.originalname,
@@ -75,4 +80,3 @@ module.exports = {
   deleteBug,
   getBugDownloadUrl,
 };
-
