@@ -69,10 +69,12 @@ export default function CreateSubjectForm({ createSubject, isCreating }) {
             <input
               type="text"
               required
+              placeholder="e.g., CSPC100"
               className="w-full p-2.5 border border-gray-300 rounded-lg"
               value={formData.subjectCode}
               onChange={(e) => setFormData({ ...formData, subjectCode: e.target.value })}
             />
+            <p className="mt-1 text-xs text-gray-500">No gap between characters and numbers.</p>
           </div>
         </div>
 
