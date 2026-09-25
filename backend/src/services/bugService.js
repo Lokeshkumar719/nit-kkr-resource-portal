@@ -80,4 +80,3 @@ module.exports = {
   deleteBug,
   getBugDownloadUrl,
 };
-
